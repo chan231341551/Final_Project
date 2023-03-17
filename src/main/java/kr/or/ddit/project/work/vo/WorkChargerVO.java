@@ -1,0 +1,15 @@
+package kr.or.ddit.project.work.vo;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+public class WorkChargerVO {
+
+	private Integer workNo;
+	private String memEmail;
+	private Integer workProgress;
+	private String memAttPath;
+	
+}

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.project.file.dao.TreeDAO">
+	<select id="selectTreeList" parameterType="String" resultType="TreeVO">
+		SELECT
+		    ID
+		    ,PARENT
+		    ,TEXT
+		    ,PRO_CODE
+		FROM
+		    TREE
+		WHERE PRO_CODE = #{proCode,jdbcType=VARCHAR}
+	</select>
+	
+	<insert id="insertTree">
+		INSERT 
+		 INTO TREE(
+			ID
+			,PARENT
+			,TEXT
+			,PRO_CODE
+		)VALUES(
+			#{id,jdbcType=VARCHAR}
+			,#{parent,jdbcType=VARCHAR}
+			,#{text,jdbcType=VARCHAR}
+			,#{proCode,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<update id="updateTree">
+		UPDATE TREE
+		<set>
+			<if test="parent != null">
+				PARENT=#{parent,jdbcType=VARCHAR},
+			</if>
+			<if test="text != null">
+				TEXT=#{text,jdbcType=VARCHAR},
+			</if>
+		</set>
+		WHERE ID=#{id,jdbcType=VARCHAR}
+		AND PRO_CODE=#{proCode,jdbcType=VARCHAR}
+	</update>
+	
+	<delete id="deleteTree">
+		DELETE FROM TREE
+		WHERE ID=#{id,jdbcType=VARCHAR}
+		AND PRO_CODE=#{proCode,jdbcType=VARCHAR}
+	</delete>
+	
+	
+</mapper>

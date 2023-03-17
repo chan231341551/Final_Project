@@ -1,0 +1,89 @@
+package kr.or.ddit.project.issue.service;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.member.dao.MemberDAO;
+import kr.or.ddit.member.vo.MemberVO;
+import kr.or.ddit.project.home.vo.ProjectVO;
+import kr.or.ddit.project.issue.dao.IssueDAO;
+import kr.or.ddit.project.issue.vo.IssChargerVO;
+import kr.or.ddit.project.issue.vo.IssueVO;
+import kr.or.ddit.project.work.dao.WorkDAO;
+import kr.or.ddit.project.work.vo.WorkVO;
+import kr.or.ddit.vo.PagingVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+public class IssueServiceImpl implements IssueService {
+	
+	@Inject
+	private IssueDAO issueDAO;
+	@Inject
+	private WorkDAO workDAO;
+	
+	@Override
+	public int createIssue(IssueVO issue) {
+		int rowcnt = issueDAO.insertIssue(issue);
+		return rowcnt;
+	}
+
+	@Override
+	public List<IssueVO> retrieveIssueList(String proCode) {
+		List<IssueVO> issueList = issueDAO.selectIssueList(proCode);
+		return issueList;
+	}
+
+	@Override
+	public IssueVO retrieveIssue(int issNo) {
+		IssueVO selectIssue = issueDAO.selectIssue(issNo);
+		if(selectIssue == null) {
+			throw new RuntimeException("선택한 이슈 없음");
+		}
+		return selectIssue;
+	}
+
+	@Override
+	public int modifyIssue(IssueVO issue) {
+		log.info("serviceIssue"+issue);
+		int rowcnt = issueDAO.updateIssue(issue);
+		for (IssChargerVO iss : issue.getIssChargerList()) {
+			rowcnt += issueDAO.updateIssCharher(iss);
+		}
+		return rowcnt;
+	}
+	
+	@Override
+	public int removeIssue(int issNo) {
+		int rowcnt = issueDAO.deleteIssue(issNo);
+		rowcnt += issueDAO.deleteIssCharger(issNo);
+		return rowcnt;
+	}
+
+	@Override
+	public List<WorkVO> retrieveWork(String memEmail) {
+		List<WorkVO> workList = workDAO.selectISWork(memEmail);
+		return workList;
+	}
+
+	@Override
+	public List<MemberVO> retrieveMember(int workNo) {
+		List<MemberVO> memList = workDAO.selectISMember(workNo);
+		return memList;
+	}
+
+	@Override
+	public List<Map<String, String>> retrieveChargerMem(int issNo) {
+	 List<Map<String, String>> chargerMem = issueDAO.selectChargerMem(issNo);
+		return chargerMem;
+	}
+
+
+
+
+}

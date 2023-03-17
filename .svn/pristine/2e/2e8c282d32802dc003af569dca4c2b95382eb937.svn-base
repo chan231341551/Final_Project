@@ -1,0 +1,27 @@
+package kr.or.ddit.project.home.vo;
+
+import java.io.Serializable;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+public class ParticipateVO implements Serializable{
+	
+//	----------- -------- ------------ 
+//	PRO_CODE    NOT NULL VARCHAR2(20) 
+//	MEM_EMAIL   NOT NULL VARCHAR2(50) 
+//	PRO_ROLE_CD NOT NULL VARCHAR2(10) 
+//	PART_DATE            VARCHAR2(8)  
+//	PART_YN     NOT NULL VARCHAR2(1)  
+	
+	private String proCode;
+	private String memEmail;
+	private String proRoleCd;
+		
+	private String partDate;
+	private String partYn;
+	
+	private String mcodeNm;
+}

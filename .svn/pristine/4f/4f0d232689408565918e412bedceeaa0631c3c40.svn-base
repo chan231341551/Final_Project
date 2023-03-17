@@ -1,0 +1,33 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+
+    <div class="modal-dialog modal-dialog-centered modal-lg isCont" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<div class="badge bg-success my-2">QUESTION(라벨)</div>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body m-3">
+			
+				<h5 class="card-title">제목</h5>
+				<h6 class="card-subtitle text-muted">이슈 진짜 ㅎㅎ</h6>
+				<hr>
+				<h5 class="card-title">시작일</h5>
+				<h6 class="card-subtitle text-muted">2022-00-00</h6>
+				<h5 class="card-title">종료 예정일</h5>
+				<h6 class="card-subtitle text-muted">2022-00-00</h6>
+				<hr>
+				<h5 class="card-title">상태</h5>
+				<h6 class="card-subtitle text-muted">이슈 진짜 ㅎㅎ</h6>
+				<hr>
+				<h5 class="card-title">내용</h5>
+				<h6 class="card-subtitle text-muted">이슈 진짜 ㅎㅎ</h6>
+				<hr>
+					
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary">저장</button>
+			</div>
+		</div>
+	</div>

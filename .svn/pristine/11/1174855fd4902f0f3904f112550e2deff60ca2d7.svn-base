@@ -1,0 +1,25 @@
+package kr.or.ddit.project.work.vo;
+
+import java.util.List;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(of="workNo")
+public class WorkVO {
+	
+	private Integer workNo;
+	private String 	proCode;
+	private Integer workPntNo;
+	/*private String 	workGroup;*/
+	private String 	workTitle;
+	private String 	workDetail;
+	private String 	workSdate;
+	private String 	workEdate;
+	private String 	workStateCd;
+	private String 	workOrderCd;
+	private String  memEmail;
+	private List<WorkChargerVO> workChargerList;
+	
+}

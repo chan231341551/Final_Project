@@ -1,0 +1,18 @@
+
+      <div class="modal-header">
+        <h3 class="modal-title">작업</h3>
+      </div>
+      <div class="modal-body">
+        <p>작업 제목:
+        <!-- <pre>{{ vm.action }}</pre> -->
+        <pre>json으로 비동기 방식으로 받기</pre>
+        </p>
+        <p>작업 내용:
+        <!-- <pre>{{ vm.event | json }}</pre> -->
+        <pre>json으로 비동기 방식으로 받기</pre>
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="$close()">OK</button>
+      </div>
+    

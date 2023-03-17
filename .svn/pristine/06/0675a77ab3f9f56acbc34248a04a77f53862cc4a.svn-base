@@ -1,0 +1,44 @@
+package kr.or.ddit.project.sidemenu.service;
+
+import kr.or.ddit.project.sidemenu.vo.MemoVO;
+import kr.or.ddit.vo.PagingVO;
+
+/**
+ * 
+ * 메모 Service 인터페이스
+ * @author 이찬영
+ * @since 2023. 2. 6.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일                  수정자               수정내용
+ * --------     --------    ----------------------
+ * 2023. 2. 6.      PC-02       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+public interface MemoService {
+	
+	/**
+	 * 메모 조회 CALL BY REFERENCE
+	 * @param pagingVO
+	 */
+	public void retrieveMemoList(PagingVO<MemoVO> pagingVO);
+	
+	/**
+	 * 메모 상세 조회
+	 * @param memoNo
+	 * @return
+	 */
+	public MemoVO retrieveMemo(int memoNo);
+	
+	/**
+	 * 메모 등록 
+	 * @param memoVO
+	 * @return
+	 */
+	public int createMemo(MemoVO memoVO);
+	
+	public int deleteMemo(int memoNo);
+}

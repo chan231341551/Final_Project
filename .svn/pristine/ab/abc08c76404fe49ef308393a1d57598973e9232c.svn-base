@@ -1,0 +1,38 @@
+/**
+ * 
+ */
+package kr.or.ddit.main.help.service;
+
+import kr.or.ddit.main.help.vo.NoticeVO;
+import kr.or.ddit.vo.PagingVO;
+
+/**
+ * notice (공지사항) 서비스 BLL 
+ * @author 김경하
+ * @since 2023. 2. 6.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일                          수정자               수정내용
+ * --------     --------    ----------------------
+ * 2023. 2. 6.       PC-13       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+
+public interface NoticeService {
+	/**
+	 * 전체 공지 리스트 조회 
+	 * @param pagingVO
+	 */
+	public void retrieveNoticeList(PagingVO<NoticeVO> pagingVO);
+	
+	/**
+	 * 공지 상세 조회
+	 * @param noNo
+	 * @return
+	 */
+/*	public NoticeVO retrieveNotice(int noNo);*/
+	
+}

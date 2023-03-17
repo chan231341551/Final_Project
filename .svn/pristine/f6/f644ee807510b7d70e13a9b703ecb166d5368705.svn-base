@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.project.alarm.dao.AlarmDAO">
+
+	<insert id="insertAlarm" parameterType="kr.or.ddit.project.alarm.vo.AlarmVO">
+		<selectKey order="BEFORE" resultType="int"
+			keyProperty="alNo">
+			SELECT ALARM_SEQ.NEXTVAL
+			FROM DUAL
+		</selectKey>
+		INSERT INTO alarm (
+		al_no,
+		mem_email,
+		al_sender,
+		al_sdate,
+		al_read_yn,
+		al_cont_cd
+		) VALUES (
+		#{alNo,jdbcType=NUMERIC}
+		, #{memEmail,jdbcType=VARCHAR}
+		, #{alSender,jdbcType=VARCHAR}
+		, SYSDATE
+		, 'N'
+		, #{alContCd,jdbcType=VARCHAR}
+		)
+	</insert>
+
+	<select id="count" resultType="int">
+		SELECT COUNT(*)
+		FROM ALARM
+		WHERE AL_READ_YN= 'N'
+		AND MEM_EMAIL=#{memEmail,jdbcType=VARCHAR}
+	</select>
+
+	<update id="updateAlarm" parameterType="int">
+		UPDATE ALARM
+		SET
+		AL_READ_YN = 'Y'
+		WHERE
+		AL_NO = #{alNo,jdbcType=NUMERIC}
+	</update>
+	
+	<select id="selectAlarm" resultType="int">
+		SELECT
+		     MAX(AL_NO)
+		FROM
+		    alarm
+	</select>
+	
+	<select id="selelctAlarmList" resultType="kr.or.ddit.project.alarm.vo.AlarmVO">
+		SELECT
+		    AL_NO,
+		    MEM_EMAIL,
+		    AL_SENDER,
+		    AL_SDATE,
+		    AL_CONT_CD
+		FROM
+		    ALARM
+		WHERE AL_READ_YN ='N'
+		AND MEM_EMAIL=#{memEmail,jdbcType=VARCHAR}
+	</select>
+</mapper>

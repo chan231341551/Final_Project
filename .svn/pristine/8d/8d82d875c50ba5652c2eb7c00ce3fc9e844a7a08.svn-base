@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.project.statistics.dao.StatisticDAO">
+	
+	<select id="selectProjectStatistic" parameterType="string" resultType="hashMap">
+		with 
+		    NEWSCOUNT as(
+		        SELECT 
+		            COUNT(*) AS NEWSCOUNT,
+		            PRO_CODE
+		        FROM NEWS
+		        GROUP BY PRO_CODE
+		    )
+		    ,WIKICOUNT as(
+		        SELECT 
+		            COUNT(*) AS WIKICOUNT,
+		            PRO_CODE
+		        FROM WIKI
+		        GROUP BY PRO_CODE
+		    )
+		    ,BOARDCOUNT as(
+		        SELECT 
+		            COUNT(*) AS BOARDCOUNT,
+		            PRO_CODE
+		        FROM BOARD
+		        GROUP BY PRO_CODE
+		    )
+		    ,WORKCOUNT as (
+		        SELECT 
+		            COUNT(WORK_NO) AS WORKCOUNT,
+		            COUNT(WORK_PNT_NO) AS WORKPTNCOUNT,
+		            PRO_CODE
+		        FROM WORK
+		        GROUP BY PRO_CODE
+		    )
+		    ,ISSCOUNT as(
+		        SELECT 
+		            COUNT(*) AS ISSCOUNT,
+		            PRO_CODE
+		        FROM ISSUE A , WORK B
+		        WHERE A.WORK_NO = B.WORK_NO
+		        GROUP BY PRO_CODE
+		    )
+		    ,MEMCOUNT as(
+		        SELECT 
+		            COUNT(*) AS MEMCOUNT,
+		            PRO_CODE
+		        FROM MEMBER A , PARTICIPATE B
+		        WHERE A.MEM_EMAIL = B.MEM_EMAIL
+		        GROUP BY PRO_CODE
+		    )
+		    ,ISSCGCOUNT as(
+		        SELECT 
+		            COUNT(C.ISS_NO) AS ISSCGCOUNT,
+		            PRO_CODE
+		        FROM ISSUE A INNER JOIN WORK B ON(A.WORK_NO = B.WORK_NO)
+		        INNER JOIN ISS_CHARGER C ON(A.ISS_NO = C.ISS_NO)
+		        GROUP BY PRO_CODE
+		    )
+		    ,CHATROOMCOUNT as (
+		        SELECT 
+		            COUNT(*) AS CHATROOMCOUNT,
+		            PRO_CODE
+		        FROM CHATROOM
+		        GROUP BY PRO_CODE
+		    )
+		    select project.PRO_CODE, project.PRO_SDATE, project.PRO_EDATE
+		            ,nvl(NEWSCOUNT,0) as NEWSCOUNT
+		            ,nvl(WIKICOUNT, 0) as WIKICOUNT
+		            ,nvl(BOARDCOUNT, 0) as BOARDCOUNT
+		            ,nvl(WORKCOUNT,0) as WORKCOUNT
+		            ,nvl(ISSCOUNT, 0) as ISSCOUNT
+		            ,nvl(MEMCOUNT, 0) as MEMCOUNT
+		            ,nvl(ISSCGCOUNT, 0) as ISSCGCOUNT
+		            ,nvl(CHATROOMCOUNT, 0) as CHATROOMCOUNT
+		    from project 
+		            left outer join NEWSCOUNT on (project.PRO_CODE = NEWSCOUNT.PRO_CODE)
+		            left outer join WIKICOUNT on (project.PRO_CODE = WIKICOUNT.PRO_CODE)
+		            left outer join BOARDCOUNT on (project.PRO_CODE = BOARDCOUNT.PRO_CODE)
+		            left outer join WORKCOUNT on (project.PRO_CODE = WORKCOUNT.PRO_CODE)
+		            left outer join ISSCOUNT on (project.PRO_CODE = ISSCOUNT.PRO_CODE)
+		            left outer join MEMCOUNT on (project.PRO_CODE = MEMCOUNT.PRO_CODE)
+		            left outer join ISSCGCOUNT on (project.PRO_CODE = ISSCGCOUNT.PRO_CODE)
+		            left outer join CHATROOMCOUNT on (project.PRO_CODE = CHATROOMCOUNT.PRO_CODE)
+		    where project.PRO_CODE = #{proCode}
+	</select>
+	
+	<select id="selectProjectMemStatistic" parameterType="string" resultType="hashMap">
+		with 
+		NEWSCOUNT as(
+            SELECT 
+                COUNT(*) AS NEWSCOUNT,
+                MEM_EMAIL,
+                PRO_CODE
+            FROM NEWS
+            GROUP BY PRO_CODE , MEM_EMAIL
+		)
+		,WIKICOUNT as (
+            SELECT 
+                COUNT(*) AS WIKICOUNT,
+                MEM_EMAIL,
+                PRO_CODE
+            FROM WIKI
+            GROUP BY PRO_CODE , MEM_EMAIL
+		)
+		,BOARDCOUNT as(
+             SELECT 
+                COUNT(*) AS BOARDCOUNT,
+                PRO_CODE,
+                MEM_EMAIL
+            FROM BOARD
+            GROUP BY PRO_CODE , MEM_EMAIL
+		)
+		,WORKCOUNT as(
+            SELECT 
+                COUNT(WORK_NO) AS WORKCOUNT,
+                COUNT(WORK_PNT_NO) AS WORKPTNCOUNT,
+                A.PRO_CODE,
+                B.MEM_EMAIL
+            FROM WORK A INNER JOIN PARTICIPATE B ON(A.PRO_CODE = B.PRO_CODE)
+            GROUP BY A.PRO_CODE , B.MEM_EMAIL
+		)
+		,ISSCOUNT as(      
+            SELECT 
+                COUNT(*) AS ISSCOUNT,
+                PRO_CODE,
+                MEM_EMAIL
+            FROM ISSUE A , WORK B
+            WHERE A.WORK_NO = B.WORK_NO
+            GROUP BY PRO_CODE , MEM_EMAIL
+		)
+		,MEMCOUNT as (
+		    SELECT 
+                COUNT(*) AS MEMCOUNT,
+                PRO_CODE,
+                B.MEM_EMAIL
+            FROM MEMBER A , PARTICIPATE B
+            WHERE A.MEM_EMAIL = B.MEM_EMAIL
+            GROUP BY B.PRO_CODE , B.MEM_EMAIL
+		)
+		,ISSCGCOUNT as (          
+            SELECT 
+                COUNT(C.ISS_NO) AS ISSCGCOUNT,
+                B.PRO_CODE,
+                D.MEM_EMAIL
+            FROM ISSUE A INNER JOIN WORK B ON(A.WORK_NO = B.WORK_NO)
+            INNER JOIN ISS_CHARGER C ON(A.ISS_NO = C.ISS_NO)
+            INNER JOIN PARTICIPATE D ON(C.MEM_EMAIL = D.MEM_EMAIL)
+            GROUP BY B.PRO_CODE ,D.MEM_EMAIL
+		)
+        ,CHATROOMCOUNT as (
+            SELECT 
+                COUNT(*) AS CHATROOMCOUNT,
+                PRO_CODE,
+                MEM_EMAIL
+            FROM CHATROOM
+            GROUP BY PRO_CODE , MEM_EMAIL
+        )
+		select  distinct A.MEM_EMAIL, A.PRO_ROLE_CD, A.PART_DATE ,
+
+                (select 
+                    CONCAT('/resources/images/pms/',CONCAT(att_savename,CONCAT('.',LTRIM(ATT_MIME, 'image/')))) AS att_savename
+                from attatch
+                where att_no = (
+                    SELECT 
+                        MEM_ATT_NO
+                    FROM MEMBER M
+                    WHERE M.MEM_EMAIL = A.MEM_EMAIL
+                ))att_savename
+                
+		        , nvl(NEWSCOUNT, 0) as NEWSCOUNT
+		        , nvl(WIKICOUNT, 0) as WIKICOUNT
+		        , nvl(BOARDCOUNT, 0) as BOARDCOUNT
+		        , nvl(WORKCOUNT, 0) as WORKCOUNT
+		        , nvl(ISSCOUNT, 0) as ISSCOUNT
+		        , nvl(MEMCOUNT, 0) as MEMCOUNT
+		        , nvl(ISSCGCOUNT, 0) as ISSCGCOUNT
+                , nvl(CHATROOMCOUNT, 0) as CHATROOMCOUNT
+		from PARTICIPATE A
+		        inner join PROJECT on (A.MEM_EMAIL = PROJECT.MEM_EMAIL)
+		        left outer join NEWSCOUNT on (A.PRO_CODE = NEWSCOUNT.PRO_CODE and A.MEM_EMAIL = NEWSCOUNT.MEM_EMAIL)
+		        left outer join WIKICOUNT on (A.PRO_CODE = WIKICOUNT.PRO_CODE and A.MEM_EMAIL = WIKICOUNT.MEM_EMAIL)
+		        left outer join BOARDCOUNT on (A.PRO_CODE = BOARDCOUNT.PRO_CODE and A.MEM_EMAIL= BOARDCOUNT.MEM_EMAIL)
+		        left outer join WORKCOUNT on (A.PRO_CODE = WORKCOUNT.PRO_CODE and A.MEM_EMAIL = WORKCOUNT.MEM_EMAIL)
+		        left outer join ISSCOUNT on (A.PRO_CODE = ISSCOUNT.PRO_CODE and A.MEM_EMAIL = ISSCOUNT.MEM_EMAIL)
+		        left outer join MEMCOUNT on (A.PRO_CODE = MEMCOUNT.PRO_CODE and A.MEM_EMAIL = MEMCOUNT.MEM_EMAIL)
+		        left outer join ISSCGCOUNT on (A.PRO_CODE = ISSCGCOUNT.PRO_CODE and A.MEM_EMAIL = ISSCGCOUNT.MEM_EMAIL)
+                left outer join CHATROOMCOUNT on (A.PRO_CODE = CHATROOMCOUNT.PRO_CODE and A.MEM_EMAIL = CHATROOMCOUNT.MEM_EMAIL)
+		where A.PRO_CODE = #{proCode}
+		order by A.PRO_ROLE_CD;
+	</select>
+	
+	
+</mapper>

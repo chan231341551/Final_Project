@@ -1,0 +1,147 @@
+package kr.or.ddit.project.news.service;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import kr.or.ddit.enumpkg.ServiceResult;
+import kr.or.ddit.project.attach.service.AttatchService;
+import kr.or.ddit.project.news.dao.NewsDAO;
+import kr.or.ddit.project.news.vo.NewsCommVO;
+import kr.or.ddit.project.news.vo.NewsVO;
+import kr.or.ddit.vo.PagingVO;
+
+/**
+ * 
+ * NewsServiceImpl
+ * @author 전혜수
+ * @since 2023. 2. 7.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일                  수정자               수정내용
+ * --------     --------    ----------------------
+ * 2023. 2. 7.      PC-21       최초작성
+ * 
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+
+
+@Service
+public class NewsServiceImpl implements NewsService{
+	
+	@Inject
+	private NewsDAO newsDAO;
+	
+	@Inject
+	private AttatchService attService;
+	
+	
+	//조회수
+	@Override
+	public void incrementHit(int newsNo) {
+		 newsDAO.incrementHit(newsNo);
+	}
+	
+	//뉴스 목록출력(페이징처리) 
+	@Override
+	public List<NewsVO> retrieveNewsList(PagingVO pagingVO) {
+		int totalRecord = newsDAO.selectTotalRecord(pagingVO);
+
+		pagingVO.setTotalRecord(totalRecord);
+		List<NewsVO> newsList = newsDAO.selectNewsList(pagingVO);
+		pagingVO.setDataList(newsList);
+		return newsList;
+	}
+	
+	//프로젝트에 해당하는 뉴스 목록 출력 
+	@Override
+	public List<NewsVO> retrieveMyNewsList(String proCode) {
+		List<NewsVO> newsList = newsDAO.selectMyNewsList(proCode);
+		return newsList;
+	}
+	
+	
+	//뉴스 1건 출력 
+	@Override
+	public NewsVO retrieveNews(int newsNo) {
+		NewsVO selectNews = newsDAO.selectNews(newsNo);
+		if(selectNews == null) {
+			throw new RuntimeException("선택한 뉴스 자료가 없습니다.");
+		}
+		return selectNews;
+	}
+
+	//생성
+	@Override
+	public ServiceResult createNews(NewsVO news) {
+		
+		//파일첨부
+		MultipartFile[] files = news.getFiles(); 
+		if(files!=null && files.length > 0) {
+		   int newsAttNo = attService.createAttatch(files,"newsFile");
+		   news.setNewsAttNo(newsAttNo);
+		}
+		
+		int rowcnt = newsDAO.insertNews(news);
+		return rowcnt > 0 ? ServiceResult.OK : ServiceResult.FAIL ;
+	}
+
+	//수정	
+	@Override
+	public ServiceResult modifyNews(NewsVO news) {
+		int rowcnt = newsDAO.updateNews(news);
+		return rowcnt > 0 ? ServiceResult.OK : ServiceResult.FAIL;
+	}
+	
+	//삭제
+	@Override
+	public ServiceResult removeNews(NewsVO news) {
+		
+		ServiceResult result;
+		// 1. 진짜 VO를 가져오기
+		NewsVO realNews = newsDAO.selectNews(news.getNewsNo());
+		
+		
+		// 2. 진짜 VO와 사용자에게 입력한 VO 비교 (비밀번호)
+		
+		if(realNews.getNewsPass()==news.getNewsPass()) {
+			
+			System.out.println(news.getNewsNo());
+			
+			int rowcnt = newsDAO.deleteNews(news);	
+			result = rowcnt > 0 ? ServiceResult.OK : ServiceResult.FAIL;
+			System.out.println(result);
+		}else {
+			result = ServiceResult.INVALIDPASSWORD;
+		}
+		return result;
+	}
+
+	//댓글 작성 	
+	@Override
+	public int createNewsComm(NewsCommVO newscommVo) {
+		
+		int rowcnt = newsDAO.insertNewsComm(newscommVo);
+		
+		return rowcnt;
+	}
+
+	@Override
+	public List<NewsCommVO> retriveNewsCommList(NewsCommVO newscommVo) {
+		return newsDAO.selectNewsCommList(newscommVo);
+	}
+}
+
+	
+
+
+
+
+
+

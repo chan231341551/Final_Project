@@ -1,0 +1,14 @@
+package kr.or.ddit.project.folder.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping("/project")
+public class ProjectFolderController {
+	@GetMapping("/projectFolder")
+	public String proejctFolderList() {
+		return "pms/projectfolder/projectFolderDetail";
+	}
+}

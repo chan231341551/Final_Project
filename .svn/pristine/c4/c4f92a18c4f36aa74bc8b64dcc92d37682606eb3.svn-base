@@ -1,0 +1,117 @@
+package kr.or.ddit.project.issue.controller;
+
+import java.security.Principal;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.member.service.MemberService;
+import kr.or.ddit.member.vo.MemberVO;
+import kr.or.ddit.project.home.vo.ProjectVO;
+import kr.or.ddit.project.issue.service.IssueService;
+import kr.or.ddit.project.issue.vo.IssueVO;
+import kr.or.ddit.project.work.vo.WorkVO;
+import kr.or.ddit.validate.InsertGroup;
+import lombok.extern.slf4j.Slf4j;
+
+
+@Slf4j
+@Controller
+@RequestMapping("/project")
+public class IssueController {
+	
+	@Inject
+	private IssueService service;
+	
+	// 이슈목록 화면(select)
+	
+	
+//	@GetMapping(value="/project/issueList", produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
+	
+	@GetMapping("/project/issueList")
+	public String issueList(
+			Principal principal 
+			, Model model
+			) {
+		return "project/issue/issueRetrieve";
+	}
+	
+	@GetMapping("/project/issue")
+	public String issue(
+		 Principal principal 
+		, Model model
+	) {
+		List<IssueVO> issueList = service.retrieveIssueList(principal.getName());
+		model.addAttribute("issueList", issueList);
+		log.info("issueList : {}",issueList);
+		return "jsonView";
+	}
+	
+	// insert화면 작업목록 
+	@GetMapping("/issueForm")
+	public String issueForm(
+			IssueVO issue
+			, Principal principal
+			, Model model
+			) {
+		List<WorkVO> workList = service.retrieveWork(principal.getName());
+		log.info("workList:", workList);
+		model.addAttribute("workList", workList);
+		
+		return "project/issue/issueForm";
+	}
+	
+	// insert화면 회원목록 비동기
+//	@ResponseBody -> List<MemberVO>
+	@GetMapping("/issueMemList")
+	public String issueForm(
+			  MemberVO member
+			, WorkVO work
+			, Model model
+			) {
+		List<MemberVO> memList = service.retrieveMember(work.getWorkNo());
+		log.info("memList:", memList);
+		model.addAttribute("memList", memList);
+		
+//		return memList;
+		return "jsonView";
+	}
+	
+	// 이슈 만들기(insert)
+//	@ResponseBody
+	@PostMapping("/issueForm")
+	public String issueInsert(
+			@ModelAttribute("issue") IssueVO issue
+			, Errors errors
+			, Model model
+			, Principal principal
+			) {
+		log.info("Issue : " + issue);
+		String memEmail = principal.getName();
+		issue.setMemEmail(memEmail);
+	
+		int rowcnt = service.createIssue(issue);
+		if (rowcnt < 0) {
+			model.addAttribute("message", "이슈 만들기 실패");
+		}
+		return "jsonView";
+	}
+	
+	
+	
+	
+	
+	
+	
+}

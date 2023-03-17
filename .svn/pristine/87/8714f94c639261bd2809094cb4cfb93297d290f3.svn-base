@@ -1,0 +1,17 @@
+package kr.or.ddit.project.alarm.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+public class alarmController {
+
+	@Controller
+	@RequestMapping("/project")
+	public class MyAlarmController {
+		@GetMapping("/alarm")
+		public String myAlarm() {
+			return "project/alarm/alarmRetrieve";
+		}
+	}
+}

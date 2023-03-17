@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.project.issue.dao.IssueDAO">
+	
+	<select id="selelctTotalRecord" resultType="int" parameterType="IssueVO">
+		SELECT COUNT(*)
+		FROM Issue
+	</select>
+	
+	<insert id="insertIssue" parameterType="IssueVO">
+		INSERT ALL
+		INTO ISSUE
+		(
+			ISS_NO,
+		    WORK_NO,
+		    MEM_EMAIL,
+		    ISS_TITLE,
+		    ISS_CONT,
+		    ISS_RDATE,
+		    ISS_SDATE,
+		    ISS_EEDATE,
+		    ISS_EMER_CD,
+		    ISS_STATUS_CD,
+		    ISS_LABEL_CD
+		)VALUES(
+        	 '6'
+			, #{workNo,jdbcType=NUMERIC}
+			, #{memEmail,jdbcType=VARCHAR}
+			, #{issTitle,jdbcType=VARCHAR}
+			, #{issCont,jdbcType=VARCHAR}
+			, SYSDATE
+			, #{issSdate,jdbcType=DATE}
+			, #{issEedate,jdbcType=DATE}
+			, #{issEmerCd,jdbcType=VARCHAR}
+			, #{issStatusCd,jdbcType=VARCHAR}
+			, #{issLabelCd,jdbcType=VARCHAR}
+        )
+        INTO ISS_CHARGER ( 
+           ISS_NO,
+           MEM_EMAIL,
+           ISS_READ_YN
+		) VALUES(
+			'4'
+			, #{memEmail,jdbcType=VARCHAR}
+			, 'N'
+		)
+		SELECT * FROM dual
+	</insert>
+	
+	
+	<select id="selectIssueList" resultType="IssueVO" parameterType="IssueVO">
+		SELECT 
+	       A.WORK_TITLE,
+	       B.iss_title,
+	       B.iss_cont,
+	       B.iss_sdate,
+	       B.iss_eedate,
+	       B.iss_emer_cd,
+	       B.iss_status_cd,
+	       B.ISS_EMER_CD,
+	       B.iss_label_cd,
+	       C.ISS_READ_YN,
+	       D.MEM_NAME
+		FROM WORK A, ISSUE B, ISS_CHARGER C, MEMBER D
+		WHERE A.WORK_NO = B.WORK_NO
+		AND B.ISS_NO = C.ISS_NO
+		AND C.MEM_EMAIL = D.MEM_EMAIL
+		AND B.MEM_EMAIL = #{memEmail,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="selectIssue" resultType="IssueVO" parameterType="int">
+		SELECT 
+    		B.Issue_NO,
+   		 	A.MEM_NAME,
+   			B.Issue_TITLE,
+    		B.Issue_CONT,
+    		B.Issue_DATE
+		FROM MEMBER A , Issue B
+		WHERE A.MEM_NO = B.MEM_NO
+		AND B.Issue_NO = #{IssueNo}
+	</select>
+	
+</mapper>

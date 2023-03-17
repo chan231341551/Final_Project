@@ -1,0 +1,92 @@
+package kr.or.ddit.project.work.service;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.enumpkg.ServiceResult;
+import kr.or.ddit.project.work.dao.WorkDAO;
+import kr.or.ddit.project.work.vo.WorkVO;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+public class WorkServiceImpl implements WorkService {
+
+	@Inject
+	private WorkDAO workDAO;
+	
+	@Override
+	public List<WorkVO> retrieveWorkList(String proCode) {
+		List<WorkVO> workList = workDAO.selectWorkList(proCode);
+		return workList;
+	}
+	
+	@Override
+	public List<WorkVO> retrieveMyWorkList(WorkVO work) {
+		List<WorkVO> workList = workDAO.selectMyWorkList(work);
+		return workList;
+	}
+	
+	@Override
+	public WorkVO retrieveWorkDetail(WorkVO work) {
+		WorkVO workVO = workDAO.selectWorkDetail(work);
+		return workVO;
+	}
+	
+	@Override
+	public ServiceResult createWork(WorkVO work) {
+		ServiceResult result = null;
+		int rowcnt = workDAO.insertWork(work);
+		result = rowcnt > 0 ? ServiceResult.OK : ServiceResult.FAIL;
+		return result;
+	}
+
+	@Override
+	public ServiceResult createWorkCharger(WorkVO work) {
+		ServiceResult result = null;
+		int rowcnt = workDAO.insertWorkCharger(work);
+		result = rowcnt > 0 ? ServiceResult.OK : ServiceResult.FAIL;
+		return result;
+	}
+
+	@Override
+	public ServiceResult deleteWorkCharger(List<WorkVO> workList) {
+		ServiceResult result = null;
+		int rowcnt = 0;
+		int rowcntAll=0;
+		for (int i = 0; i < workList.size(); i++) {
+			rowcnt = workDAO.deleteWorkCharger(workList.get(i));
+			rowcntAll += rowcnt;
+		}
+		result = rowcntAll > 0 ? ServiceResult.OK : ServiceResult.FAIL;
+		return result;
+	}
+
+	@Override
+	public ServiceResult deleteWork(List<WorkVO> workList) {
+		ServiceResult result = null;
+		System.out.println("여기까지오나요 ? 3");
+		int rowcnt = 0;
+		int rowcntAll = 0;
+		log.info("workList123123",workList);
+		for (int i = 0; i < workList.size(); i++) {
+			rowcnt = workDAO.deleteWork(workList.get(i));
+			rowcntAll += rowcnt;
+			System.out.println("여기까지오나요 ?9999");
+		}
+		result = rowcntAll > 0 ? ServiceResult.OK : ServiceResult.FAIL;
+		System.out.println("여기까지오나요 ? 4");
+		return result;
+	}
+
+
+
+
+
+
+
+}

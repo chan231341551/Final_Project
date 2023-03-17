@@ -1,0 +1,50 @@
+package kr.or.ddit.project.board.service;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.project.board.dao.BoardDao;
+import kr.or.ddit.project.board.vo.BoardVO;
+
+@Service
+public class BoardServiceImpl implements BoardService{
+
+	@Inject
+	private BoardDao boardDao;
+	
+	@Override
+	public List<BoardVO> retrieveBoardList(String proCode) {
+		return boardDao.selectBoardList(proCode);
+	}
+
+	@Override
+	public BoardVO retrieveBoard(int boardNo) {
+		boardDao.incrementHit(boardNo);
+		return boardDao.selectBoard(boardNo);
+	}
+
+	@Override
+	public int createBoard(BoardVO boardVO) {
+		return boardDao.insertBoard(boardVO);
+	}
+
+	@Override
+	public int modifyBoard(BoardVO boardVO) {
+		return boardDao.updateBoard(boardVO);
+	}
+
+	@Override
+	public int removeBoard(int boardNo) {
+		return boardDao.deleteBoard(boardNo);
+	}
+
+	@Override
+	public int incrementHit(int boardNo) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+}

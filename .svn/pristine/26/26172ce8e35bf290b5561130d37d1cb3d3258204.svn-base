@@ -1,0 +1,30 @@
+package kr.or.ddit.project.wiki.controller;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.project.home.service.ProjectService;
+import kr.or.ddit.project.home.vo.ProjectVO;
+
+@Controller
+@RequestMapping("/project")
+public class WikiController {
+	
+	@Inject
+	private ProjectService projectservice;
+	
+	@GetMapping("/project/wiki/{proCode}")
+	public String projectWiki(
+			@PathVariable String proCode
+			,Model model
+			) {
+		ProjectVO project = projectservice.retrieveProject(proCode);
+		model.addAttribute("project", project);
+		return "project/wiki/wiki";
+	}
+}

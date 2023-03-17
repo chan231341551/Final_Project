@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.project.wiki.dao.WikiDAO">
+
+	<insert id="insertWiki" parameterType="WikiVO">
+	
+		<selectKey order="BEFORE" resultType="int" keyProperty="wikiNo">
+			SELECT  WIKI_SEQ.NEXTVAL
+			FROM DUAL 
+			
+		</selectKey>
+		
+		INSERT INTO WIKI (
+		    WIKI_NO
+		   ,MEM_EMAIL
+		   ,PRO_CODE
+		   ,WIKI_TITLE
+		   ,WIKI_DATE
+		   ,WIKI_CONT
+		   ,WIKI_CLS_CD
+		) VALUES (
+			  #{wikiNo,jdbcType=NUMERIC}
+			, #{memEmail,jdbcType=VARCHAR}
+			, #{proCode,jdbcType=VARCHAR}
+			, #{wikiTitle,jdbcType=VARCHAR}
+			, SYSDATE
+			, #{wikiCont,jdbcType=CLOB}
+			, #{wikiClsCd,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<select id="selectWikiList" parameterType="String" resultType="kr.or.ddit.project.wiki.vo.WikiVO" >
+		SELECT  *
+		FROM WIKI
+		WHERE PRO_CODE= #{proCode}
+	
+	</select>
+	
+	<select id="selectWiki" parameterType="int" resultType="WikiVO">
+		SELECT *
+		FROM WIKI 
+		WHERE WIKI_NO = #{wikiNo}
+	</select>
+	
+	<delete id="deleteWiki" parameterType="WikiVO" >
+		DELETE FROM WIKI 
+		WHERE WIKI_NO = #{wikiNo}
+	</delete>
+	
+	<update id="updateWiki" parameterType="WikiVO">
+		UPDATE WIKI
+			SET 
+			WIKI_TITLE= #{wikiTitle}
+		    ,MEM_EMAIL = #{memEmail}
+			,PRO_CODE = #{proCode}
+		    ,WIKI_CLS_CD = #{wikiClsCd}
+		    ,WIKI_CONT = #{wikiCont}
+		WHERE WIKI_NO = #{wikiNo}
+	
+	</update>
+  
+	
+
+</mapper>

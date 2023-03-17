@@ -1,0 +1,295 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+<main class="content">
+	<div class="container-fluid p-0">
+
+		<a class="btn btn-primary float-end mt-n1 modalPop" id="issCreate">
+		<button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#centeredModalPrimary" style="padding: 0px; color: currentcolor;">
+			New issue
+		</button>
+		</a>
+
+		<div class="mb-3">
+			<h1 class="h3 d-inline align-middle">ISSUE</h1>
+		</div>
+		
+		<div class="row list">
+		</div>
+		
+		<!-- BEGIN primary modal -->
+			<div class="modal fade" id="centeredModalPrimary" tabindex="-1" role="dialog" aria-hidden="true">
+				<div class="modal-dialog modal-dialog-centered modal-lg isCont" role="document">	
+							
+					<div class="modal-content">
+						<div class="modal-body m-3">
+							<div class="card-title mb-0 float-end" id="memName"></div>
+							<div class="card-title mb-0 float-end" id="issName"></div>
+							<div class="card-title mb-0" style="display: flex;">
+								<div id="workTitle"></div>
+								<div id="issLabelCd"></div>
+								<div id="issEmerCd"></div>
+							</div>
+							
+							<div class="d-flex align-items-start" style="margin-top: 20px;">
+								<div class="flex-grow-1">
+									<table class="table table-bordered">
+										<tr>
+											<td colspan="2" style="height:400px">
+												<div class="card-header">
+													<div class="float-start card-title inline" id="issTitle"></div>
+													<div class="float-end" id="issStatusCd" ></div><br>
+													<div class="float-end" id="issRdate"></div>
+												</div>
+												<div class="card-body">
+													<div  id="issCont" style="height: 350px;padding-top: 100px;"></div>
+													<div>@첨부파일</div>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<td style="width:50%">
+														<span class="mb-2 font-weight-bold" id="issSdate">
+														</span>
+														<span class="float-end" id="issEedate">span</span>
+														<div class="progress progress-sm">
+															<div class="progress-bar" role="progressbar"  aria-valuemin="0" aria-valuemax="100" style="width: 퍼센트;">
+															</div>
+														</div>
+											</td>
+											<td>
+												<div class="card-title mb-0">답변하기</div>
+											</td>
+										</tr>
+									</table>
+									<div>
+										댓글
+									</div>
+								</div>
+							</div>
+			
+			
+							<hr>
+							<button type="button" id="hideModal" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+							<button type=submit class="btn btn-primary">저장</button>
+						</div>
+						
+					</div>
+				</div>	
+			</div>
+		<!-- END primary modal -->
+	
+	</div>
+</main>
+<script>
+
+// <a class="btn btn-primary float-end mt-n1 modalPop" id="issCreate">
+	
+	// issue list ui 생성 함수
+	let ListTag = function(i,v){
+		// console.log("v : ",v);
+		return $("<div>").attr('class', 'col-12 col-md-6 col-lg-3')
+				.append($("<div>").attr('class','card')
+				.append($("<button>").attr({
+										  'type' : 'button'
+										, 'class' : 'btn modalPop'
+										, 'data-bs-toggle' : 'modal'
+										, 'data-bs-target' : '#centeredModalPrimary'
+										, 'id':'issDetail'
+				}).css('text-align', 'start')
+				.append(
+					$("<input>").attr({
+						"type" : "hidden",
+					}).html(v.issNo),
+					$("<div>").attr('class', 'card-header px-4 pt-4')
+					.append(
+						  $("<div>").attr('class', 'card-actions float-end').html(v.issStatusCd)
+						, $("<h5>").attr('class', 'card-title mb-0').html(v.issTitle)
+						, LabelTag(v.issLabelCd)
+						, EmerCdTag(v.issEmerCd)
+						  )
+					, $("<div>").attr('class', 'card-body px-4 pt-2')
+						.append(
+							  $("<p>").html(v.issCont)
+							, $("<h5>").attr('class', 'rounded-circle me-1').html(v.memName))
+					, $("<ul>").attr('class', 'list-group list-group-flush')
+						.append($("<li>").attr('class', 'list-group-item px-4 pb-4')
+							.append(
+									$("<p>").attr('class', 'mb-2 font-weight-bold').html("마감 기한")
+										.append($("<span>").attr('class', 'float-end').html(Progress(v.issSdate, v.issEedate)))
+										, $("<div>").attr('class', 'progress progress-sm')
+											.append($("<div>").attr({
+																	'class':'progress-bar'
+																	, 'role':'progressbar'
+																	, 'aria-valuenow':'100'
+																	, 'aria-valuemin':'0'								
+																	, 'aria-valuemax':'100'
+																	})
+																	.css('width', Progress(v.issSdate, v.issEedate))
+								)
+							)
+						)
+					)
+				)
+			)
+		}
+	
+	// issue detail 값 선택
+	let $workTitle = $("#workTitle");
+	let $issLabelCd = $("#issLabelCd");
+	let $issEmerCd = $("#issEmerCd");
+	let $issTitle = $("#issTitle");
+	let $issStatusCd = $("#issStatusCd");
+	let $issRdate = $("#issRdate");
+	let $issCont = $("#issCont");
+	let $memName = $("#memName");
+	let $issSdate = $("#issSdate");
+	let $issEedate = $("#issEedate");
+	let $issName = $("#issName");
+	
+	// 모달 띄우기
+	$(document).on("click", ".modalPop", function(){
+		let modalPop = $(this).attr("id");
+		console.log(modalPop);
+		let issNo = $(this).children("input").text()
+		if(modalPop=="issCreate"){
+			
+			// 이슈 생성 페이지
+			$.ajax({
+				url : '${pageContext.request.contextPath}/project/issueForm',
+				type : 'GET',
+				success : function(resp) {
+					$('.isCont').html(resp);
+				},
+				error : function(xhr, error, msg) {
+					console.log(xhr, error, msg);
+				},
+				dataType : 'html'
+			}) 
+		}else if(modalPop=="issDetail"){
+			
+			// 이슈 상세 페이지
+			$.ajax({
+				url : '${pageContext.request.contextPath}/project/issueDetail/'+issNo,
+				type : 'POST',
+	            dataType : 'json',
+				success : function(resp) {
+					//resp : IssueVO issue
+					//resp.issueVOList : List<IssueVO> ChargerMem
+					 $workTitle.text(resp.work.workTitle);
+					 $issLabelCd.text(resp.issLabelCd);
+					 $issEmerCd.text(resp.issEmerCd);
+					 $issTitle.text(resp.issTitle);
+					 $issStatusCd.text(resp.issStatusCd);
+					 $issRdate.text(resp.issRdate);
+					 $issCont.text(resp.issCont);
+					 $memName.text(resp.member.memName);
+					 $issName.text(resp.issChargerList.memName);
+					 $issSdate.text(resp.issSdate);
+					 $issEedate.text(resp.issEedate);
+					 
+					 
+				},
+				error : function(jqXHR, status, error) {
+					console.log("jqXHR : " + jqXHR);
+					console.log("status : " + status);
+					console.log("error : " + error);
+	             }
+	        })
+		        
+	        
+	        
+		}
+	});
+	
+						
+	// issu List 값 불러옴
+	$(document).ready(function(){
+		 $.ajax({
+             url: '${pageContext.request.contextPath}/project/project/issue',
+             method: 'GET',
+             dataType : 'json',
+             success: function (resp) {
+// 				 console.log("resp.issueList : ", resp.issueList);
+// 				 // ui 생성 함수 호출
+				 let selectTag = [];
+				 $.each(resp.issueList,function(i,v){
+				 	selectTag.push(ListTag(i,v));
+				 });
+				 $(".list").html(selectTag);
+             },
+				error : function(jqXHR, status, error) {
+					console.log(jqXHR);
+					console.log(status);
+					console.log(error);
+             }
+         })
+	});
+						
+	
+	// 날짜 퍼센트 계산
+	let Progress = function(start, end){
+// 		console.log("start : ", start);
+// 		console.log("end : ", end);
+
+		/* 년 / 월 / 일을 쪼갬 */
+		var start_date = start.substring(0, 4)+start.substring(5, 7)+start.substring(8, 10);
+		var end_date = end.substring(0, 4)+end.substring(5, 7)+end.substring(8, 10);
+		
+		var date = new Date();
+		var today = date.getFullYear() +
+		'' + ( (date.getMonth()+1) < 9 ? "0" + (date.getMonth()+1) : (date.getMonth()+1) )+
+		'' + ( (date.getDate()) < 9 ? "0" + (date.getDate()) : (date.getDate()) );
+		
+// 		console.log("start_date : ", start_date);
+// 		console.log("end_date : ", end_date);
+// 		console.log("today : ", today);
+
+		var total = end_date-start_date;
+		var day = end_date-today;
+
+		var perc ="";
+		if(total<0 || start_date>today){
+			perc = 0;
+		}else if(day>0){
+			perc = 1 - day/total;			
+		}else if(day<=0 || today>end_date){
+			perc = 100;
+		}
+		var result = Math.floor(perc*100);
+// 		console.log("result : ", result);
+		
+		return result+"%";
+	}
+	
+	// 긴급도 생성
+	let EmerCdTag = function(code){
+// 		console.log("code : ",code);
+		if(code == "b003"){
+			return $('<div>').attr({'class':'btn btn-github', 'style':'margin-left: 5px'}).html('긴급');
+		}else{
+			return "&nbsp;";
+		}
+	}
+	
+	// 라벨 색 지정
+	let LabelTag = function(label){
+// 		console.log("label : ",label);
+		let color="";
+		
+		if(label == "Question"){
+			color = "btn btn-success";
+		}else if(label == "Bug"){
+			color = "btn btn-danger";
+		}else if(label == "Help"){
+			color = "btn btn-warning";
+		}else {
+			color = "btn btn-primary";
+		}
+		return $("<div>").attr('class', color).html(label);
+	}
+	
+	
+	
+</script>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN" "http://tiles.apache.org/dtds/tiles-config_3_0.dtd" >
+<tiles-definitions> 
+
+
+	<!-- 메인 템플릿 -->
+	<definition name="main" template="/WEB-INF/views/template/template.jsp">
+		<put-attribute name="preScript" value="/includee/main/preScript.jsp" />
+	 	<put-attribute name="headerMenu" value="/includee/main/headerMenu.jsp" />
+	 	<put-attribute name="footer" value="/includee/main/footer.jsp" />
+	 	<put-attribute name="postScript" value="/includee/main/postScript.jsp" />
+	</definition>
+  
+	<definition name="index" extends="main">
+		<put-attribute name="content" value="/WEB-INF/views/index.jsp"/>
+	</definition>
+	<definition name="/service/payDetail" extends="main">
+		<put-attribute name="content" value="/WEB-INF/views/main/service/payDetail.jsp"/>
+	</definition>	
+	<definition name="member/*" extends="main">
+		<put-attribute name="content" value="/WEB-INF/views/main/member/{1}.jsp"/>
+	</definition>
+  
+	<definition name="/help/*" extends="main">
+		<put-attribute name="content" value="/WEB-INF/views/main/help/{1}.jsp"/>
+	</definition>
+	
+  
+  	<!-- PMS 메인 템플릿 -->
+	<definition name="pmsMain" template="/WEB-INF/views/template/pmsTemplate.jsp">  	
+		<put-attribute name="preScript" value="/includee/pms/preScript.jsp" />
+		<put-attribute name="projectInsertModal" value="/includee/pms/projectInsertModal.jsp" />
+	 	<put-attribute name="headerMenu" value="/includee/pms/headerMenu.jsp" />
+	 	<put-attribute name="leftMenu" value="/includee/pms/leftMenu.jsp" />
+		<put-attribute name="footer" value="/includee/pms/footer.jsp" />
+	 	<put-attribute name="postScript" value="/includee/pms/postScript.jsp" />
+	</definition>
+	<definition name="pms/*/*" extends="pmsMain">
+		<put-attribute name="content" value="/WEB-INF/views/pms/{1}/{2}.jsp"/>
+	</definition>
+	
+	<definition name="pmsIndex" extends="pmsMain">
+		<put-attribute name="content" value="/WEB-INF/views/pmsIndex.jsp"/>
+	</definition>
+  
+  
+	<!-- PMS 프로젝트 템플릿 -->
+	<definition name="pmsProject" template="/WEB-INF/views/template/pmsProjectTemplate.jsp">  	
+		<put-attribute name="preScript" value="/includee/pms/preScript.jsp" />
+		<put-attribute name="projectInsertModal" value="/includee/pms/projectInsertModal.jsp" />
+	  	<put-attribute name="headerMenu" value="/includee/pms/headerMenu.jsp" />
+	  	<put-attribute name="leftMenu" value="/includee/pms/leftMenu.jsp" />
+	  	<put-attribute name="subMenu" value="/includee/pms/subMenu.jsp" />
+	  	<put-attribute name="workModal" value="/includee/pms/projectWorkModal.jsp" />
+	  	<put-attribute name="workAddModal" value="/includee/pms/projectWorkAddModal.jsp" />
+		<put-attribute name="footer" value="/includee/pms/footer.jsp" />
+	  	<put-attribute name="postScript" value="/includee/pms/postScript.jsp" />
+  	</definition>
+  
+  	
+ 	<definition name="project/*" extends="pmsProject">
+		<put-attribute name="content" value="/WEB-INF/views/project/{1}.jsp"/>
+	</definition>
+	
+	<definition name="project/*/*" extends="pmsProject">
+		<put-attribute name="content" value="/WEB-INF/views/project/{1}/{2}.jsp"/>
+	</definition>
+  
+  	<!--레이아웃을 적용하지않는화면-->    
+    <definition name="baseEmpty" template="/WEB-INF/views/template/baseEmpty.jsp">
+    </definition>
+    
+    <!-- 레이아웃 미적용 -->    
+    <definition name="pms/mypage/mypageDetail" extends="baseEmpty">
+      <put-attribute name="content" value="/WEB-INF/views/pms/mypage/mypageDetail.jsp" />
+    </definition>
+    <definition name="project/issue/issueForm" extends="baseEmpty">
+      <put-attribute name="content" value="/WEB-INF/views/project/issue/issueForm.jsp" />
+    </definition>
+    
+    <!-- PMS 프로젝트 템플릿 -->
+	<definition name="notilesProject" template="/WEB-INF/views/template/notilesProjectTemplate.jsp">  	
+		<put-attribute name="preScript" value="/includee/pms/preScript.jsp" />
+		<put-attribute name="projectInsertModal" value="/includee/pms/projectInsertModal.jsp" />
+	  	<put-attribute name="postScript" value="/includee/pms/postScript.jsp" />
+  	</definition>
+    	<!-- return "notiles/work/workAddForm" -->
+    <definition name="notiles/*/*" extends="notilesProject">
+      <put-attribute name="content" value="/WEB-INF/views/notiles/{1}/{2}.jsp" />
+    </definition>
+
+</tiles-definitions>

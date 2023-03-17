@@ -1,0 +1,91 @@
+package kr.or.ddit.project.home.controller;
+
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.enumpkg.ServiceResult;
+import kr.or.ddit.project.home.service.ProjectService;
+import kr.or.ddit.project.home.vo.ProjectVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/project")
+public class ProjectController {
+	
+	@Inject
+	private ProjectService service;
+	
+	@GetMapping("/Home")
+	public String pmsProjectView() {
+		return "project/projectHome";
+	}
+
+	// 사용자 참여 프로젝트 목록
+	@GetMapping("/myProject")
+	public String myProjectList(
+			Principal principal
+			, Model model) {
+
+		List<ProjectVO> projectList = service.retrieveProjectList(principal.getName());
+		log.info("projectList : {}",projectList);
+		model.addAttribute("projectList",projectList);
+		
+		return "pms/myproject/projectList";
+	}
+	
+	// Ajax 연습중
+	@GetMapping(value="/myProject/{proSelectId}", produces="application/json;charset=utf-8")
+	@ResponseBody
+	public List<ProjectVO> myProjectSelectList(
+			Principal principal
+			, @PathVariable String proSelectId
+			, Model model
+			) {
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("proSelect",proSelectId);
+		List<ProjectVO> projectList = service.retrieveProjectSelectList(principal.getName(), map);
+		
+		model.addAttribute("projectList",projectList);
+
+		return projectList;
+	}
+	
+	// 프로젝트 생성
+	@PostMapping("/projectInsert")
+	public String projectInsert(
+			HttpServletRequest req 
+			, @ModelAttribute("project") ProjectVO project) {
+		
+		String viewName = null;
+		
+		ServiceResult result = service.createProject(project);
+
+		switch(result) {
+		case OK:
+			req.setAttribute("message", "프로젝트 생성 성공");
+			viewName = "redirect:/project/Home";
+			break;
+		case FAIL:
+			req.setAttribute("message", "프로젝트 생성 실패");
+			viewName = "pms/myproject/projectList";
+			break;
+		}
+		
+		return viewName;
+	}
+}

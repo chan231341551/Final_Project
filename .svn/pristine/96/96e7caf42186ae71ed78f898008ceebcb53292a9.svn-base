@@ -1,0 +1,94 @@
+package kr.or.ddit.project.issue.service;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.annotations.Param;
+
+//import kr.or.ddit.board.vo.AttatchVO;
+import kr.or.ddit.enumpkg.ServiceResult;
+import kr.or.ddit.exception.UserNotFoundException;
+import kr.or.ddit.member.vo.MemberVO;
+import kr.or.ddit.project.issue.vo.IssChargerVO;
+import kr.or.ddit.project.issue.vo.IssCommVO;
+import kr.or.ddit.project.issue.vo.IssueVO;
+import kr.or.ddit.project.work.vo.WorkCommVO;
+import kr.or.ddit.project.work.vo.WorkVO;
+import kr.or.ddit.vo.PagingVO;
+
+/**
+ * 이슈관리(CRUD)를 위한 Business Logic Layer
+ */
+public interface IssueService {
+
+	/**
+	 * 이슈 생성
+	 * @param issNo
+	 * @return 존재여부(NotExistBoardException)
+	 */
+	public int createIssue(IssueVO issue);
+	
+	/**
+	 * 내 이슈 리스트 조회
+	 * @param memEmail
+	 * @return 성공(OK), 실패(FAIL)
+	 */
+	public List<IssueVO> retrieveIssueList(@Param("proCode") String proCode);
+	
+	/**
+	 * 이슈 상세 조회
+	 * @param issNo
+	 * @return 성공(OK), 실패(FAIL)
+	 */
+	public IssueVO retrieveIssue(int issNo);
+	
+	/**
+	 * 이슈 담당자 조회
+	 * @param issNo
+	 * @return 성공(OK), 실패(FAIL)
+	 */
+	public List<Map<String, String>> retrieveChargerMem(int issNo);
+	
+	/**
+	 * 이슈 수정
+	 * @param issNo
+	 * @return 존재여부(NotExistBoardException), rowcnt
+	 */
+	public int modifyIssue(IssueVO issue);
+	
+	/**
+	 * 이슈 삭제
+	 * @param issNo
+	 * @return 존재 부(NOTEXIST), 성공(OK), 실패(FAIL)
+	 */
+	public int removeIssue(int issNo);
+	
+	/**
+	 * 작업 목록 조회
+	 * @param memEmail
+	 * @return 성공(OK), 실패(FAIL)
+	 */
+	public List<WorkVO> retrieveWork(@Param("proCode") String proCode);
+	
+	/**
+	 * 회원 목록 조회
+	 * @param workNo
+	 * @return 성공(OK), 실패(FAIL)
+	 */
+	public List<MemberVO> retrieveMember(@Param("workNo") int workNo);
+	
+	/**
+	 * 댓글 추가하기
+	 * @param IssCommVO
+	 * @return 
+	 */
+	public int createIssComm(IssCommVO issComm);
+	
+	/**
+	 * 댓글 목록 가져오기
+	 * @param IssCommVO
+	 * @return List<IssCommVO>
+	 */
+	public List<IssCommVO> retrieveIssCommList(int issNo);
+	
+}

@@ -1,0 +1,47 @@
+package kr.or.ddit.project.issue.service;
+
+import java.util.List;
+
+//import kr.or.ddit.board.vo.AttatchVO;
+import kr.or.ddit.enumpkg.ServiceResult;
+import kr.or.ddit.exception.UserNotFoundException;
+import kr.or.ddit.project.issue.vo.IssueVO;
+import kr.or.ddit.vo.PagingVO;
+
+/**
+ * 이슈관리(CRUD)를 위한 Business Logic Layer
+ */
+public interface IssueService {
+
+	/**
+	 * 이슈 생성
+	 * @param issNo
+	 * @return 존재여부(NotExistBoardException)
+	 */
+	public int createIssue(IssueVO issue);
+	
+	public void retrieveIssueList(PagingVO<IssueVO> pagingVO);
+	
+	/**
+	 * 이슈 상세 조회
+	 * @param issNo
+	 * @return 성공(OK), 실패(FAIL)
+	 */
+	public IssueVO retrieveIssue(int issNo);
+	
+	/**
+	 * 이슈 수정
+	 * @param issNo
+	 * @return 존재여부(NotExistBoardException), rowcnt
+	 */
+	public int modifyIssue(IssueVO Issue);
+	
+	/**
+	 * 이슈 삭제
+	 * @param issNo
+	 * @return 존재 부(NOTEXIST), 성공(OK), 실패(FAIL)
+	 */
+	public int removeIssue(int issNo);
+	
+//	public AttatchVO retrieveForDownload(int attNo);
+}

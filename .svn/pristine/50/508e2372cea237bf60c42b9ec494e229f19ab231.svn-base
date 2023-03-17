@@ -1,0 +1,59 @@
+package kr.or.ddit.project.issue.controller;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.project.issue.service.IssueService;
+import kr.or.ddit.project.issue.vo.IssueVO;
+import kr.or.ddit.validate.InsertGroup;
+import lombok.extern.slf4j.Slf4j;
+
+
+@Slf4j
+@Controller
+@RequestMapping("/project")
+public class IssueController {
+	
+	@Inject
+	private IssueService service;
+	
+	@GetMapping("/issueList")
+	public String issueList() {
+		return "project/issue/issueRetrieve";
+	}
+	
+	@GetMapping("/issueForm")
+	public String issueForm(IssueVO Issue) {
+		return "project/issue/issueForm";
+	}
+	
+	@PostMapping("/issueForm")
+	public String issueInsert(
+			@Validated(InsertGroup.class) @ModelAttribute("Issue") IssueVO Issue
+			, Errors errors
+			, Model model
+			) {
+		String viewName = null;
+		if(!errors.hasErrors()) {
+			int rowcnt = service.createIssue(Issue);
+			if(rowcnt>0) {
+				viewName = "redirect:/Issue/IssueView.do?what="+Issue.getIssNo();
+			}else {
+				model.addAttribute("message", "서버 오류, 쫌따 다시!");
+				viewName = "Issue/IssueForm";
+			}
+		}else {
+			viewName = "Issue/IssueForm";
+		}
+		return viewName;
+	}
+	
+}

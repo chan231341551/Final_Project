@@ -1,0 +1,31 @@
+package kr.or.ddit.commons.api.controller;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.commons.api.service.PapagoService;
+
+@Controller
+@RequestMapping("/api")
+public class PapagoController {
+	
+	@Inject
+	PapagoService service;
+	
+//	@GetMapping("/papago")
+//	public String papago() {
+//		return "project/api/papago";
+//	}
+	
+//	@GetMapping("/papago")
+//	public String papagoInsert(Model model) {
+//		String papago = service.Papago();
+//		model.addAttribute("message",papago);
+//		return "project/api/papago";
+//	}
+
+}

@@ -1,0 +1,701 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>    
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="security" %>
+<script src="${pageContext.request.contextPath }/resources/ckeditor/ckeditor.js"></script>
+<security:authentication property="principal.realMember" var="authMember"/>
+
+
+
+<main class="content" style="padding-top:0px;">
+
+<div class="container-fluid p-0">
+	<div class="row">
+	<!--====================== 위키 상단 바 ======================-->
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header">
+					<div class="d-flex flex-row justify-content-between">
+						<h3>프로젝트</h3>
+					</div>
+					<hr>
+					<div class="d-flex flex-column justify-content-between">
+						<nav aria-label="breadcrumb">
+							<ol class="breadcrumb" style="margin:0px;">
+								<li class="breadcrumb-item"><a href="#">프로젝트 </a></li>
+								<li class="breadcrumb-item active">위키</li>
+							</ol>
+						</nav>
+						<div role="tablist" class="d-flex flex-row justify-content-end">
+							<button id="wirteWikiBtn" class="btn btn-primary"><a id="wirteWikiBtn" >위키작성</a></button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="row">
+
+<div class="col-12" id="projectNewsListView" style="display: block;">
+		<div class="card">
+			<div class="card-header">
+				<div class="row">
+					<div class="col-sm-12 col-md-7">
+						<div class="d-flex justify-content-start"></div>
+						<h4>위키게시판 안내사항 주의사항</h4>
+					</div>
+					<div class="col-sm-12 col-md-5">
+						<div id="searchUI" class="d-flex justify-content-end">
+							<select name="searchOption" class="form-control" style="width: 20%;">
+							<!-- 동적으로 값을 불러와야해   -->
+								<option value="total">전체</option>
+								<option value="title">제목</option>
+								<option value="writer">분류</option>
+							</select>
+							<input class="bg-light" type="text" name="searchWord" placeholder="검색어를입력" /> 
+							<input class="btn btn-primary" type="button" value="검색" id="searchProjectBtn" />
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="card-body">
+				<div class="row">
+					<div class="col-12  col-md-9" id="wikiSelect"></div>
+					<script id="ckEditorId">
+					
+					</script>
+					<div class="col-md-3" id="listSelect">
+						<h4>조건별 정렬 </h4><br>
+					<td><a href="#" onclick="wikiList()">● 날짜별</a></td><br>
+					<td><a href="#" onclick="f_wikiClsList()">● 분류별</a></td><br>
+					<td><a href="#" onclick="f_WC001()">　　● 지식</a></td><br>
+					<td><a href="#" onclick="f_WC002()">　　● 참고자료</a></td><br>
+					<td><a href="#" onclick="f_WC003()">　　● 기타</a></td><br>
+						
+					</div>
+						
+				</div>
+			</div>
+			
+			<div class="card-footer">
+				<div id="proTotalDisp" class="row"></div>
+				
+				<!-- paging  -->
+				<div class="row" id="projectWikiListPagingDisp" style="display: block;">
+					<div class="col-sm-12 col-md-12">
+						<div class="pagingArea d-flex justify-content-center"></div>
+					</div>
+					<!--페이지 검색 확인용! -->
+					<form id="searchForm">
+						<input type="text" name="page" />
+						<security:csrfInput/>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>	
+</main>
+
+
+
+<script type="text/javascript">
+
+	let wikiSelect = $("#wikiSelect");
+	let proTotalDisp = $("#proTotalDisp");
+	
+	
+///// 뉴스가 없는경우 html
+	   let NotHtml = function(){
+	      let ListHtml = "";
+	      ListHtml += `
+	      <div class="col-12 col-md-6 col-lg-4">
+	         <div class="card">
+	            <p><h3>해당 게시물이 없어
+	            	게시글을 작성해~ </h3></p>
+	         </div>
+	      </div>`;
+	      return ListHtml;
+	   }
+	
+
+/////위키html 	
+	let makeWikiHtml = function(wikiList){
+		let wikiHtml = "";
+			wikiHtml += `
+			<div class="row" >
+				<table class="table">
+					<thead>
+						<tr>
+							<th style="width: 10%;">순번</th>
+							<th style="width: 20%;">분류</th> 
+							<th style="width: 45%;">제목</th>
+							<th style="width: 30%;">등록일</th>
+							<th style="width: 15%">작성자</th>
+						</tr>
+					</thead>
+			`;
+				for(let i=0; i<wikiList.length; i++){
+					wikiHtml+=`	<tr> `;
+						wikiHtml += `			
+							<td>\${wikiList[i].rnum}</td>
+							<td>\${wikiList[i].mcodeNm}</td>
+							<td><a href="#" onclick="f_detail(\${wikiList[i].wikiNo})">\${wikiList[i].wikiTitle}</a></td>
+							<td>\${wikiList[i].wikiDate}</td>
+							<td>\${wikiList[i].memEmail}</td>
+					</tr>`;
+				}
+					wikiHtml +=`
+				</tbody>
+				</table>
+			</div>
+					`;
+		return  wikiHtml;
+	} 
+		
+////////////////////위키목록 첫 UI/////////////////
+	$.ajax({
+		url : "${pageContext.request.contextPath}/project/project/wiki/${project.proCode}",
+		method : "get",
+		success : function(resp) {
+			console.log("위키ui만뿌릴꺼야!!");
+		},
+		error : function(jqXHR, status, error) {
+			console.log(jqXHR,status,error);
+		}
+	});
+
+//목록 보여주기(최신순 정렬)	
+	wikiList();
+	function wikiList(wikiList){
+		$.ajax({
+			url : "${pageContext.request.contextPath }/project/project/wikiListView/${project.proCode}",
+			method : "get",
+			dataType : "json",
+			success : function(resp) {
+				if(resp.length>0){
+					console.log("위키 목록(날짜별) :",resp);
+					wikiSelect.html(makeWikiHtml(resp));
+				}
+				else{
+					wikiSelect.html(NotHtml(resp));
+				}
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});
+	};
+
+	
+/////정렬 다르게 ()
+ 	function f_wikiClsList(wikiNo){
+		$.ajax({
+			url : "${pageContext.request.contextPath }/project/project/wikiListViewSort/${project.proCode}",
+			method : "get",
+			dataType : "json",
+			success : function(resp) {
+				console.log("위키목록(분류별)",resp);
+				wikiSelect.html(makeWikiHtml(resp));
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR,status,error);
+			}
+		});
+	};
+	
+	
+/////WC001
+ 	function f_WC001(wikiNo){
+		$.ajax({
+			url : "${pageContext.request.contextPath }/project/project/wikiListOne/${project.proCode}",
+			method : "get",
+			dataType : "json",
+			success : function(resp) {
+				console.log("위키목록(지식)",resp);
+				wikiSelect.html(makeWikiHtml(resp));
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR,status,error);
+			}
+		});
+	}; 
+
+/////WC002
+ 	function f_WC002(wikiNo){
+		$.ajax({
+			url : "${pageContext.request.contextPath }/project/project/wikiListTwo/${project.proCode}",
+			method : "get",
+			dataType : "json",
+			success : function(resp) {
+				console.log("위키목록(참고자료)",resp);
+				wikiSelect.html(makeWikiHtml(resp));
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR,status,error);
+			}
+		});
+	}; 
+	
+/////WC003
+ 	function f_WC003(wikiNo){
+		$.ajax({
+			url : "${pageContext.request.contextPath }/project/project/wikiListThree/${project.proCode}",
+			method : "get",
+			dataType : "json",
+			success : function(resp) {
+				console.log("위키목록(기타)",resp);
+				wikiSelect.html(makeWikiHtml(resp));
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR,status,error);
+			}
+		});
+	}; 	
+
+////////////상세보기 html 
+ let makeWikiDetailHtml = function(wikiVo){
+	let WikiDetailHtml = "";
+		WikiDetailHtml += `
+		
+		<div class="row">
+			<div class="col-12 col-md-12 col-lg-12">
+					<div class="card">
+							<div class="card-header px-4 pt-4">
+							<table class="table table-sm mt-2 mb-4">
+								<tbody>
+									<tr>
+										<th>제목</th>
+										<td>\${wikiVo.wikiTitle}</td>
+									</tr>
+									<tr>
+										<th>분류</th>
+										<td>\${wikiVo.mcodeNm}</td>
+									</tr>
+									<tr>
+										<th>이메일</th>
+										<td>\${wikiVo.memEmail}</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						
+						<div class="card-body px-4 pt-2">
+						<p>\${wikiVo.wikiCont}</p>
+						<hr>
+					</div>
+				</div>
+				<div class="d-flex justify-content-end">
+				
+				<div>
+					
+					<a href="#" id="updateWikiBtn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2 align-middle"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg></a>
+					<a href="#"id="SelectwikiDeleteBtn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash align-middle"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></a>
+					
+					<button id="GotoList" class="btn btn-outline-primary">목록으로 </button>
+					<button id="WriteComm" class="btn btn-outline-primary" data-wiki-no="\${wikiVo.wikiNo}">답글쓰기 </button>
+				</div>
+			</div>
+			</div>
+		</div>`;
+	return WikiDetailHtml;
+}
+	
+/////글쓰기 Html
+	let makeWriteWikiHtml = function(){
+		writeWikiHtml = "";
+		writeWikiHtml+=`
+			<!-- 위키 글쓰기폼 -->
+					<div class="card-body">
+					<form class="NewWikiForm">
+							<input type="hidden" name="proCode" value="${project.proCode }">
+							<input type="hidden" name="memEmail" value="${authMember.memEmail }">
+							<table class="table table-bordered">
+								<tr>
+									<th rowspan="2">위키 제목
+								</th>
+								</tr>
+								<tr>
+									<td>
+										<input type="text" name= "wikiTitle" Class="form-control" value="" required>
+									</td>
+								</tr>
+								<tr><th rowspan="2">위키 분류</th></tr>
+								<td>
+								
+								
+								<select name="wikiClsCd" class="form-select" required>
+									<option value="WC000">선택안함</option>
+									<option value="WC001" >지식</option>
+									<option value="WC002">참고자료</option>
+									<option value="WC003">기타</option>
+								</select>
+								</td>
+								</tr>
+
+								<tr>
+									<th>위키내용</th>
+									<td><textarea id="editor1" name="wikiCont" rows="30" cols="80" required></textarea>
+									</td>
+								</tr>
+							</table>
+							<div class="d-flex justify-content-end">
+							
+								<a id="NewsWikiAddBtn" class="btn btn-primary">위키 등록</a>
+								<a id="GotoList" class="btn btn-primary">목록으로</a>
+							</div>
+						</form>
+					</div>
+					<div class="card-footer"></div>
+			`;
+			return writeWikiHtml;
+	}
+	</script>
+	
+
+	
+<script>
+/////답글쓰기 Html
+ 	let makeWikiCommHtml = function(wikiVo){
+		wikiCommHtml = "";
+		wikiCommHtml+=`
+			<!-- 작업Form -->
+					<div class="card-body">
+					<form class="CommWikiForm">
+							<input type="hidden" name="proCode" value="${project.proCode }">
+							<input type="hidden" name="memEmail" value="${authMember.memEmail }">
+							<!--글 번호 가져오기-->
+							<table class="table table-bordered">
+								<tr>
+									<th rowspan="2">위키 제목
+								</th>
+								</tr>
+								<tr>
+									<td>
+										<input type="text" name= "wikiTitle" Class="form-control" value="" required>
+									</td>
+								</tr>
+								
+								<tr><th rowspan="2">위키 분류</th></tr>
+								<td>
+								<select name="wikiClsCd" class="form-select" required>
+									<option value="WC000" >선택안함</option>
+									<option value="WC001" >지식</option>
+									<option value="WC002">참고자료</option>
+									<option value="WC003">기타</option>
+								</select>
+								</td>
+								</tr>
+								
+								<tr>
+									<th>위키내용</th>
+									<td><textarea name="wikiCont" rows="30" cols="80" required></textarea>
+									</td>
+								</tr>
+							</table>
+							<div class="d-flex justify-content-end">
+								<a id="WikiCommAddBtn" class="btn btn-primary" data-wiki-no="\${wikiVo.wikiNo}">답글 등록</a>
+								<a id="GotoList" class="btn btn-primary">목록으로</a>
+							</div>
+						</form>
+					</div>
+					<div class="card-footer"></div>
+			`;
+			return wikiCommHtml;
+	}
+	
+	
+/////////////수정하기 Html
+
+	let makeUpdateWikiHtml = function(resp){
+		console.log("수정폼",resp)
+		updateWikiHtml = "";
+		updateWikiHtml+=`
+			<!-- 작업Form -->
+					<div class="card-body">
+					<form class="UpdateWikiForm">
+							<input type="hidden" name="proCode" value="${project.proCode }">
+							<input type="hidden" name="memEmail" value="${authMember.memEmail }">
+							<input type="hidden" name="wikiPntNo" value="">
+							<table class="table table-bordered">
+								<tr>
+									<th rowspan="2">위키 제목
+								</th>
+								</tr>
+								<tr>
+									<td>
+										<input type="text" name= "wikiTitle" Class="form-control" value="\${resp.wikiTitle}" required>
+									</td>
+								</tr>
+								
+								<tr><th rowspan="2">위키 분류</th></tr>
+								<td>
+								<select name="wikiClsCd" class="form-control" required>
+									<option selected>선택해주세요</option>
+									<option value="WC001">지식</option>
+									<option value="WC002">참고자료</option>
+									<option value="WC003">기타</option>
+								</select>
+								</td>
+								</tr>
+								
+								<tr>
+									<th>위키내용</th>
+									<td><textarea name="wikiCont" rows="30" cols="80" required>\${resp.wikiCont}</textarea>
+									</td>
+								</tr>
+							</table>
+							<div class="d-flex justify-content-end">
+							
+								<a id="UpdateWikiAddBtn" class="btn btn-primary">수정 완료 </a>
+								<a id="GotoList" class="btn btn-primary">취소</a>
+							</div>
+						</form>
+					</div>
+					<div class="card-footer"></div>
+			`;
+			return updateWikiHtml;
+	}
+
+/////////목록으로
+	$(document).on("click","#GotoList",function(){
+		wikiList();
+		
+	});
+	
+
+/////////////상세보기
+
+	function f_detail(wikiNo){
+		
+	 	let data = { 
+			wikiNo : wikiNo
+		}
+	 	
+		$.ajax({
+			url : "${pageContext.request.contextPath}/project/project/wikiDetail",
+			method : "post",
+			data :  JSON.stringify(data),
+			contentType : "application/json;charset=utf-8",
+			dataType : "json",
+			success : function(resp) {
+				console.log("상세보기"+resp);
+				/*글쓰기버튼이 안보임  */
+				wikiSelect.html(makeWikiDetailHtml(resp));
+				
+
+//////////////삭제하기
+				$("#SelectwikiDeleteBtn").on("click",function(){
+					
+					let data = {wikiNo :resp.wikiNo};
+					console.log("위키번호 : ",data);
+							
+					$.ajax({
+						url : "${pageContext.request.contextPath}/project/project/deleteWiki",
+						method : "post",
+						data : JSON.stringify(data),
+						contentType : "application/json;charset=utf-8",
+						dataType : "json",
+						success : function(result) {
+							console.log("삭제할꺼야",result);
+							wikiList();
+						},
+						error : function(jqXHR, status, error) {
+							console.log(jqXHR,status,error);
+						}
+					});
+				});
+		
+///////////수정하기
+				$("#updateWikiBtn").on("click",function(){
+					wikiSelect.html(makeUpdateWikiHtml(resp));
+					$("#UpdateWikiAddBtn").on("click",function(){
+						
+						let wiki = {
+								wikiNo : wikiNo,
+								wikiTitle : $("input[name=wikiTitle]").val(),
+								memEmail : $("input[name=memEmail]").val(),
+								proCode : $("[name=proCode]").val(),
+								wikiClsCd : $("[name=wikiClsCd]").val(),
+								wikiCont : $("[name=wikiCont]").val()
+						}
+						console.log("나올까?",wiki);
+						
+						$.ajax({
+							url : "${pageContext.request.contextPath}/project/project/updateWiki",
+							method : "post",
+							data :  JSON.stringify(wiki),
+							contentType : "application/json;charset=utf-8",
+							dataType : "json",
+							success : function(resp) {
+								console.log("수정완료");
+								wikiList();
+							},
+							error : function(jqXHR, status, error) {
+								console.log(jqXHR);
+								console.log(status);
+								console.log(error);
+							}
+						});
+					});
+				});
+			},
+			error : function(jqXHR, status,error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});
+	}
+
+//////// 생성하기
+    function fn_seri(myForm){
+        let elems = myForm.elements
+        let myObj = {}
+        for(let i=0; i<elems.length; i++){
+            if(myObj.hasOwnProperty(elems[i].name)){
+               if(Array.isArray(myObj[elems[i].name])){                  
+                  myObj[elems[i].name].push(elems[i].value);
+               }else{                  
+                  let array = [myObj[elems[i].name]]
+                  array.push(elems[i].value);
+                  myObj[elems[i].name] = array;
+               }
+            }else{
+               myObj[elems[i].name] = elems[i].value;
+            }
+        }
+        return myObj;
+    }
+///////작성하기
+	$(document).on("click","#wirteWikiBtn",function(){
+		$("#Showme").css("display","none");
+		wikiSelect.html(makeWriteWikiHtml);
+		
+	
+		$(document).on("click","#NewsWikiAddBtn",function(){
+			let hForm = $(".NewWikiForm");
+			
+			let data = fn_seri(hForm[0]);
+			console.log("data",data);
+			
+			$.ajax({
+				url : "${pageContext.request.contextPath}/project/project/wikiInsert",
+				method : "post",
+				data : JSON.stringify(data),
+				contentType : "application/json;charset=utf-8",
+				success : function(resp) {	wikiList(); },
+				error : function(jqXHR, status, error) {
+					console.log(jqXHR,status,error);
+				}
+			});
+		});
+	});
+
+///////답글 작성하기
+	$(document).on("click","#WriteComm",function(wiki){
+		 wikiSelect.html(makeWikiCommHtml); 
+		 
+		let wikiNo = $(this).data('wikiNo');
+		 console.log("wikiNo!!!!!!!!!!!!!!!",wikiNo);
+		 
+		 $(document).on("click","#WikiCommAddBtn",function(){
+				let data = {
+					 wikiPntNo : wikiNo,
+					 	wikiTitle :"　RE:" +$("input[name=wikiTitle]").val(),
+						memEmail : $("input[name=memEmail]").val(),
+						proCode : $("[name=proCode]").val(),
+						wikiClsCd : $("[name=wikiClsCd]").val(),
+						wikiCont : $("[name=wikiCont]").val() 
+				}
+				console.log(data);
+			 
+		 
+			 $.ajax({
+				url : "${pageContext.request.contextPath}/project/project/wikiCommInsert",
+				method : "post",
+				data : JSON.stringify(data),
+				contentType : "application/json;charset=utf-8",
+				success : function(resp) {	
+					wikiList(); 
+				},
+				error : function(jqXHR, status, error) {
+					console.log(jqXHR,status,error);
+				}
+			});  
+		});
+	});	
+
+///////위키 검색
+	let searchForm = $("#searchForm").on("submit", function(event){
+		event.preventDefault();
+		console.log("검색할껴");
+		let method = this.method;
+		let queryString = $(this).serialize();
+
+		$.ajax({
+			
+			url : "${pageContext.request.contextPath }/project/wikiListView/{proCode}",
+			method : method,
+			data : queryString ,
+			dataType : "json",
+			success : function(resp) {
+				console.log(resp);
+				proTotalDisp.empty();
+				pagingArea.empty();
+				
+				pagingArea.empty();
+				searchForm[0].page.value="";
+				
+				let dataList = resp.pagingVO.dataList;
+				let trTags = [];
+				
+				console.log(dataList.length>0);
+				
+				if(dataList.length>0){
+					$.each(dataList, function(index, project){
+						trTags.push(makeProjectHtml(project));
+					});
+				}else{
+					trTags.push(makeNoProjectHtml());
+				}
+				console.log(trTags);
+				proTotalDisp.html(trTags);
+				if(resp.pagingHTML)
+					pagingArea.html(resp.pagingHTML);		
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});
+		return false;
+	});
+	
+	// 검색 Form 보내기
+	let searchUI = $("#searchUI").on("click", "#searchProjectBtn", function(){
+		let inputs = searchUI.find(":input[name]");
+		$.each(inputs, function(index, input){
+			let name = this.name;
+			let value = $(this).val();
+			searchForm[0][name].value = value;
+		});
+		searchForm.submit();
+	});
+
+</script>
+
+
+
+
+
+
+
+

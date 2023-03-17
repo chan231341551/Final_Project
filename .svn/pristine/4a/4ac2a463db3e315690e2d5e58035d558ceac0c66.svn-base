@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.project.management.dao.ManagementDAO">
+
+
+	<!-- 공지 작성 -->
+	<insert id="insertNotice" parameterType="NewsVO">
+		<selectKey order="BEFORE" resultType="int" keyProperty="newsNo">
+			SELECT NEWS_SEQ.NEXTVAL
+			FROM DUAL
+		</selectKey>
+		INSERT INTO NEWS (
+		    NEWS_NO,
+		    MEM_EMAIL,
+		    PRO_CODE,
+		    NEWS_TITLE,
+		    NEWS_CONT,
+		    NEWS_DATE,
+		    NEWS_PASS,
+		    NEWS_ATT_NO,
+		    NEWS_NOTICE
+		) VALUES (
+		  #{newsNo,jdbcType=NUMERIC}
+		, #{memEmail,jdbcType=VARCHAR}
+		, #{proCode,jdbcType=VARCHAR}
+		, #{newsTitle,jdbcType=VARCHAR}
+		, #{newsCont,jdbcType=CLOB}
+		, SYSDATE
+		, #{newsPass,jdbcType=NUMERIC}
+		,#{newsAttNo,jdbcType=NUMERIC}
+		, 'Y'
+		)
+	</insert>
+	
+	<select id="selectNoticeList" parameterType="NewsVO" resultType="NewsVO">
+		SELECT ROW_NUMBER() OVER (ORDER BY NEWS_NO DESC) RNUM
+	     , NEWS_NO, PRO_CODE, MEM_EMAIL, NEWS_TITLE,NEWS_ATT_NO
+	     , TO_CHAR(NEWS_DATE,'YYYY-MM-DD') NEWS_DATE, NEWS_HIT ,
+	     (SELECT ATT_PATH || ATT_SAVENAME
+             FROM ATTATCH
+             WHERE ATT_NO = NEWS_ATT_NO) AS NEWS_ATT_PATH
+		  FROM   NEWS
+	     WHERE  1 = 1
+		   AND NEWS_NOTICE = 'Y'
+     	   AND PRO_CODE = #{proCode}
+	</select>
+
+	<!-- 프로젝트 멤버 리스트 -->
+	<select id="selectParticipateList1" parameterType="string" resultType="kr.or.ddit.project.home.vo.ParticipateVO">
+    	  
+	  		SELECT
+	    	PRO_CODE
+		    , A.MEM_EMAIL
+		    , PRO_ROLE_CD
+		    , (
+		       SELECT MCODE_NM
+		         FROM COM_MCODE B
+		        WHERE A.PRO_ROLE_CD = B.MCODE_CD
+	        ) MCODE_NM
+		    , PART_DATE
+		    , PART_YN 
+		    ,(SELECT 
+			    (SELECT ATT_PATH||ATT_SAVENAME
+	             FROM ATTATCH
+	             WHERE ATT_NO = MEM_ATT_NO)
+		      FROM MEMBER
+		      WHERE MEM_EMAIL = A.MEM_EMAIL
+		     ) AS MEM_ATT_PATH
+		    , MEM_NAME
+		    , (SELECT ATT_PATH||ATT_SAVENAME
+               FROM ATTATCH
+           	   WHERE ATT_NO = MEM_ATT_NO )AS MEM_ATT_PATH
+		FROM
+	   		PARTICIPATE A , MEMBER M
+	   	WHERE PRO_CODE = #{proCode}
+	   	  AND PART_YN = '1'
+	   	  AND A.MEM_EMAIL = M.MEM_EMAIL
+	</select>
+	
+	<!-- 초대 대기중인 멤버 리스트 -->
+	<select id="selectParticipateList0" parameterType="string" resultType="kr.or.ddit.project.home.vo.ParticipateVO">
+		SELECT
+	    	PRO_CODE
+		    , A.MEM_EMAIL
+		    , PRO_ROLE_CD
+		    , (
+		       SELECT MCODE_NM
+		         FROM COM_MCODE B
+		        WHERE A.PRO_ROLE_CD = B.MCODE_CD
+	        ) MCODE_NM
+		    , PART_DATE
+		    , PART_YN 
+		    , MEM_NAME
+		    , (SELECT ATT_PATH||ATT_SAVENAME
+               FROM ATTATCH
+           	   WHERE ATT_NO = MEM_ATT_NO )AS MEM_ATT_PATH
+		FROM
+	   		PARTICIPATE A , MEMBER M
+	   	WHERE PRO_CODE = #{proCode}
+	   	  AND PART_YN = '0'
+	   	  AND A.MEM_EMAIL = M.MEM_EMAIL
+	</select>
+
+	<!-- 초대 거절한 멤버 리스트 -->
+	<select id="selectParticipateList2" parameterType="string" resultType="kr.or.ddit.project.home.vo.ParticipateVO">
+		SELECT
+	    	PRO_CODE
+		    , A.MEM_EMAIL
+		    , PRO_ROLE_CD
+		    , (
+		       SELECT MCODE_NM
+		         FROM COM_MCODE B
+		        WHERE A.PRO_ROLE_CD = B.MCODE_CD
+	        ) MCODE_NM
+		    , PART_DATE
+		    , PART_YN 
+		    , MEM_NAME
+		    , (SELECT ATT_PATH||ATT_SAVENAME
+               FROM ATTATCH
+           	   WHERE ATT_NO = MEM_ATT_NO )AS MEM_ATT_PATH
+		FROM
+	   		PARTICIPATE A , MEMBER M
+	   	WHERE PRO_CODE = #{proCode}
+	   	  AND PART_YN = '2'
+	   	  AND A.MEM_EMAIL = M.MEM_EMAIL
+	</select>
+
+	<!-- 프로젝트 멤버 초대하기 -->
+	<insert id="insertParticipate" parameterType="ParticipateVO">
+		INSERT INTO PARTICIPATE (
+			PRO_CODE
+			, MEM_EMAIL 
+			, PRO_ROLE_CD
+			, PART_YN) 
+		VALUES (
+			#{proCode,jdbcType=VARCHAR}
+			, #{memEmail,jdbcType=VARCHAR}
+			, #{proRoleCd,jdbcType=VARCHAR}
+			, '0')
+	</insert>
+	
+	<!-- 프로젝트 멤버 추방하기 -->
+	<delete id="deleteParticipate" parameterType="ParticipateVO">
+		DELETE FROM PARTICIPATE
+		 WHERE MEM_EMAIL = #{memEmail,jdbcType=VARCHAR}
+		   AND PRO_CODE = #{proCode,jdbcType=VARCHAR}
+	</delete>
+	
+	<!-- 프로젝트 멤버 초대 불가 -->
+	<select id="selectParticipateAlready" parameterType="ParticipateVO" resultType="int">
+	    SELECT COUNT(*) AS PARTICIPATECOUNT
+		  FROM PARTICIPATE
+		 WHERE MEM_EMAIL = #{memEmail,jdbcType=VARCHAR}
+		   AND PRO_CODE = #{proCode,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 프로젝트 다시 초대하기 -->
+	<delete id="updateParticipateAgain" parameterType="ParticipateVO">	   
+   		UPDATE PARTICIPATE
+		   SET PART_YN = '0',
+		   	   PART_DATE = TO_CHAR(SYSDATE,('YYYYMMDD'))
+		 WHERE MEM_EMAIL = #{memEmail,jdbcType=VARCHAR}
+		   AND PRO_CODE = #{proCode,jdbcType=VARCHAR}
+	</delete>
+	
+
+</mapper>

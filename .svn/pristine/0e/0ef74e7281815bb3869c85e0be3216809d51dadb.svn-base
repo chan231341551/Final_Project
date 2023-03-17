@@ -1,0 +1,98 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>	
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+<!-- JStree -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+
+
+
+
+<main class="content pt-0">
+	<div class="container-fluid p-0">
+		<div class="row">
+			<div class="col-md-5 col-xl-3">
+				<div class="card mb-3">
+					<div class="card-header">
+						<h5 class="card-title mb-0">파일 저장소</h5>
+					</div>
+					<!-- jstree -->
+					<div id="tree" class="m-3">
+					</div>
+					
+				</div>
+			</div>
+			<div class="col-md-7 col-xl-9">
+				<div class="card">
+					<div class="card-header">
+
+						<h5 class="card-title mb-0">Activities</h5>
+					</div>
+					<div class="card-body h-100">
+
+					<div class="d-flex align-items-start">
+						<div class="flex-grow-1">
+							<small class="float-end text-navy">5m ago</small>
+							<strong>Vanessa Tucker</strong> started following <strong>Christina Mason</strong><br>
+							<small class="text-muted">Today 7:51 pm</small><br>
+
+						</div>
+					</div>
+
+					<hr>
+					<div class="d-flex align-items-start">
+						<div class="flex-grow-1">
+							<small class="float-end text-navy">30m ago</small>
+							<strong>Charles Hall</strong> posted something on <strong>Christina Mason</strong>'s timeline<br>
+							<small class="text-muted">Today 7:21 pm</small>
+
+							<div class="border text-sm text-muted p-2 mt-1">
+								Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem
+								neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante
+								tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante.
+							</div>
+
+							<a href="#" class="btn btn-sm btn-danger mt-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-heart feather-sm"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> Like</a>
+						</div>
+					</div>
+					<hr>
+					<div class="d-flex align-items-start">
+						<div class="flex-grow-1">
+							<small class="float-end text-navy">1d ago</small>
+							<strong>William Harris</strong> started following <strong>Christina Mason</strong><br>
+							<small class="text-muted">Yesterday 3:12 pm</small>
+
+							<div class="d-flex align-items-start mt-1">
+								<a class="pe-3" href="#">
+								</a>
+								<div class="flex-grow-1">
+									<div class="border text-sm text-muted p-2 mt-1">
+										Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt
+										tempus.
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</main>
+<script>
+$('#tree').jstree({ 
+	'core' : {
+		'data' : [
+			{ "id" : "ajson1", "parent" : "#", "text" : "Simple root node" },
+			{ "id" : "ajson2", "parent" : "#", "text" : "Root node 2" },
+			{ "id" : "ajson3", "parent" : "ajson2", "text" : "Child 1" },
+			{ "id" : "ajson4", "parent" : "ajson2", "text" : "Child 2" },
+		],
+		"check_callback" : true
+	},
+	"plugins" : ["dnd"]
+});
+</script>

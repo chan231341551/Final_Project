@@ -1,0 +1,12 @@
+package kr.or.ddit.project.file.service;
+
+import java.util.List;
+
+import kr.or.ddit.project.file.vo.TreeVO;
+
+public interface TreeService {
+	public List<TreeVO>retrieveTreeList(String proCode);
+	public int createTree(TreeVO tree);
+	public int modifyTree(TreeVO tree);
+	public int removeTree(String id);
+}

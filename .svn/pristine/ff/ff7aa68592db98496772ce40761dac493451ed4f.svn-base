@@ -1,0 +1,42 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+ 1:1 문의
+ 
+	<%-- <div class="content">
+		<div class="container" style="width: 1000px; margin-left: 150px;">
+			<div class="table-responsive custom-table-responsive" id="divNotice">
+				<table class="table custom-table">
+					<thead>
+						<tr>
+							<th scope="col">글 번호</th>
+							<th scope="col">글 제목</th>
+							<th scope="col">글 작성일</th>
+							<th scope="col">조회수</th>
+						</tr>
+					</thead>
+					<tbody>
+						<c:forEach items="${pagingVO.dataList}" var="noticeList">
+							<tr scope="row">
+								<td>${noticeList.rnum }</td>
+								<td><a href="#" class="noticeTitle" data-notice-no="1392">${noticeList.noticeTitle }</a></td>
+								<td>${noticeList.noticeDate }</td>
+								<td>${noticeList.noticeHit }</td>
+							</tr>
+						</c:forEach>
+					</tbody>
+				</table>
+				<!-- Modal -->
+				<button id="newBtn" type="button" class="btn btn-primary">새
+					글 작성</button>
+			</div>
+		</div>
+	</div> --%>
+</body>
+</html>

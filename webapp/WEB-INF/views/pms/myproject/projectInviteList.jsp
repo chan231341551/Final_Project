@@ -1,0 +1,451 @@
+<%@page import="java.util.Date"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>    
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="security" %>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<%String log = new Date(session.getCreationTime()).toLocaleString(); %>
+
+<!-- 폰트 어썸 cdn -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"/>
+
+<security:authentication property="principal.realMember" var="authMember"/>
+
+<main class="content">
+	<div class="container-fluid p-0">
+		<h1 class="h3 mb-3">초대받은 프로젝트</h1>
+		<nav aria-label="breadcrumb">
+			<ol class="breadcrumb">
+				<li class="breadcrumb-item"><a href="#">Pms</a></li>
+				<li class="breadcrumb-item"><a href="#">Home</a></li>
+				<li class="breadcrumb-item active">초대받은 프로젝트 목록</li>
+			</ol>
+		</nav>
+		<hr>
+		
+		<div class="card">
+			<div class="card-header">
+				<ul class="nav nav-pills card-header-pills pull-left" role="tablist">
+					<li class="nav-item" role="presentation">
+						<a id="proAll" class="nav-link active" data-bs-toggle="tab" href="#tab-1" aria-selected="true" role="tab">초대 대기중인 프로젝트</a>
+					</li>
+					<li class="nav-item" role="presentation">
+						<a id="proBefore" class="nav-link" data-bs-toggle="tab" href="#tab-2" aria-selected="false" role="tab" tabindex="-1">수락한 프로젝트</a>
+					</li>
+					<li class="nav-item" role="presentation">
+						<a id="proIng" class="nav-link" data-bs-toggle="tab" href="#tab-3" aria-selected="false" tabindex="-1" role="tab">거절한 프로젝트</a>
+					</li>
+				</ul>
+			</div>		
+		</div>
+		
+		<div class="tab-content">
+			<!-- 초대 대기중인 프로젝트 -->
+			<div class="tab-pane fade active show" id="tab-1" role="tabpanel">
+				<div id="proInviteListDisp" class="row"></div>
+			</div>
+			<!-- 수락한 프로젝트 -->
+			<div class="tab-pane fade" id="tab-2" role="tabpanel">
+				<div id="proAcceptListDisp" class="row">
+				</div>
+			</div>
+			<!-- 거절한 프로젝트 -->
+			<div class="tab-pane fade" id="tab-3" role="tabpanel">
+				<div id="proRefuseDisp" class="row">
+				</div>
+			</div>
+		</div>
+	</div>
+</main>
+
+<script>
+
+	/*************************** 초대받은 프로젝트 목록 시작 ***************************/
+	// 프로젝트가 없는 경우 html
+	let makeNoProjectHtml = function(){
+		let projectHtml = "";
+		projectHtml += `
+		<div class="col-12 col-md-6 col-lg-3">
+			<div class="card">
+				<div class="card-body">
+					<p>프로젝트가 없습니다.</p>
+				</div>
+			</div>
+		</div>`;
+		return projectHtml;
+	}
+
+	// 초대받은 Project List Html
+	let makeProInviteListHtml = function(projectList){
+		let myEmail = '${authMember.memEmail}';		
+
+		let proInviteListHtml = "";
+		for(let i=0; i < projectList.length; i++){
+			let proFavorites = null
+ 			for(let j=0; j<projectList[i].participateMemberList.length; j++){
+				if(projectList[i].participateMemberList[j].participateMemEmail == myEmail){
+					proFavorites = projectList[i].participateMemberList[j].proFavorites
+				}
+			}
+			
+			proInviteListHtml += "";
+	    	proInviteListHtml += "<div class='col-12 col-md-6 col-lg-3'>";
+		    proInviteListHtml += "	<div class='card' style='position: relative; left:0; top:0;'>";
+		    
+		    proInviteListHtml += "<div style='position: absolute; right:1rem; top:1rem; z-index:9;'>";
+			proInviteListHtml += "	<div class='projectFavoritesBtn' data-favorites='"+proFavorites+"' data-project-code='"+projectList[i].proCode+"'>";
+			if(proFavorites=="0"){
+			proInviteListHtml += "	<i class='fa fa-star fa-2x' data-color='white' style='color: white;'></i>";
+			}else{
+			proInviteListHtml += "	<i class='fa fa-star fa-2x' data-color='yellow' style='color: #f3da35'></i>";
+			}
+			proInviteListHtml += "	</div>";
+			proInviteListHtml += "</div>";
+		    proInviteListHtml += "		<a href='#'>";
+		    proInviteListHtml += "			<img class='card-img-top' id='proImgTag' src='"+projectList[i].proAttPath+"' alt='Project'>";
+		    proInviteListHtml += "		</a>";
+		    
+		    proInviteListHtml += "<div class='card-header px-4 pt-4'>";
+		    proInviteListHtml += "<h5 class='card-title mb-0'>"+projectList[i].proTitle+"</h5>";
+		    
+		    if(projectList[i].proClsCd == 'PC001'){
+		    	proInviteListHtml += "<div class='badge bg-danger my-2'>디자인</div>"
+		    }else if(projectList[i].proClsCd == 'PC002'){
+		    	proInviteListHtml += "<div class='badge bg-success my-2'>마케팅</div>"	
+		    }else if(projectList[i].proClsCd == 'PC003'){
+		    	proInviteListHtml += "<div class='badge bg-info my-2'>엔지니어링</div>"	
+		    }else if(projectList[i].proClsCd == 'PC004'){
+		    	proInviteListHtml += "<div class='badge bg-primary my-2'>웹개발</div>"	
+		    }else if(projectList[i].proClsCd == 'PC005'){
+		    	proInviteListHtml += "<div class='badge bg-primary my-2'>앱개발</div>"	
+		    }else if(projectList[i].proClsCd == 'PC006'){
+		    	proInviteListHtml += "<div class='badge bg-secondary my-2'>기타</div>"	
+		    }
+		    
+		    proInviteListHtml += "</div>";
+		    proInviteListHtml += "<div class='card-body px-4 pt-2'>";
+		    proInviteListHtml += "	<p>"+projectList[i].proDetail+"</p>";
+
+		    for(let z=0; z<projectList[i].participateMemberList.length; z++){
+		    	proInviteListHtml += "	<img src='"+projectList[i].participateMemberList[z].participateMemAttPath+"' class='rounded-circle me-1' alt='Avatar' width='28' height='28'>";
+		    }
+
+		    proInviteListHtml += "</div>";
+		    proInviteListHtml += "<button type='button' data-pro-Code='"+projectList[i].proCode+"' data-mem-Email='${authMember.memEmail }' data-part-Yn='1' class='participateAcceptBtn btn btn-primary'>수락하기</button>";
+			proInviteListHtml += "<button type='button' data-pro-Code='"+projectList[i].proCode+"' data-mem-Email='${authMember.memEmail }' data-part-Yn='2' class='participateAcceptBtn btn btn-outline-primary'>거절하기</btton>";
+		    proInviteListHtml += "	</div>";
+		    proInviteListHtml += "</div>";
+		    
+		}
+		return proInviteListHtml;
+
+	}
+	
+	// 내가 참여한 프로젝트 목록 HTML
+ 	let makeProjectListHtml = function(projectList){
+		let myEmail = '${authMember.memEmail}';	
+		
+		let projectListHtml = "";
+		for(let i=0; i < projectList.length; i++){
+			let proFavorites = null
+ 			for(let j=0; j<projectList[i].participateMemberList.length; j++){
+				if(projectList[i].participateMemberList[j].participateMemEmail == myEmail){
+					proFavorites = projectList[i].participateMemberList[j].proFavorites
+				}
+			}
+			
+			projectListHtml += "";
+	    	projectListHtml += "<div class='col-12 col-md-6 col-lg-3'>";
+		    projectListHtml += "	<div class='card' style='position: relative; left:0; top:0;'>";
+		    
+		    projectListHtml += "<div style='position: absolute; right:1rem; top:1rem; z-index:9;'>";
+			projectListHtml += "	<div class='projectFavoritesBtn' data-favorites='"+proFavorites+"' data-project-code='"+projectList[i].proCode+"'>";
+			if(proFavorites=="0"){
+			projectListHtml += "	<i class='fa fa-star fa-2x' data-color='white' style='color: white;'></i>";
+			}else{
+			projectListHtml += "	<i class='fa fa-star fa-2x' data-color='yellow' style='color: #f3da35'></i>";
+			}
+			projectListHtml += "	</div>";
+			projectListHtml += "</div>";
+		    projectListHtml += "		<a href='"+"${pageContext.request.contextPath}"+"/project/project/Home/"+projectList[i].proCode+"'>";
+		    projectListHtml += "			<img class='card-img-top' id='proImgTag' src='"+projectList[i].proAttPath+"' alt='Project'>";
+		    projectListHtml += "		</a>";
+		    
+		    projectListHtml += "<div class='card-header px-4 pt-4'>";
+		    projectListHtml += "	<div class='card-actions float-end'>";
+		    projectListHtml += "		<div class='dropdown-button'>";
+		    projectListHtml += "			<div href='#' id='dropdownMenuButton' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>";
+		    projectListHtml += "				<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-more-horizontal align-middle'><circle cx='12' cy='12' r='1'></circle><circle cx='19' cy='12' r='1'></circle><circle cx='5' cy='12' r='1'></circle></svg>";
+		    projectListHtml += "			</div>";
+		    projectListHtml += "			<div class='dropdown-menu' aria-labelledby='dropdownMenuButton'>";
+		    projectListHtml += "				<a class='dropdown-item' href='"+"${pageContext.request.contextPath}"+"/project/project/Home/"+projectList[i].proCode+"'>프로젝트 입장하기</a>";
+		    if(projectList[i].memEmail == myEmail){
+		    projectListHtml += "				<a class='dropdown-item' href='#'>프로젝트 관리</a>";		    	
+		    }else{		    	
+		    projectListHtml += "				<a class='dropdown-item' href='#'>프로젝트 탈퇴</a>";		    	
+		    }
+		    projectListHtml += "			</div>";
+		    projectListHtml += "		</div>";
+		    projectListHtml += "	</div>";
+		    projectListHtml += "<h5 class='card-title mb-0'>"+projectList[i].proTitle+"</h5>";
+		    
+		    if(projectList[i].proClsCd == 'PC001'){
+		    	projectListHtml += "<div class='badge bg-danger my-2'>디자인</div>"
+		    }else if(projectList[i].proClsCd == 'PC002'){
+		    	projectListHtml += "<div class='badge bg-success my-2'>마케팅</div>"	
+		    }else if(projectList[i].proClsCd == 'PC003'){
+		    	projectListHtml += "<div class='badge bg-info my-2'>엔지니어링</div>"	
+		    }else if(projectList[i].proClsCd == 'PC004'){
+		    	projectListHtml += "<div class='badge bg-primary my-2'>웹개발</div>"	
+		    }else if(projectList[i].proClsCd == 'PC005'){
+		    	projectListHtml += "<div class='badge bg-primary my-2'>앱개발</div>"	
+		    }else if(projectList[i].proClsCd == 'PC006'){
+		    	projectListHtml += "<div class='badge bg-secondary my-2'>기타</div>"	
+		    }
+		    
+		    projectListHtml += "</div>";
+		    projectListHtml += "<div class='card-body px-4 pt-2'>";
+		    projectListHtml += "	<p>"+projectList[i].proDetail+"</p>";
+
+		    for(let z=0; z<projectList[i].participateMemberList.length; z++){
+		    	projectListHtml += "	<img src='"+projectList[i].participateMemberList[z].participateMemAttPath+"' class='rounded-circle me-1' alt='Avatar' width='28' height='28'>";
+		    }
+
+		    projectListHtml += "</div>";
+		    projectListHtml += "<ul class='list-group list-group-flush'>";
+		    projectListHtml += "	<li class='list-group-item px-4 pb-4'>";
+		    projectListHtml += "		<p class='mb-2 font-weight-bold'>Progress <span class='float-end'>"+projectList[i].proProgress+"%</span></p>";
+		    projectListHtml += "		<div class='progress progress-sm'>";
+		    projectListHtml += "			<div class='progress-bar' role='progressbar' aria-valuenow='"+projectList[i].proProgress+"' aria-valuemin='0' aria-valuemax='100' style='width: "+projectList[i].proProgress+"%;'>";
+		    projectListHtml += "			</div>";
+		    projectListHtml += "		</div>";
+		    projectListHtml += "	</li>";
+		    projectListHtml += "</ul>";
+		    projectListHtml += "	</div>";
+		    projectListHtml += "</div>";
+		}
+		return projectListHtml;
+	}
+	
+	// 초대 거절한 Project List Html
+	let makeProRefuseListHtml = function(projectList){
+		let myEmail = '${authMember.memEmail}';		
+
+		let proRefuseListHtml = "";
+		for(let i=0; i < projectList.length; i++){
+			let proFavorites = null
+ 			for(let j=0; j<projectList[i].participateMemberList.length; j++){
+				if(projectList[i].participateMemberList[j].participateMemEmail == myEmail){
+					proFavorites = projectList[i].participateMemberList[j].proFavorites
+				}
+			}
+			
+	    	proRefuseListHtml += "<div class='col-12 col-md-6 col-lg-3'>";
+		    proRefuseListHtml += "	<div class='card' style='position: relative; left:0; top:0;'>";
+		    
+		    proRefuseListHtml += "<div style='position: absolute; right:1rem; top:1rem; z-index:9;'>";
+			proRefuseListHtml += "	<div class='projectFavoritesBtn' data-favorites='"+proFavorites+"' data-project-code='"+projectList[i].proCode+"'>";
+			if(proFavorites=="0"){
+			proRefuseListHtml += "	<i class='fa fa-star fa-2x' data-color='white' style='color: white;'></i>";
+			}else{
+			proRefuseListHtml += "	<i class='fa fa-star fa-2x' data-color='yellow' style='color: #f3da35'></i>";
+			}
+			proRefuseListHtml += "	</div>";
+			proRefuseListHtml += "</div>";
+		    proRefuseListHtml += "		<a href='#'>";
+		    proRefuseListHtml += "			<img class='card-img-top' id='proImgTag' src='"+projectList[i].proAttPath+"' alt='Project'>";
+		    proRefuseListHtml += "		</a>";
+		    
+		    proRefuseListHtml += "<div class='card-header px-4 pt-4'>";
+		    proRefuseListHtml += "<h5 class='card-title mb-0'>"+projectList[i].proTitle+"</h5>";
+		    
+		    if(projectList[i].proClsCd == 'PC001'){
+		    	proRefuseListHtml += "<div class='badge bg-danger my-2'>디자인</div>"
+		    }else if(projectList[i].proClsCd == 'PC002'){
+		    	proRefuseListHtml += "<div class='badge bg-success my-2'>마케팅</div>"	
+		    }else if(projectList[i].proClsCd == 'PC003'){
+		    	proRefuseListHtml += "<div class='badge bg-info my-2'>엔지니어링</div>"	
+		    }else if(projectList[i].proClsCd == 'PC004'){
+		    	proRefuseListHtml += "<div class='badge bg-primary my-2'>웹개발</div>"	
+		    }else if(projectList[i].proClsCd == 'PC005'){
+		    	proRefuseListHtml += "<div class='badge bg-primary my-2'>앱개발</div>"	
+		    }else if(projectList[i].proClsCd == 'PC006'){
+		    	proRefuseListHtml += "<div class='badge bg-secondary my-2'>기타</div>"	
+		    }
+		    
+		    proRefuseListHtml += "</div>";
+		    proRefuseListHtml += "<div class='card-body px-4 pt-2'>";
+		    proRefuseListHtml += "	<p>"+projectList[i].proDetail+"</p>";
+
+		    for(let z=0; z<projectList[i].participateMemberList.length; z++){
+		    	proRefuseListHtml += "	<img src='"+projectList[i].participateMemberList[z].participateMemAttPath+"' class='rounded-circle me-1' alt='Avatar' width='28' height='28'>";
+		    }
+
+		    proRefuseListHtml += "</div>";
+		    proRefuseListHtml += "<button type='button' data-pro-Code='"+projectList[i].proCode+"' data-mem-Email='${authMember.memEmail }' data-part-Yn='1' class='participateAcceptBtn btn btn-primary'>다시 수락하기</button>";
+		    proRefuseListHtml += "	</div>";
+		    proRefuseListHtml += "</div>";
+		    
+		}
+		return proRefuseListHtml;
+	}
+	
+	// 초대받은 프로젝트 list view
+	proInviteListView();
+	function proInviteListView(){
+		$.ajax({
+			url :"${pageContext.request.contextPath }/project/myProject/participateList",
+			method : "get",
+			dataType : "json",
+			beforeSend : function(xhr) {   // 데이터 전송 전  헤더에 csrf값 설정
+	            xhr.setRequestHeader("${_csrf.headerName}", "${_csrf.token}");
+	        },
+			success : function(resp) {
+				console.log("초대받은프로젝트리스트",resp);
+				if(resp.length>0){					
+					$("#proInviteListDisp").html(makeProInviteListHtml(resp));
+					projectParticipateUpdate();
+					console.log("hi");
+				}else{
+					$("#proInviteListDisp").html(makeNoProjectHtml());
+				}
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});
+	}
+	
+	// 초대 수락한 프로젝트 list view
+	proAcceptListView();
+	function proAcceptListView(){
+		$.ajax({
+			url :"${pageContext.request.contextPath }/project/myProject/proAll",
+			method : "get",
+			dataType : "json",
+			beforeSend : function(xhr) {   // 데이터 전송 전  헤더에 csrf값 설정
+	            xhr.setRequestHeader("${_csrf.headerName}", "${_csrf.token}");
+	        },
+			success : function(resp) {
+				console.log(resp);
+				if(resp.length>0){					
+					$("#proAcceptListDisp").html(makeProjectListHtml(resp));
+				}else{
+					$("#proAcceptListDisp").html(makeNoProjectHtml());
+				}
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});
+	}
+	
+	
+	// 초대 거절한 프로젝트 list 목록
+	proRefuseListView()
+	function proRefuseListView(){
+		$.ajax({
+			url :"${pageContext.request.contextPath }/project/myProject/RefuseList",
+			method : "get",
+			dataType : "json",
+			beforeSend : function(xhr) {   // 데이터 전송 전  헤더에 csrf값 설정
+	            xhr.setRequestHeader("${_csrf.headerName}", "${_csrf.token}");
+	        },
+			success : function(resp) {
+				console.log("초대거절",resp);
+				if(resp.length>0){					
+					$("#proRefuseDisp").html(makeProRefuseListHtml(resp));
+					projectParticipateUpdate();
+					console.log("hi");
+				}else{
+					$("#proRefuseDisp").html(makeNoProjectHtml());
+				}
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});
+	}
+	
+	// 초대받은 프로젝트 수락하기
+	function projectParticipateUpdate(){
+		$(".participateAcceptBtn").on('click', function(){
+			let data = 
+				{ 
+					"memEmail" : this.dataset.memEmail, 
+					"proCode" : this.dataset.proCode,
+					"partYn" : this.dataset.partYn
+				}
+			console.log(data);
+ 			$.ajax({
+				url : "${pageContext.request.contextPath}/project/myProject/participateAccept",
+				method : "post",
+				data : data,
+				beforeSend : function(xhr) {   // 데이터 전송 전  헤더에 csrf값 설정
+		            xhr.setRequestHeader("${_csrf.headerName}", "${_csrf.token}");
+		        },
+				success : function(resp) {
+					if(resp=="1"){
+						proInviteListView();						
+					}
+					if(resp=="0"){
+						console.log("실패");
+					}
+				},
+				error : function(jqXHR, status, error) {
+					console.log(jqXHR);
+					console.log(status);
+					console.log(error);
+				}
+			}); 
+		});
+	}
+	
+	// 프로젝트 즐겨찾기 수정
+	$(document).on("click", ".projectFavoritesBtn", function(){
+		let data = {
+				"proFavorites" : $(this)[0].dataset['favorites'],
+				"proCode" : $(this)[0].dataset['projectCode'],
+				"memEmail" : '${authMember.memEmail}'
+		}
+		let project = $(this);
+		let color = $(this).children().data("color");
+		
+		if(color=="yellow"){
+			$(this).children().css("color","#FFFFFF");
+			$(this).children().data("color","white");		
+		}else{
+			$(this).children().css("color","#f3da35");
+			$(this).children().data("color","yellow");
+		}
+		
+		$.ajax({
+			url : "${pageContext.request.contextPath}/project/project/favoritesUpdate",
+			method : "post",
+			data : JSON.stringify(data),
+			contentType : "application/json;charset=utf-8",
+			dataType : "json",
+			async: false,
+			beforeSend : function(xhr) {   // 데이터 전송 전  헤더에 csrf값 설정
+	            xhr.setRequestHeader("${_csrf.headerName}", "${_csrf.token}");
+	        },
+			success : function(resp) {
+				console.log("응답",resp);
+				console.log("project",project);
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});
+	});
+	/*************************** 초대받은 프로젝트 목록 종료 ***************************/
+
+</script>

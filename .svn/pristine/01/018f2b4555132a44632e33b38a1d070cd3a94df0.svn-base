@@ -1,0 +1,29 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>	
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+	<div>
+		<h1>파일</h1>	
+	</div>
+	
+	<script>
+		$("#fileBtn").on("click",function(){
+			$.ajax({
+				url : '${pageContext.request.contextPath}/pms/file',
+				type : 'get',
+				success : function(res) {
+					console.log(res);
+					$('.content').html(res);
+// 					$('.content').remove();
+				},
+				error : function(xhr, error, msg) {
+					ajaxError(xhr, error, msg);
+				},
+				dataType : 'html'
+			}) 
+		})
+	</script>
+	
+	
+

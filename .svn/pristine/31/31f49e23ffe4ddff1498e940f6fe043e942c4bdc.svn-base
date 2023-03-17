@@ -1,0 +1,33 @@
+package kr.or.ddit.project.issue.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import kr.or.ddit.project.issue.vo.IssChargerVO;
+import kr.or.ddit.project.issue.vo.IssueVO;
+import kr.or.ddit.vo.PagingVO;
+
+@Mapper
+public interface IssueDAO {
+	
+	public int insertIssue(IssueVO Issue);
+	
+	public List<IssueVO> selectIssueList(@Param("proCode") String proCode);
+	
+	public int selectTotalRecord(PagingVO<IssueVO> pagingVO);
+	
+	public IssueVO selectIssue(@Param("issNo") int issNo);
+	
+	public List<Map<String, String>> selectChargerMem(@Param("issNo") int issNo);
+	
+	// update
+	public int updateIssue(IssueVO issue);
+	public int updateIssCharher(IssChargerVO charge);
+	
+	// delete
+	public int deleteIssue(int issNo);
+	public int deleteIssCharger(int issNo);
+}

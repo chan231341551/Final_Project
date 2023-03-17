@@ -1,0 +1,86 @@
+package kr.or.ddit.main.help.controller;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.main.help.service.NoticeService;
+import kr.or.ddit.main.help.vo.NoticeVO;
+import kr.or.ddit.vo.PagingVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/help")
+public class NoticeController {
+	@Inject
+	private NoticeService service;
+	
+	@GetMapping("/noticeList")
+	public String helpMain() {
+		return "/help/noticeList";
+	}
+	
+	@GetMapping("/noticeListIn")
+	@ResponseBody
+	public PagingVO<NoticeVO> noticeList(
+			@RequestParam(value="page", required=false, defaultValue="1") int currentPage
+//			, @ModelAttribute("simpleCondition") SearchVO searchVO
+			, Model model
+	) {
+		PagingVO<NoticeVO> pagingVO = new PagingVO<>();
+		pagingVO.setCurrentPage(currentPage);
+//		pagingVO.setSimpleCondition(searchVO);
+		
+		service.retrieveNoticeList(pagingVO);
+		model.addAttribute("pagingVO",pagingVO);
+		
+		return pagingVO;
+	}
+	
+	//url:"/help/noticeDetail",
+	//let data = {"noticeNo":1392};
+	//json이 들어올 때는 RequestBody로 받고
+	//json으로 나갈 때는 ResponseBody로 내보냄
+	@ResponseBody
+	@GetMapping("/noticeDetail/{noticeNo}")
+	public NoticeVO detail(@PathVariable int noticeNo, Model model) {
+		NoticeVO notice = service.retriveNotice(noticeNo);
+		model.addAttribute("notice", notice);
+		return notice;
+	}
+	
+	
+	// 입력, 수정폼 가져오기 get
+	@GetMapping("/noticeForm")
+	public String noticeForm() {
+		log.info("공지폼 왔다");
+		return "main/help/noticeForm";
+	}
+	
+	// 입력, 수정 기능 수행 post
+	@PostMapping("insertNotice")
+	public String noticeInsert(
+		   @ModelAttribute("notice") NoticeVO notice,
+		   Model model
+	) {
+		String viewName = null;
+		int rowcnt = service.createNotice(notice);
+		if(rowcnt > 0) {
+			viewName = "redirect:/help/noticeList?what=" + notice.getNoticeNo();
+		}else {
+			model.addAttribute("message", "다시 시도하세요.");
+			viewName = "/help/noticeList";
+		}
+		return viewName;
+	}
+		
+}

@@ -1,0 +1,74 @@
+package kr.or.ddit.project.home.controller;
+
+import java.security.Principal;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.enumpkg.ServiceResult;
+import kr.or.ddit.member.service.MemberService;
+import kr.or.ddit.member.vo.MemberVO;
+import kr.or.ddit.project.home.service.ProjectService;
+import kr.or.ddit.project.home.vo.ProjectVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/project")
+public class ProjectController {
+	
+	@Inject
+	private ProjectService service;
+	@Inject
+	private MemberService memberService;
+	
+	@GetMapping("/Home")
+	public String pmsProjectView() {
+		return "project/projectHome";
+	}
+	
+	@GetMapping("/myProject")
+	public String myProjectList(
+			Principal principal
+			, Model model) {
+		MemberVO member = memberService.retrieveMember(principal.getName());
+		log.info("member : {}",member);
+		List<ProjectVO> projectList = service.retrieveProjectList(member.getMemNo());
+		log.info("projectList : {}",projectList);
+		
+		model.addAttribute("projectList",projectList);
+
+		return "pms/myproject/projectList";
+	}
+	
+	@PostMapping("/projectInsert")
+	public String projectInsert(
+			HttpServletRequest req 
+			, @ModelAttribute("project") ProjectVO project) {
+		
+		String viewName = null;
+		
+		ServiceResult result = service.createProject(project);
+
+		switch(result) {
+		case OK:
+			req.setAttribute("message", "프로젝트 생성 성공");
+			viewName = "redirect:/project/Home";
+			break;
+		case FAIL:
+			req.setAttribute("message", "프로젝트 생성 실패");
+			viewName = "pms/myproject/projectList";
+			break;
+		}
+		
+		return viewName;
+	}
+}

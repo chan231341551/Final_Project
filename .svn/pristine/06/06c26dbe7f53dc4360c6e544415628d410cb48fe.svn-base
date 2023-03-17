@@ -1,0 +1,41 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+		<div class="nav" style="padding-bottom:0px; padding-left: 3rem; padding-top: 3rem">
+
+		<div class="btn-group btn-group-lg mb-3 " role="group" aria-label="Large a group">
+			<a class="btn btn-secondary active" href="${pageContext.request.contextPath }/project/project/Home/${project.proCode }">개요</a>
+			<a class="btn btn-secondary" href="${pageContext.request.contextPath }/project/project/workList/${project.proCode }">작업목록</a>
+			<a class="btn btn-secondary" href="${pageContext.request.contextPath }/project/project/kanban/${project.proCode }">칸반보드</a>
+			<a class="btn btn-secondary" href="${pageContext.request.contextPath }/project/project/calendar/${project.proCode }">캘린더</a>
+			<a class="btn btn-secondary" href="${pageContext.request.contextPath }/project/project/gantt/${project.proCode }">간트차트</a>
+			<a class="btn btn-secondary" href="${pageContext.request.contextPath }/project/project/dashboard/${project.proCode }">대시보드</a>
+			<a class="btn btn-secondary" href="${pageContext.request.contextPath }/project/mention/${project.proCode }">멘션(임시)</a>
+			<a class="btn btn-secondary subMenu" id="issueList">이슈</a>
+			<a class="btn btn-secondary" href="${pageContext.request.contextPath }/project/project/wiki/${project.proCode }">위키</a>
+			<a class="btn btn-secondary" href="${pageContext.request.contextPath }/project/project/news/${project.proCode }">뉴스</a>
+			<a class="btn btn-secondary" href="${pageContext.request.contextPath }/project/project/boardList/${project.proCode }">게시판</a>
+			<a id="fileBtn" class="btn btn-secondary" href="${pageContext.request.contextPath }/project/project/file/${project.proCode }">파일</a>
+			<a class="btn btn-secondary me-2" href="${pageContext.request.contextPath }/project/project/management/${project.proCode }">관리</a>
+		</div>	
+
+		</div>
+		
+		<script>
+		$(".subMenu").on("click",function(){
+			let urlParam = $(this).attr("id");
+			let proCode = '${project.proCode}'
+			
+			$.ajax({
+				url : '${pageContext.request.contextPath}/project/project/'+urlParam+"/"+proCode,
+				type : 'get',
+				dataType : 'html',
+				success : function(res) {
+//  				console.log(res);
+					$('.wrapper').html(res);
+				},
+				error : function(xhr, error, msg) {
+					console.log(xhr, error, msg);
+				},
+			}) 
+		});
+		</script>

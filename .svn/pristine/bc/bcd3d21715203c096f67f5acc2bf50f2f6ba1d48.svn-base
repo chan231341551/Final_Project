@@ -1,0 +1,14 @@
+package kr.or.ddit.project.calendar.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping("/project")
+public class CalendarController {	
+	@GetMapping("/project/calendar")
+	public String projectCalendar() {
+		return "project/calendar/calendar";
+	}
+}

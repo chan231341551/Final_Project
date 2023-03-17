@@ -1,0 +1,19 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+	<div class="navbar">
+
+		<div class="btn-group btn-group-lg mb-3" role="group" aria-label="Large a group">
+			<a class="btn btn-secondary" href="${pageContext.request.contextPath }/project/Home">개요</a>
+			<a class="btn btn-secondary" href="${pageContext.request.contextPath }/project/project/workList">목록</a>
+			<a class="btn btn-secondary" href="${pageContext.request.contextPath }/project/project/kanban">칸반보드</a>
+			<a class="btn btn-secondary" href="${pageContext.request.contextPath }/project/project/calendar">캘린더</a>
+			<a class="btn btn-secondary" href="${pageContext.request.contextPath }/project/project/gantt">간트차트</a>
+			<a class="btn btn-secondary" href="${pageContext.request.contextPath }/project/project/dashboard">대시보드</a>
+			<a class="btn btn-secondary" href="${pageContext.request.contextPath }/project/project/wiki">위키</a>
+			<a class="btn btn-secondary" href="${pageContext.request.contextPath }/project/project/news">뉴스</a>
+			<a class="btn btn-secondary" href="${pageContext.request.contextPath }/project/project/board">게시판</a>
+			<a id="fileBtn" class="btn btn-secondary" href="${pageContext.request.contextPath }/project/project/file">파일</a>
+		</div>
+
+	</div>
+	

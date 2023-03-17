@@ -1,0 +1,422 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>    
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="security" %>
+<script src="${pageContext.request.contextPath }/resources/ckeditor/ckeditor.js"></script>
+<security:authentication property="principal.realMember" var="authMember"/>
+<main class="content" style="padding-top:0px;">
+
+<div class="container-fluid p-0">
+	<div class="row">
+		<div class="col-md-8 col-xl-12">
+			<!-- 자유게시판 -->
+			<div class="card">
+				<div class="card-header">
+					<h5 class="card-title">위키게시판</h5>
+				</div>
+				<div class="card-body">
+					<div id="wiki">
+					무엇을 선택해서 정렬했는지 나올곳??
+					</div>
+					<!--여기에 내용이 더해짐   -->
+					<div id="wikiSelect"></div>
+					 
+				</div>
+					<div class="d-flex justify-content-end">
+						<div id="Showme" >
+							<button id="wirteWikiBtn" class="btn btn-outline-primary">
+							<!-- href="${pageContext.request.contextPath }/project/project/wikiForm"  -->
+							<a id="wirteWikiBtn" >글쓰기</a></button>
+							
+						</div>
+					</div>
+					
+				</div>
+			</div>
+		</div>
+	</div>
+</main>
+
+
+<script type="text/javascript">
+
+	let wikiSelect = $("#wikiSelect");
+
+/////위키html 	
+	let makeWikiHtml = function(wikiList){
+		let wikiHtml = "";
+		wikiHtml += `
+		<div class="row">
+			<table class="table">
+				<thead>
+					<tr>
+						<th style="width: 10%;">No</th>
+						<th style="width: 45%;">제목</th>
+						<th style="width: 15%">작성자</th>
+					</tr>
+				</thead>
+		`;
+		for(let i=0; i<wikiList.length; i++){
+			wikiHtml+=`
+					<tr>
+							`;
+			wikiHtml += `			
+				<td>\${wikiList[i].wikiNo}</td>
+				<td><a href="#" onclick="f_detail(\${wikiList[i].wikiNo})">\${wikiList[i].wikiTitle}</a></td>
+				<td>\${wikiList[i].memEmail}</td>
+					<td class="table-action">
+					여기에~~~~
+				</td>
+			</tr>`;
+		}
+		wikiHtml +=`
+			</tbody>
+				</table>
+		</div>
+		`;
+		return  wikiHtml;
+	} 
+ 	
+////////////////////위키목록 첫 UI/////////////////
+	$.ajax({
+		url : "${pageContext.request.contextPath}/project/project/wiki/${project.proCode}",
+		method : "get",
+		success : function(resp) {
+			console.log("위키ui만뿌릴꺼야!!");
+		},
+		error : function(jqXHR, status, error) {
+			console.log(jqXHR);
+			console.log(status);
+			console.log(error);
+		}
+	});
+	
+
+	
+//목록 보여주기	
+	wikiList();
+	function wikiList(wikiList){
+		$.ajax({
+			url : "${pageContext.request.contextPath }/project/project/wikiListView/${project.proCode}",
+			method : "get",
+			dataType : "json",
+			success : function(resp) {
+				console.log("위키목록나올예정");
+				console.log("respppppppp",resp);
+				wikiSelect.html(makeWikiHtml(resp));
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});
+	};
+	
+	
+////////////상세보기 html 
+
+ let makeWikiDetailHtml = function(wikiVo){
+	let WikiDetailHtml = "";
+		WikiDetailHtml += `
+		
+		<div class="row">
+			<div class="col-12 col-md-12 col-lg-12">
+					<div class="card">
+					
+						<div class="card-header px-4 pt-4">
+							<h5 class="card-title">자유게시판</h5>
+							<table class="table table-sm mt-2 mb-4">
+								<tbody>
+									<tr>
+										<th>번호</th>
+										<td>\${wikiVo.wikiNo}</td>
+									</tr>
+									<tr>
+										<th>제목</th>
+										<td>\${wikiVo.wikiTitle}</td>
+									</tr>
+									<tr>
+										<th>이메일</th>
+										<td>\${wikiVo.memEmail}</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						
+						<div class="card-body px-4 pt-2">
+						<p>\${wikiVo.wikiCont}</p>
+						<hr>
+					</div>
+				</div>
+				
+				<div class="d-flex justify-content-end">
+				
+				<div>
+				<a href="#" id="updateWikiBtn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2 align-middle"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg></a>
+				<a href="#"id="SelectwikiDeleteBtn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash align-middle"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></a>
+				
+				<button id="GotoList" class="btn btn-outline-primary">목록으로 </button>
+					
+				</div>
+			</div>
+				
+			</div>
+		</div>`;
+	return WikiDetailHtml;
+}
+
+	
+/////글쓰기 Html
+	let makeWriteWikiHtml = function(){
+		writeWikiHtml = "";
+		writeWikiHtml+=`
+			<!-- 작업Form -->
+					<div class="card-body">
+					<form class="NewWikiForm">
+							<input type="hidden" name="proCode" value="${project.proCode }">
+							<input type="hidden" name="memEmail" value="${authMember.memEmail }">
+							<table class="table table-bordered">
+								<tr>
+									<th rowspan="2">위키 제목
+								</th>
+								</tr>
+								<tr>
+									<td>
+										<input type="text" name= "wikiTitle" Class="form-control" value="">
+									</td>
+								</tr>
+								
+								<tr><th rowspan="2">위키 분류</th></tr>
+								<td>
+								<select name="wikiClsCd" class="form-control">
+									<option value="W01" selected>분류1</option>
+									<option value="W02">분류2</option>
+									<option value="W03">분류3</option>
+								</select>
+								</td>
+								</tr>
+								
+								<tr>
+									<th>위키내용</th>
+									<td><textarea name="wikiCont" rows="30" cols="80"></textarea>
+									</td>
+								</tr>
+							</table>
+							<div class="d-flex justify-content-end">
+								<a id="NewsWikiAddBtn" class="btn btn-primary">위키 등록</a>
+								<a id="GotoList" class="btn btn-primary">목록으로</a>
+							</div>
+						</form>
+					</div>
+					<div class="card-footer"></div>
+			`;
+			return writeWikiHtml;
+	}
+	
+/////////////수정하기 Html
+
+	let makeUpdateWikiHtml = function(resp){
+		console.log("수정폼",resp)
+		updateWikiHtml = "";
+		updateWikiHtml+=`
+			<!-- 작업Form -->
+					<div class="card-body">
+					<form class="UpdateWikiForm">
+							<input type="hidden" name="proCode" value="${project.proCode }">
+							<input type="hidden" name="memEmail" value="${authMember.memEmail }">
+							<table class="table table-bordered">
+								<tr>
+									<th rowspan="2">위키 제목
+								</th>
+								</tr>
+								<tr>
+									<td>
+										<input type="text" name= "wikiTitle" Class="form-control" value="\${resp.wikiTitle}">
+									</td>
+								</tr>
+								
+								<tr><th rowspan="2">위키 분류</th></tr>
+								<td>
+								<select name="wikiClsCd" class="form-control">
+									<option value="W01" selected>분류1</option>
+									<option value="W02">분류2</option>
+									<option value="W03">분류3</option>
+								</select>
+								</td>
+								</tr>
+								
+								<tr>
+									<th>위키내용</th>
+									<td><textarea name="wikiCont" rows="30" cols="80" value="\${resp.wikiCont}"></textarea>
+									</td>
+								</tr>
+							</table>
+							<div class="d-flex justify-content-end">
+								<a id="UpdateWikiAddBtn" class="btn btn-primary">수정 완료 </a>
+								
+								<a id="GotoList" class="btn btn-primary">취소</a>
+							</div>
+						</form>
+					</div>
+					<div class="card-footer"></div>
+			`;
+			return updateWikiHtml;
+	}
+
+/////////목록으로
+	$(document).on("click","#GotoList",function(){
+		wikiList();
+		$("#Showme").css("display","block");
+	});
+	
+
+/////////////상세보기
+
+	function f_detail(wikiNo){
+		
+	 	let data = { 
+			wikiNo : wikiNo
+		}
+	 	
+		$.ajax({
+			url : "${pageContext.request.contextPath}/project/project/wikiDetail",
+			method : "post",
+			data :  JSON.stringify(data),
+			contentType : "application/json;charset=utf-8",
+			dataType : "json",
+			success : function(resp) {
+				console.log("상세보기"+resp);
+				/*글쓰기버튼이 안보임  */
+				$("#Showme").css("display","none");
+				wikiSelect.html(makeWikiDetailHtml(resp));
+				
+
+//////////////삭제하기
+				$("#SelectwikiDeleteBtn").on("click",function(){
+					
+					let data = {wikiNo :resp.wikiNo};
+					console.log("위키번호 : ",data);
+							
+					$.ajax({
+						url : "${pageContext.request.contextPath}/project/project/deleteWiki",
+						method : "post",
+						data : JSON.stringify(data),
+						contentType : "application/json;charset=utf-8",
+						dataType : "json",
+						success : function(result) {
+							console.log("삭제할꺼야",result);
+							wikiList();
+						},
+						error : function(jqXHR, status, error) {
+							console.log(jqXHR,status,error);
+						}
+					});
+				});
+		
+///////////수정하기
+				$("#updateWikiBtn").on("click",function(){
+					wikiSelect.html(makeUpdateWikiHtml(resp));
+					console.log("수정글제목찍기: ",resp.wikiCont);
+					$("#UpdateWikiAddBtn").on("click",function(){
+						let wiki = {
+								wikiNo : wikiNo,
+								wikiTitle : $("input[name=wikiTitle]").val(),
+								memEmail : $("input[name=memEmail]").val(),
+								proCode : $("[name=proCode]").val(),
+								wikiClsCd : $("[name=wikiClsCd]").val(),
+								wikiCont : $("[name=wikiCont]").val()
+						}
+						console.log("나올까?",wiki);
+						$.ajax({
+							url : "${pageContext.request.contextPath}/project/project/updateWiki",
+							method : "post",
+							data :  JSON.stringify(wiki),
+							contentType : "application/json;charset=utf-8",
+							dataType : "json",
+							success : function(resp) {
+								console.log("수정완료");
+							},
+							error : function(jqXHR, status, error) {
+								console.log(jqXHR);
+								console.log(status);
+								console.log(error);
+							}
+						});
+					});
+				});
+			},
+			error : function(jqXHR, status,error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});
+	}
+	
+
+
+//////// 생성하기
+    function fn_seri(myForm){
+        let elems = myForm.elements
+        let myObj = {}
+        for(let i=0; i<elems.length; i++){
+            if(myObj.hasOwnProperty(elems[i].name)){
+               if(Array.isArray(myObj[elems[i].name])){                  
+                  myObj[elems[i].name].push(elems[i].value);
+               }else{                  
+                  let array = [myObj[elems[i].name]]
+                  array.push(elems[i].value);
+                  myObj[elems[i].name] = array;
+               }
+            }else{
+               myObj[elems[i].name] = elems[i].value;
+            }
+        }
+        return myObj;
+    }
+	
+	$(document).on("click","#wirteWikiBtn",function(){
+		$("#Showme").css("display","none");
+		wikiSelect.html(makeWriteWikiHtml);
+
+		$(document).on("click","#NewsWikiAddBtn",function(){
+			let hForm = $(".NewWikiForm");
+			
+			let data = fn_seri(hForm[0]);
+			console.log("data",data);
+			
+			$.ajax({
+				url : "${pageContext.request.contextPath}/project/project/wikiInsert",
+				method : "post",
+				data : JSON.stringify(data),
+				contentType : "application/json;charset=utf-8",
+				success : function(resp) {	wikiList(); },
+				error : function(jqXHR, status, error) {
+					console.log(jqXHR,status,error);
+				}
+			});
+		});
+	});
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+</script>
+
+
+
+
+
+
+
+

@@ -1,0 +1,211 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%-- ${pageContext.request.contextPath }/api/papago --%>
+<a href="#" data-bs-toggle="offcanvas"
+	data-bs-target="#offcanvasScrolling2"
+	style="position: fixed; bottom: 170px; right: 30px; width: 50px;"
+	aria-controls="offcanvasScrolling"> <img
+	src="${pageContext.request.contextPath }/resources/images/icon/translator.png"
+	width="60" height="60" />
+</a>
+
+<div class="offcanvas offcanvas-end" data-bs-scroll="true"
+	data-bs-backdrop="false" tabindex="-1" id="offcanvasScrolling2"
+	aria-labelledby="offcanvasScrollingLabel">
+	<div class="offcanvas-header">
+		<h5 class="offcanvas-title" id="offcanvasScrollingLabel"></h5>
+		<button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+			aria-label="Close"></button>
+	</div>
+	<div class="offcanvas-body">
+		<div class="card-header">
+			<h5 class="card-title">번역기</h5>
+		</div>
+		<div class="card-body">
+			<button class="btn btn-outline-danger" type="button" id="resetBtn">리셋</button>
+			<table class="table">
+				<thead>
+					<tr>
+						<th>한국어</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+					
+						<td><textarea id="korean" name="korean" placeholder="한국어를 입력하세요." style="height: 142px; width: 100%"></textarea></td>
+					</tr>
+				</tbody>
+				<thead>
+					<tr>
+						<th>영어</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><textarea  id="english" name="en" placeholder="영어를 입력하세요." style="height: 142px; width: 100%"></textarea></td>
+					</tr>
+				</tbody>
+				<thead>
+					<tr>
+						<th>한국어</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td width="200" height="30" id="korea"></td>
+					</tr>
+				</tbody>
+				<thead>
+					<tr>
+						<th>중국어</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td width="200" height="30" id="china"></td>
+					</tr>
+				</tbody>
+				<thead>
+					<tr>
+						<th>영어</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td width="200" height="30" id="en"></td>
+					</tr>
+				</tbody>
+				<thead>
+					<tr>
+						<th>일본어</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td width="200" height="30" id="japan"></td>
+					</tr>
+				</tbody>
+
+			</table>
+			<button class="btn btn-outline-primary" type="button" id="chineseBtn">중국어</button>
+			<button class="btn btn-outline-success" type="button" id="englishBtn">영어</button>
+			<button class="btn btn-outline-warning" type="button"
+				id="japaneseBtn">일본어</button>
+			<button class="btn btn-outline-info" type="button" id="koreanBtn">한국어</button>
+			
+			<!-- 		 	<input type="button" id="clean" value="리셋"> -->
+
+		</div>
+	</div>
+</div>
+<script>
+	$(function() {
+		$("#chineseBtn").click(function() {
+			var ko = $("#korean").val();
+			var en = $("#english").val();
+			console.log(en);
+			$.ajax({
+				url : "${pageContext.request.contextPath}/project/chinese",
+				type : "GET",
+				dataType : "json",
+				data : {
+					korean : ko,
+					english : en
+				},
+				beforeSend : function(xhr) {   // 데이터 전송 전  헤더에 csrf값 설정
+	                xhr.setRequestHeader("${_csrf.headerName}", "${_csrf.token}");
+	            },
+				success : function(v) {
+					console.log(v);
+					var chinese = v.message.result.translatedText;
+					$("#china").text(chinese);
+				},
+				error : function(e) {
+					console.log(e);
+				}
+			});
+		});
+		$("#englishBtn").click(function() {
+			var ko = $("#korean").val();
+			var en = $("#english").val();
+			$.ajax({
+				url : "${pageContext.request.contextPath}/project/english",
+				type : "GET",
+				dataType : "json",
+				data : {
+					korean : ko,
+					english : en
+				},
+				beforeSend : function(xhr) {   // 데이터 전송 전  헤더에 csrf값 설정
+	                xhr.setRequestHeader("${_csrf.headerName}", "${_csrf.token}");
+	            },
+				success : function(v) {
+					console.log(v);
+					var english = v.message.result.translatedText;
+					$("#en").text(english);
+
+				},
+				error : function(e) {
+					console.log(e);
+				}
+			});
+		})
+		$("#japaneseBtn").click(function() {
+			var ko = $("#korean").val();
+			var en = $("#english").val();
+			$.ajax({
+				url : "${pageContext.request.contextPath}/project/japanese",
+				type : "GET",
+				dataType : "json",
+				data : {
+					korean : ko,
+					english : en
+				},
+				beforeSend : function(xhr) {   // 데이터 전송 전  헤더에 csrf값 설정
+	                xhr.setRequestHeader("${_csrf.headerName}", "${_csrf.token}");
+	            },
+				success : function(v) {
+					console.log(v);
+					var japanese = v.message.result.translatedText;
+					$("#japan").text(japanese);
+				},
+				error : function(e) {
+					console.log(e);
+				}
+			});
+		})
+		$("#koreanBtn").click(function() {
+			var en = $("#english").val();
+			$.ajax({
+				url : "${pageContext.request.contextPath}/project/korean",
+				type : "GET",
+				dataType : "json",
+				data : {
+					english : en
+				},
+				beforeSend : function(xhr) {   // 데이터 전송 전  헤더에 csrf값 설정
+	                xhr.setRequestHeader("${_csrf.headerName}", "${_csrf.token}");
+	            },
+				success : function(v) {
+					console.log(v);
+					var korean = v.message.result.translatedText;
+					$("#korea").text(korean);
+				},
+				error : function(e) {
+					console.log(e);
+				}
+			});
+		})
+		$("#resetBtn").click(function() {
+			console.log("리셋버튼 체크");
+			var ko = $("#korean");
+			var china = $("#china");
+			var en = $("#en");
+			var japan = $("#japan");
+			ko.val('')
+			china.empty();
+			en.empty();
+			japan.empty	();
+		})
+	});
+</script>

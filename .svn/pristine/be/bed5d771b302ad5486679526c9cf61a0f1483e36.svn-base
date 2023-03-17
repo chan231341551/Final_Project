@@ -1,0 +1,377 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
+<%@ taglib uri="http://www.springframework.org/security/tags"
+	prefix="security"%>
+<link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>	
+
+<script
+	src="${pageContext.request.contextPath }/resources/ckeditor/ckeditor.js"></script>
+<script src="${pageContext.request.contextPath }/resources/js/news.js"></script>
+
+
+<main class="content">
+<div class="container-fluid p-0">
+	<h1 class="h3 mb-3">내 프로젝트</h1>
+	<nav aria-label="breadcrumb">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a href="#">프로젝트</a></li>
+			<li class="breadcrumb-item active">뉴스</li>
+		</ol>
+	</nav>
+	<hr>
+	작성하기 및 검색창 들어갈 예정??
+	<div class="row">
+		<div class="col-sm-12 col-md-7">
+			<div class="d-flex justify-content-start"></div>
+		</div>
+		<div class="col-sm-12 col-md-5">
+			<div id="searchUI" class="d-flex justify-content-end">
+				<select name="searchOption" class="form-control" style="width: 20%;">
+					<option value="total">전체</option>
+					<option value="title">제목</option>
+					<option value="writer">생성자</option>
+				</select> <input class="bg-light" type="text" name="searchWord"
+					placeholder="검색어를입력" /> <input class="btn btn-primary"
+					type="button" value="검색" id="searchProjectBtn" />
+			</div>
+		</div>
+	</div>
+
+	<div class="card">
+		<div class="card-header">
+			<ul class="nav nav-tabs card-header-tabs pull-right" role="tablist">
+				<li class="nav-item" role="presentation">
+			</ul>
+		</div>
+		<div class="card-body">
+			<div class="tab-content">
+				<div class="tab-pane fade active show" role="tabpanel">
+					<div id="newsAllDisp" class="row"></div>
+				</div>
+				</hr>
+				<div id="proTotalDisp" class="row"></div>
+				페이징처리
+				<div class="row">
+					<div class="col-sm-12 col-md-12">
+						<div class="pagingArea d-flex justify-content-center"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	작성 및 검색?
+</div>
+</div>
+</main>
+
+
+
+<!------------------ 뉴스 작성 모달창 --------------------------------->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal"
+	data-bs-target="#newsModal">뉴스작성</button>
+
+<div class="modal fade" id="newsModal" tabindex="-1"
+	aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog  modal-lg">
+
+		<div class="modal-content" id="newswrite">
+			<div class="modal-header">
+				<h1 class="modal-title fs-5" id="exampleModalLabel">뉴스 추가</h1>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+
+			<div class="modal-body">
+				<form id="newsForm" enctype="multipart/form-data">
+					<div class="form-group">
+						<label for="news-title-input" class="col-form-label">뉴스 제목</label>
+						<input type="text" class="form-control" name="newsTitle">
+					</div>
+
+					<!-- 불러와야함 -->
+					<div class="form-group">
+						<input type="hidden" value="${project.memEmail }" name="memEmail">
+					</div>
+
+					<div class="form-group">
+						<input type="hidden" value="${project.proCode }" name="proCode">
+					</div>
+
+					<th>뉴스내용</th>
+					<td><input type="text" name="newsCont" id="editor1"
+						cssClass="form-control" /></td>
+
+					<div class="form-group">
+						<th>비밀번호</th> <input type="text" class="form-control"
+							name="newsPass">
+					</div>
+					<!------ modal-footer ---------->
+					<div class="modal-footer">
+						<input type="file" name="newsfile" accept="image/*">
+					</div>
+
+					<button type="button" class="btn btn-secondary"
+						data-bs-dismiss="modal">닫기</button>
+					<button id="newsSaveBtn" type="submit" class="btn btn-success">저장</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+<script>
+	CKEDITOR.replace('editor1');
+</script>
+
+
+<script type="text/javascript">
+
+	let newsAllDisp = $("#newsAllDisp");
+
+/////뉴스리스트 Html
+	let makeListHtml = function(newsList){
+		let ListHtml = "";
+		for(let i=0; i < newsList.length; i++){
+			ListHtml += `
+			<div class="col-12 col-md-6 col-lg-4">
+				<div class="card">
+				
+				
+					<div class="card-header">
+					
+						<h5 class="card-title mb-0">\${newsList[i].newsNo} \${newsList[i].newsTitle }</h5>
+					</div>
+					<img class="card-img-top" src="${pageContext.request.contextPath }/resources/images/pms/800.png" alt="뉴스1">
+					
+					<div class="card-body">
+						<p class="card-text">\${newsList[i].newsCont }</p>
+						
+						 <button id="detailBtn" class="btn btn-primary" data-news-no="\${newsList[i].newsNo}">자세히보기</button>
+						<h6 class="date">작성일: \${newsList[i].newsDate}</h6>							
+					</div>
+				</div>
+			</div>`;
+		}
+		return ListHtml;
+	}
+	
+///// 뉴스가 없는경우 html
+	let NotHtml = function(){
+		let ListHtml = "";
+		ListHtml += `
+		<div class="col-12 col-md-6 col-lg-4">
+			<div class="card">
+				<p>뉴스가 없어용!!</p>
+			</div>
+		</div>`;
+		return ListHtml;
+	}
+	
+
+////////상세보기 html
+	 	let makeDetailHtml = function(news){
+			let DatailHtml = "";
+				DatailHtml += `
+				<div class="mb-4">
+					<h4> 글번호 : \${news.newsNo}<h4> <br>
+					<h4> 조회수 : \${news.newsHit}<h4> <br>
+					<strong> \${news.newsTitle}</strong><h4>	<br>
+				</div>
+				<div class="row mb-4">
+				
+				<div class="col-md-10">
+					<div class="text-muted">내용</div>
+					<img class="card-img-top" src="${pageContext.request.contextPath }/resources/images/pms/800.png" alt="뉴스1">
+					<p>\${news.newsCont}</p>
+				</div>
+				<button id="updateBtn" class="btn btn-success"  style="width: 10%; height:10%;">수정하기 </button>
+				<button id="DeleteBtn" class="btn btn-danger btn-xs" >삭제하기 </button>
+				</div>
+				</div>`;
+			return DatailHtml;
+		}
+	 
+
+	
+	
+//////////// 전체 내 뉴스목록 첫 UI////////////////
+	$.ajax({
+		url :"${pageContext.request.contextPath }/project/project/news/${project.proCode}",
+		method : "get",
+		success : function(resp) {
+			console.log("ui만뿌림");
+			
+		},
+		error : function(jqXHR, status, error) {
+			console.log(jqXHR);
+			console.log(status);
+			console.log(error);
+		}
+	});
+	
+///////////목록 보여주기 
+	newslist();
+	function newslist(){
+		$.ajax({
+			url : "${pageContext.request.contextPath }/project/project/newsListView/${project.proCode}",
+			method : "get",
+			dataType : "json",
+			success : function(resp) {
+				console.log("목록뿌림");
+				
+				if(resp.length>0){
+					newsAllDisp.html(makeListHtml(resp));
+				}
+				else{
+					newsAllDisp.html(NotHtml(resp));
+				}
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+	
+			}
+		});
+	};
+	
+	////폼열고닫기도전
+/* 	$("#newsSaveBtn").on("click", function() {
+		$("input[name=noticeTitle]").val("");
+		$("input[name=noticeDate]").val("");
+		CKEDITOR.instances.editor1.setData("");
+		
+		$("#createBtn").html("작성하기");
+		
+		noticeModal.style.display = "block";
+
+	});
+	
+	$("#closeBtn").on("click", function(){
+		noticeModal.style.display = "none";
+	});
+	 */
+
+	
+/////////// 뉴스등록 
+	$("#newsSaveBtn").on("click",function(event){
+		//let data = $("#newsForm").serialize();	
+		event.preventDefault();
+		console.log("등록시작합니당");
+		let news = {
+			newsTitle : $("input[name=newsTitle]").val(),
+			memEmail : $("input[name=memEmail]").val(),
+			proCode : $("[name=proCode]").val(),
+			newsCont: CKEDITOR.instances.editor1.getData(),
+			newsPass : $("input[name=newsPass]").val()
+		}
+		/* console.log(data); */
+	
+			
+	 	$.ajax({
+			url : "${pageContext.request.contextPath }/project/project/newsInsert/${project.proCode}",
+			type : "post",
+			data : news,
+			dataType : "json",
+			success : function(resp) {
+				console.log(resp);
+ 				$("#newsModal").hide();
+ 				newslist();
+				
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});
+	});
+	
+	 
+
+////////글 상세 보기 
+
+	$(document).on("click","#detailBtn",function(){
+		let data = this.dataset['newsNo'];
+		console.log("상세보기글번호",data);
+		$.ajax({
+			url : "${pageContext.request.contextPath}/project/project/newsDetail/"+data,
+			method : "get",
+			dataType : "json",
+			success : function(resp) {
+				newsAllDisp.html(makeDetailHtml(resp));
+				console.log("글상세보기콘솔임"); 
+		
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+
+		});
+ 	
+	})
+	
+///////글 삭제
+
+	/* 글번호?랑 비밀번호일치여부확인필요  */ 
+	$(document).on("click","#DeleteBtn",function(){
+		let data = this.dataset['newsNo'];
+		console.log(data);
+		
+		 $.ajax({
+				url : "${pageContext.request.contextPath}/project/project/deleteNews/"+data,
+				method : "post",
+				data : data,
+				dataType : "json",
+				success : function(resp) {
+					console.log("삭제");
+
+				},
+				error : function(jqXHR, status, error) {
+					console.log(jqXHR);
+					console.log(status);
+					console.log(error);
+
+				}
+
+			});
+	});
+		
+			 
+	 	
+</script>
+
+
+ <%-- let result = confirm("진짜삭제?")
+		 console.log("삭제할껴")
+		 
+		 $.ajax({
+			url : "${pageContext.request.contextPath}/project/project/deleteNews"+newsno,
+			method : "post",
+			data : newsno,
+			dataType : "json",
+			success : function(resp) {
+				console.log("삭제");
+
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+
+			}
+
+		});
+		 
+	}); --%>
+

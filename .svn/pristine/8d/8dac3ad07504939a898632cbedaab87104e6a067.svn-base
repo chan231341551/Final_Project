@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.project.sidemenu.dao.MemoDAO">
+	
+	<select id="selelctTotalRecord" resultType="int" parameterType="MemoVO">
+		SELECT COUNT(*)
+		FROM MEMO
+	</select>
+	<select id="selectMemoList" resultType="MemoVO" parameterType="MemoVO">
+		SELECT 
+   			 A.*
+		FROM(
+		    SELECT 
+		        ROWNUM RNUM,
+		        B.MEMO_NO,
+		        A.MEM_NAME,
+		        B.MEMO_TITLE,
+		        B.MEMO_CONT,
+		        B.MEMO_DATE
+		    FROM MEMBER A , MEMO B
+		    WHERE A.MEM_NO = B.MEM_NO
+		)A
+		WHERE RNUM BETWEEN #{startRow} AND #{endRow}
+		
+	</select>
+	
+	<select id="selectMemo" resultType="MemoVO" parameterType="int">
+		SELECT 
+    		B.MEMO_NO,
+   		 	A.MEM_NAME,
+   			B.MEMO_TITLE,
+    		B.MEMO_CONT,
+    		B.MEMO_DATE
+		FROM MEMBER A , MEMO B
+		WHERE A.MEM_NO = B.MEM_NO
+		AND B.MEMO_NO = #{memoNo}
+	</select>
+	
+</mapper>

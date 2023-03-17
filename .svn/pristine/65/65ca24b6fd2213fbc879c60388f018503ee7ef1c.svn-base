@@ -1,0 +1,127 @@
+<!--
+	사이드 툴 바 메모장 jsp
+  -->
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+
+<a data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling"
+	style="position: fixed; bottom: 30px; right: 30px; width: 50px;"
+	aria-controls="offcanvasScrolling"> 
+	<img
+		id="memoImg"
+		src="${pageContext.request.contextPath }/resources/images/icon/memo.png"
+		width="60" height="60" 
+	/>
+</a>
+
+
+<div class="offcanvas offcanvas-end" data-bs-scroll="true"
+	data-bs-backdrop="false" tabindex="-1" id="offcanvasScrolling"
+	aria-labelledby="offcanvasScrollingLabel">
+	<div class="offcanvas-header">
+		<h5 class="offcanvas-title" id="offcanvasScrollingLabel"></h5>
+		<button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+			aria-label="Close"></button>
+	</div>
+	<div class="offcanvas-body">
+		<div class="card-header">
+			<h5 class="card-title">메모장</h5>
+		</div>
+		<div class="card-body">
+<!-- 			<div id="wrapper"> -->
+
+			<form method="get" action="">
+
+				<div id="margin">
+				제목: <input id="title" type="text" name="title">
+				</div>
+				<textarea placeholder="메모 내용 입력." id="text"
+					name="text" rows="4"
+					style="/* overflow: hidden; */ word-wrap: break-word; resize: none; width: 350px; height: 160px;">
+				</textarea>
+				
+				<input id="button" type="submit" value="저장">
+
+			</form>
+
+<!-- 			</div> -->
+		</div>
+
+		<div class="input-group" style="padding-top: 30px;">
+			<input type="text" class="form-control"
+				aria-label="Text input with segmented dropdown button">
+			<button type="button" class="btn btn-outline-secondary">검색</button>
+			<select class="form-select" aria-label="Default select example">
+				<option selected>옵션</option>
+				<option value="1">제목</option>
+				<option value="2">내용</option>
+			</select>
+		</div>
+		<div id="disp">
+			
+		</div>
+		
+	</div>
+</div>
+<script>
+	
+// 	<br><br><br><p id=\"memoC\">\${v.memoCont}</p>
+	$.ajax({
+		url : "memoList",
+		method : "get",
+		dataType : "json",
+		success : function(resp) {
+			let memoList = resp.dataList;
+			let str = "";
+			$.each(memoList,function(i,v){
+// 				console.log(v);
+				str += `
+					<div class=\"post-it memoPaper\" contenteditable>
+						<input id=\"\${v.memoNo}\" value=\${v.memoNo} type=\"hidden\" />
+						<h1>\${v.memoTitle}</h1>
+						<ul>
+							<li>\${v.memoDate}</li>
+							<br>
+							<li>\${v.memoCont}</li>
+						</ul>
+					</div>
+				`;
+			})
+			$("#disp").html(str);
+				
+		},
+		error : function(jqXHR, status, error) {
+			console.log(jqXHR);
+			console.log(status);
+			console.log(error);
+		}
+	});
+	
+	$(function(){
+	  $('.memoPaper').click(function(){
+		  console.log(this);
+	 	  $(".offcanvas-body").html("");
+		  let paperVal = $(this).children('input').val()
+		  console.log(paperVal);
+		  
+		  $.ajax({
+			url : "memoDetail/"+paperVal+"",
+			method : "get",
+			data : paperVal,
+			dataType : "json",
+			success : function(resp) {
+				console.log(resp);
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});//END AJAX
+	
+	  });
+	});
+	
+</script>
+

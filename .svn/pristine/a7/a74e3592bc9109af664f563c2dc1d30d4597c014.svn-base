@@ -1,0 +1,301 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+<main class="content">
+	<div class="container-fluid p-0">
+
+		<a class="btn btn-primary float-end mt-n1 isCreate">
+		<button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#centeredModalPrimary" style="padding: 0px; color: currentcolor;">
+			New issue
+		</button>
+		</a>
+		
+		<div class="mb-3">
+			<h1 class="h3 d-inline align-middle">ISSUE</h1>
+		</div>
+
+		<div class="row">
+		
+			<div class="col-12 col-md-6 col-lg-3">
+				<div class="card">
+	
+				<button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#centeredModalPrimary" style="text-align: start;">
+					<div class="card-header px-4 pt-4">
+						<div class="card-actions float-end">
+							${issue.issStatusCd}
+						</div>
+						<h5 class="card-title mb-0">${issue.issTitle}</h5>
+						<div class="badge bg-success my-2">${issue.issLabelCd}</div>
+					</div>
+					<div class="card-body px-4 pt-2">
+						<p>${issue.issNo}</p>
+						<h5  class="rounded-circle me-1" >${issue.memName}</h5>
+					</div>
+					<ul class="list-group list-group-flush">
+						<li class="list-group-item px-4 pb-4">
+							<p class="mb-2 font-weight-bold">Progress <span class="float-end">100%</span></p>
+							<div class="progress progress-sm">
+					
+					
+								<div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;">
+							</div>
+						</div>
+					</li>
+				</ul>
+			</button>
+		</div>
+		</div>
+			
+			<!-- BEGIN primary modal -->
+			<div class="modal fade" id="centeredModalPrimary" tabindex="-1" role="dialog" aria-hidden="true">
+				<div class="modal-dialog modal-dialog-centered modal-lg isCont" role="document">						
+				</div>	
+			</div>
+			<!-- END primary modal -->
+			
+			<div class="col-12 col-md-6 col-lg-3">
+				<div class="card">
+
+					<div class="card-header px-4 pt-4">
+						<div class="card-actions float-end">
+							<div class="dropdown position-relative">
+								<a href="#" data-bs-toggle="dropdown" data-bs-display="static">
+									<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-horizontal align-middle"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+								</a>
+
+								<div class="dropdown-menu dropdown-menu-end">
+									<a class="dropdown-item" href="#">Action</a>
+									<a class="dropdown-item" href="#">Another action</a>
+									<a class="dropdown-item" href="#">Something else here</a>
+								</div>
+							</div>
+						</div>
+						<h5 class="card-title mb-0">Company posters</h5>
+						<div class="badge bg-warning my-2">NOTICE(라벨)</div>
+					</div>
+					<div class="card-body px-4 pt-2">
+						<p>Curabitur ligula sapien, tincidunt non, euismod vitae, posuere imperdiet, leo. Maecenas malesuada. Praesent congue erat
+							at massa.</p>
+
+						<img src="img/avatars/avatar-3.jpg" class="rounded-circle me-1" alt="Avatar" width="28" height="28">
+						<img src="img/avatars/avatar-2.jpg" class="rounded-circle me-1" alt="Avatar" width="28" height="28">
+						<img src="img/avatars/avatar.jpg" class="rounded-circle me-1" alt="Avatar" width="28" height="28">
+					</div>
+					<ul class="list-group list-group-flush">
+						<li class="list-group-item px-4 pb-4">
+							<p class="mb-2 font-weight-bold">Progress <span class="float-end">75%</span></p>
+							<div class="progress progress-sm">
+								<div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 75%;">
+								</div>
+							</div>
+						</li>
+					</ul>
+				</div>
+			</div>
+			<div class="col-12 col-md-6 col-lg-3">
+				<div class="card">
+
+					<div class="card-header px-4 pt-4">
+						<div class="card-actions float-end">
+							<div class="dropdown position-relative">
+								<a href="#" data-bs-toggle="dropdown" data-bs-display="static">
+									<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-horizontal align-middle"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+								</a>
+
+								<div class="dropdown-menu dropdown-menu-end">
+									<a class="dropdown-item" href="#">Action</a>
+									<a class="dropdown-item" href="#">Another action</a>
+									<a class="dropdown-item" href="#">Something else here</a>
+								</div>
+							</div>
+						</div>
+						<h5 class="card-title mb-0">Product page design</h5>
+						<div class="badge bg-success my-2">HELP(라벨)</div>
+					</div>
+					<div class="card-body px-4 pt-2">
+						<p>Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque
+							sed ipsum.</p>
+
+						<img src="img/avatars/avatar-3.jpg" class="rounded-circle me-1" alt="Avatar" width="28" height="28">
+						<img src="img/avatars/avatar-2.jpg" class="rounded-circle me-1" alt="Avatar" width="28" height="28">
+						<img src="img/avatars/avatar.jpg" class="rounded-circle me-1" alt="Avatar" width="28" height="28">
+					</div>
+					<ul class="list-group list-group-flush">
+						<li class="list-group-item px-4 pb-4">
+							<p class="mb-2 font-weight-bold">Progress<span class="float-end">100%</span></p>
+							<div class="progress progress-sm">
+								<div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;">
+								</div>
+							</div>
+						</li>
+					</ul>
+				</div>
+			</div>
+			<div class="col-12 col-md-6 col-lg-3">
+				<div class="card">
+
+					<div class="card-header px-4 pt-4">
+						<div class="card-actions float-end">
+							<div class="dropdown position-relative">
+								<a href="#" data-bs-toggle="dropdown" data-bs-display="static">
+									<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-horizontal align-middle"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+								</a>
+
+								<div class="dropdown-menu dropdown-menu-end">
+									<a class="dropdown-item" href="#">Action</a>
+									<a class="dropdown-item" href="#">Another action</a>
+									<a class="dropdown-item" href="#">Something else here</a>
+								</div>
+							</div>
+						</div>
+						<h5 class="card-title mb-0">Upgrade CRM software</h5>
+						<div class="badge bg-warning my-2">In progress</div>
+					</div>
+					<div class="card-body px-4 pt-2">
+						<p>Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam
+							ultrices mauris.</p>
+
+						<img src="img/avatars/avatar-3.jpg" class="rounded-circle me-1" alt="Avatar" width="28" height="28">
+						<img src="img/avatars/avatar-2.jpg" class="rounded-circle me-1" alt="Avatar" width="28" height="28">
+						<img src="img/avatars/avatar.jpg" class="rounded-circle me-1" alt="Avatar" width="28" height="28">
+					</div>
+					<ul class="list-group list-group-flush">
+						<li class="list-group-item px-4 pb-4">
+							<p class="mb-2 font-weight-bold">Progress <span class="float-end">50%</span></p>
+							<div class="progress progress-sm">
+								<div class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 50%;">
+								</div>
+							</div>
+						</li>
+					</ul>
+				</div>
+			</div>
+			<div class="col-12 col-md-6 col-lg-3">
+				<div class="card">
+
+					<div class="card-header px-4 pt-4">
+						<div class="card-actions float-end">
+							<div class="dropdown position-relative">
+								<a href="#" data-bs-toggle="dropdown" data-bs-display="static">
+									<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-horizontal align-middle"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+								</a>
+
+								<div class="dropdown-menu dropdown-menu-end">
+									<a class="dropdown-item" href="#">Action</a>
+									<a class="dropdown-item" href="#">Another action</a>
+									<a class="dropdown-item" href="#">Something else here</a>
+								</div>
+							</div>
+						</div>
+						<h5 class="card-title mb-0">Fix form validation</h5>
+						<div class="badge bg-warning my-2">In progress</div>
+					</div>
+					<div class="card-body px-4 pt-2">
+						<p>Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam
+							ultrices mauris.</p>
+
+						<img src="img/avatars/avatar-3.jpg" class="rounded-circle me-1" alt="Avatar" width="28" height="28">
+						<img src="img/avatars/avatar-2.jpg" class="rounded-circle me-1" alt="Avatar" width="28" height="28">
+						<img src="img/avatars/avatar.jpg" class="rounded-circle me-1" alt="Avatar" width="28" height="28">
+					</div>
+					<ul class="list-group list-group-flush">
+						<li class="list-group-item px-4 pb-4">
+							<p class="mb-2 font-weight-bold">Progress <span class="float-end">65%</span></p>
+							<div class="progress progress-sm">
+								<div class="progress-bar" role="progressbar" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100" style="width: 65%;">
+								</div>
+							</div>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</main>
+<script>
+	
+	let ListTag = function(i,v){
+// 		console.log("v : ",v);
+		return $("<div>").attr('class', 'col-12 col-md-6 col-lg-3')
+				.append($("<div>").attr('class', 'card'))
+				.append($("<button>").attr({
+										  'type' : 'button'
+										, 'class' : 'btn'
+										, 'data-bs-toggle' : 'modal'
+										, 'data-bs-target' : '#centeredModalPrimary'
+				}).css('text-align', 'start'))
+				.append($("<div>").attr('class', 'card-header px-4 pt-4')
+					.append(
+						  $("<div>").attr('class', 'card-actions float-end').html(v.issStatusCd)
+						, $("<h5>").attr('class', 'card-title mb-0').html(v.issTitle)
+						, $("<div>").attr('class', 'badge bg-success my-2').html(v.issLabelCd))
+					, $("<div>").attr('class', 'card-body px-4 pt-2')
+						.append(
+							  $("<p>").html(v.issNo)
+							, $("<h5>").attr('class', 'rounded-circle me-1').html(v.memName))
+					, $("<ul>").attr('class', 'list-group list-group-flush')
+						.append($("<li>").attr('class', 'list-group-item px-4 pb-4'))
+							.append(
+									$("<p>").attr('class', 'mb-2 font-weight-bold')
+									, $("<pdiv>").attr('class', 'div')
+										.append($("<div>").attr({
+																'class':'progress-bar'
+																, 'role':'progressbar'
+																, 'aria-valuenow':'100'
+																, 'aria-valuemin':'0'
+																, 'aria-valuemax':'100'
+																}).css('width', '100%'))
+									
+							)
+					
+								
+				)
+				
+	}
+	
+	$(document).ready(function(){
+		 $.ajax({
+             url: '${pageContext.request.contextPath}/project/project/issue',
+             method: 'GET',
+             dataType : 'json',
+             success: function (resp) {
+            	 
+             	 console.log("resp : ", resp);
+				 console.log("resp.issueList : ", resp.issueList);
+				 
+				 let selectTag = [];
+				 $.each(resp.issueList,function(i,v){
+				 	selectTag.push(ListTag(i,v));
+				 });
+				 $(".row").html(selectTag);
+             },
+				error : function(jqXHR, status, error) {
+					console.log(jqXHR);
+					console.log(status);
+					console.log(error);
+             }
+         })
+	});
+	
+	
+	
+	$(".isCreate").on("click",function(){
+		$.ajax({
+			url : '${pageContext.request.contextPath}/project/issueForm',
+			type : 'GET',
+			success : function(resp) {
+// 				console.log(resp);
+				$('.isCont').html(resp);
+			},
+			error : function(xhr, error, msg) {
+				console.log(xhr, error, msg);
+			},
+			dataType : 'html'
+		}) 
+	});
+	
+	
+	
+	
+</script>

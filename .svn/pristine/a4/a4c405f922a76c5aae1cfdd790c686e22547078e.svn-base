@@ -1,0 +1,48 @@
+package kr.or.ddit.project.issue.service;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.project.issue.dao.IssueDAO;
+import kr.or.ddit.project.issue.vo.IssueVO;
+import kr.or.ddit.vo.PagingVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+public class IssueServiceImpl implements IssueService {
+	
+	@Inject
+	private IssueDAO issueDAO;
+	
+	@Override
+	public int createIssue(IssueVO issue) {
+
+		int rowcnt = issueDAO.insertIssue(issue);
+		
+		return rowcnt;
+	}
+
+	@Override
+	public void retrieveIssueList(PagingVO<IssueVO> pagingVO) {
+		
+	}
+
+	@Override
+	public IssueVO retrieveIssue(int issNo) {
+		return null;
+	}
+
+	@Override
+	public int modifyIssue(IssueVO Issue) {
+		return 0;
+	}
+
+	@Override
+	public int removeIssue(int issNo) {
+		return 0;
+	}
+}

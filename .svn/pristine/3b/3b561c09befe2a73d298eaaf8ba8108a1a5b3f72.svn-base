@@ -1,0 +1,78 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+as
+
+<!-- <section id="faq" class="faq section-bg">
+
+						<div class="faq-list">
+							<ul>
+								<li data-aos="fade-up" data-aos-delay="100"
+									class="aos-init aos-animate"><i
+									class="bx bx-help-circle icon-help"></i> <a
+									data-bs-toggle="collapse" class="collapse"
+									data-bs-target="#faq-list-1">자주묻는 질문~~ <i
+										class="bx bx-chevron-down icon-show"></i><i
+										class="bx bx-chevron-up icon-close"></i>
+								</a>
+									<div id="faq-list-1" class="collapse show"
+										data-bs-parent=".faq-list">
+										<p>답변.</p>
+									</div></li>
+								<li data-aos="fade-up" data-aos-delay="200"
+									class="aos-init aos-animate"><i
+									class="bx bx-help-circle icon-help"></i> <a
+									data-bs-toggle="collapse" data-bs-target="#faq-list-2"
+									class="collapsed">자주묻는 질문~~ <i
+										class="bx bx-chevron-down icon-show"></i><i
+										class="bx bx-chevron-up icon-close"></i></a>
+									<div id="faq-list-2" class="collapse"
+										data-bs-parent=".faq-list">
+										<p>답변.</p>
+									</div></li>
+								<li data-aos="fade-up" data-aos-delay="300"
+									class="aos-init aos-animate"><i
+									class="bx bx-help-circle icon-help"></i> <a
+									data-bs-toggle="collapse" data-bs-target="#faq-list-3"
+									class="collapsed">자주묻는 질문~~ <i
+										class="bx bx-chevron-down icon-show"></i><i
+										class="bx bx-chevron-up icon-close"></i></a>
+									<div id="faq-list-3" class="collapse"
+										data-bs-parent=".faq-list">
+										<p>답변.</p>
+									</div></li>
+								<li data-aos="fade-up" data-aos-delay="400"
+									class="aos-init aos-animate"><i
+									class="bx bx-help-circle icon-help"></i> <a
+									data-bs-toggle="collapse" data-bs-target="#faq-list-4"
+									class="collapsed">자주묻는 질문~~ <i
+										class="bx bx-chevron-down icon-show"></i><i
+										class="bx bx-chevron-up icon-close"></i>
+								</a>
+									<div id="faq-list-4" class="collapse"
+										data-bs-parent=".faq-list">
+										<p>답변.</p>
+									</div></li>
+								<li data-aos="fade-up" data-aos-delay="500"
+									class="aos-init aos-animate"><i
+									class="bx bx-help-circle icon-help"></i> <a
+									data-bs-toggle="collapse" data-bs-target="#faq-list-5"
+									class="collapsed">자주묻는 질문~~ <i
+										class="bx bx-chevron-down icon-show"></i><i
+										class="bx bx-chevron-up icon-close"></i>
+								</a>
+									<div id="faq-list-5" class="collapse"
+										data-bs-parent=".faq-list">
+										<p>답변.</p>
+									</div></li>
+							</ul>
+						</div>
+					</section> -->
+</body>
+</html>

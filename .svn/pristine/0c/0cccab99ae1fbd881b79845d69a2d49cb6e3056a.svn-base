@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.member.dao.MemberDAO">
+
+	<select id="selectMember" parameterType="string" resultType="MemberVO">
+		SELECT 
+		 MEM_EMAIL
+		 ,MEM_NAME
+		 ,MEM_PASS
+		 ,MEM_TEL
+		 ,MEM_SDATE
+		 ,MEM_EDATE
+		 ,MEM_STTS_CD
+		 ,MEM_DATE_LOG
+		 ,MEM_ROLE
+		 ,MEM_ATT_NO
+         ,(SELECT ATT_PATH||ATT_SAVENAME
+             FROM ATTATCH
+            WHERE ATT_NO = MEM_ATT_NO )AS MEM_ATT_PATH
+		FROM
+		 MEMBER
+		WHERE
+		 MEM_EMAIL = #{memEmail}                                           
+	</select>
+	
+	<insert id="insertMember" parameterType="MemberVO">	
+		INSERT
+		 INTO MEMBER(
+		 MEM_EMAIL
+		 , MEM_NAME
+		 , MEM_PASS
+		 , MEM_ROLE
+		 , MEM_SDATE
+		 )VALUES (
+		 #{memEmail,jdbcType=VARCHAR}
+		 ,#{memName,jdbcType=VARCHAR} 
+		 ,#{memPass,jdbcType=VARCHAR} 
+		 ,'ROLE_ADMIN' 
+		 ,SYSDATE
+		 )
+	</insert>
+	
+	
+	<!-- Email 인증 -->
+	<update id="updateMailKey" parameterType="MemberVO">
+    	UPDATE
+    	 MEMBER 
+    	SET
+    	 MAIL_KEY = #{mailKey,jdbcType=VARCHAR} 
+    	WHERE
+    	 MEM_EMAIL = #{memEmail,jdbcType=VARCHAR} 
+	</update>
+	<update id="updateMailAuth" parameterType="MemberVO">
+  	  	UPDATE
+  	  	 MEMBER 
+  	 	SET
+  	 	 MAIL_AUTH=1 
+  	 	WHERE
+  	 	 MEM_EMAIL = #{memEmail,jdbcType=VARCHAR} 
+  	  	AND
+  	  	 MAIL_KEY = #{mailKey,jdbcType=VARCHAR}
+	</update>
+	<!-- Email 인증 끝-->
+	
+	<select id="emailCheck" parameterType="String" resultType="int">
+		SELECT
+		 COUNT(MEM_EMAIL)
+		FROM
+		 MEMBER
+		WHERE
+		 MEM_EMAIL = #{memEmail,jdbcType=VARCHAR}
+	</select>
+	<select id="emailAuth" parameterType="String" resultType="int">
+		SELECT
+		 MAIL_AUTH
+		FROM
+		 MEMBER
+		WHERE
+		 MEM_EMAIL = #{memEmail,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 프로필 사진 업로드시 attNo 업데이트문 -->
+	<update id="updateMemAttNo" parameterType="MemberVO">
+		UPDATE
+		 MEMBER
+		SET
+		 MEM_ATT_NO = #{memAttNo,jdbcType=NUMERIC} 
+		WHERE
+		 MEM_EMAIL =  #{memEmail,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 회원정보수정 -->
+	<update id="updateMember" parameterType="MemberVO">
+		UPDATE
+		 MEMBER
+		<set>
+			<if test="memName!=null">
+				MEM_NAME = #{memName,jdbcType=VARCHAR},
+			</if>
+			<if test="memTel!=null">
+				MEM_TEL = #{memTel,jdbcType=VARCHAR},
+			</if>
+<!-- 			<if test="memEdate!=null"> -->
+<!-- 				MEM_EDATE = #{memEdate,jdbcType=VARCHAR}, -->
+<!-- 			</if> -->
+			<if test="memSttsCd!=null">
+				MEM_STTS_CD = #{memSttsCd,jdbcType=VARCHAR},
+			</if>
+			<if test="memDateLog!=null">
+				MEM_DATE_LOG = #{memDateLog,jdbcType=DATE},
+			</if>
+			<if test="memRole!=null">
+				MEM_ROLE = #{memRole,jdbcType=VARCHAR},
+			</if>
+		</set>
+		WHERE
+		 MEM_EMAIL = #{memEmail,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 들어온 값만 선택적으로 업데이트하는 쿼리 -->
+	<update id="updateSomeThing" parameterType="MemberVO">
+		UPDATE
+		 MEMBER
+		<set>
+			<if test="memName!=null">
+				MEM_NAME = #{memName,jdbcType=VARCHAR},
+			</if>
+			<if test="memTel!=null">
+				MEM_TEL = #{memTel,jdbcType=VARCHAR},
+			</if>
+<!-- 			<if test="memEdate!=null"> -->
+<!-- 				MEM_EDATE = #{memEdate,jdbcType=VARCHAR}, -->
+<!-- 			</if> -->
+			<if test="memSttsCd!=null">
+				MEM_STTS_CD = #{memSttsCd,jdbcType=VARCHAR},
+			</if>
+			<if test="memDateLog!=null">
+				MEM_DATE_LOG = #{memDateLog,jdbcType=DATE},
+			</if>
+			<if test="memRole!=null">
+				MEM_ROLE = #{memRole,jdbcType=VARCHAR},
+			</if>
+		</set>
+		WHERE
+		 MEM_EMAIL = #{memEmail,jdbcType=VARCHAR}
+	</update>
+</mapper>
+

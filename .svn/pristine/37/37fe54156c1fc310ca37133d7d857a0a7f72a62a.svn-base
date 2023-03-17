@@ -1,0 +1,59 @@
+package kr.or.ddit.project.work.service;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.enumpkg.ServiceResult;
+import kr.or.ddit.project.work.dao.WorkDAO;
+import kr.or.ddit.project.work.vo.WorkVO;
+
+@Service
+public class WorkServiceImpl implements WorkService {
+
+	@Inject
+	private WorkDAO workDAO;
+	
+	@Override
+	public List<WorkVO> retrieveWorkList(String proCode) {
+		List<WorkVO> workList = workDAO.selectWorkList(proCode);
+		return workList;
+	}
+	
+	@Override
+	public List<WorkVO> retrieveMyWorkList(WorkVO work) {
+		List<WorkVO> workList = workDAO.selectMyWorkList(work);
+		return workList;
+	}
+	
+	@Override
+	public WorkVO retrieveWorkDetail(WorkVO work) {
+		WorkVO workVO = workDAO.selectWorkDetail(work);
+		return workVO;
+	}
+	
+	@Override
+	public ServiceResult createWork(WorkVO work) {
+		ServiceResult result = null;
+		int rowcnt = workDAO.insertWork(work);
+		result = rowcnt > 0 ? ServiceResult.OK : ServiceResult.FAIL;
+		return result;
+	}
+
+	@Override
+	public ServiceResult createWorkCharger(WorkVO work) {
+		ServiceResult result = null;
+		int rowcnt = workDAO.insertWorkCharger(work);
+		result = rowcnt > 0 ? ServiceResult.OK : ServiceResult.FAIL;
+		return result;
+	}
+
+
+
+
+
+
+
+}

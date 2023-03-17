@@ -1,0 +1,13 @@
+package kr.or.ddit.commons.api.service;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.commons.api.vo.PapagoVO;
+
+
+public interface PapagoService {
+	public String Papago();
+	public String getChinese(PapagoVO vo);
+	public String getEnglish(PapagoVO vo);
+	public String getjapanes(PapagoVO vo);
+}

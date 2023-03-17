@@ -1,0 +1,171 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>    
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="security" %>
+<security:authentication property="principal.realMember" var="authMember"/>
+
+<main class="content">
+	<div class="container-fluid p-0">
+	
+		<h1 class="h3 mb-3">내 작업</h1>
+		<nav aria-label="breadcrumb">
+			<ol class="breadcrumb">
+				<li class="breadcrumb-item"><a href="#">Pms</a></li>
+				<li class="breadcrumb-item"><a href="#">Home</a></li>
+				<li class="breadcrumb-item active">내 프로젝트</li>
+			</ol>
+		</nav>
+		<hr>
+
+
+		<h1 class="h3 mb-3">B 프로젝트 작업</h1>
+		<div class="row">
+			<div class="col-12">
+				<div class="card">
+					<div class="tab-content">
+						
+						<!--====================== 작업 목록 ======================-->
+						<div class="card">
+							<div class="card-body">
+								<table class="table table-bordered table-hover">
+									<thead class="table-primary">
+										<tr style="border-color:none;">
+											<th style="width: 5%;">#</th>
+											<th style="width: 32%;">작업 이름</th>
+											<th style="width: 15%;">진행률</th>
+											<th style="width: 5%;">시작날짜</th>
+											<th style="width: 5%;">종료날짜</th>
+											<th style="width: 7%;">우선순위</th>
+										</tr>
+									</thead>
+									<tbody id="proWorkListDsip"></tbody>
+								</table>
+							</div>
+							<div class="card-footer d-flex justify-content-end align-items-center">
+								<div>
+									<!-- <button type="button" class="btn btn-secondary projectWorkDeleteBtn">삭제하기</button> -->
+								</div>
+							</div>
+						</div>
+						
+					</div>
+				</div>
+			</div>
+		</div>		
+
+
+
+	</div>
+		
+
+</main>
+
+
+<script>
+
+	/**************************** pms 작업 목록  시작 ****************************/
+	// pms 작업 목록 )
+	// 프로젝트 목록 리스트 html
+	let makeProjectWorkListHtml = function(work){
+		let projectWorkListHtml = "";
+		let progressWidth = 0;
+			projectWorkListHtml += `
+				<tr>
+					<td>
+					</td>
+					<td>
+						<a class="projectWorkDetailBtn" data-bs-toggle="modal" data-bs-target="#projectWorkDetailModal" data-work-no="\${work.workNo}">
+							\${work.workTitle}
+						</a>
+					</td>
+			`					
+					
+			projectWorkListHtml +=`
+					<td>
+						<div class="progress progress-sm">
+							<div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width:\${progressWidth}%;"></div>
+						</div>
+						<small style="padding-left:0px;">\${progressWidth}%</small>
+					</td>
+					<td>
+						<input type="date" name="workSdate" class="form-control" value="\${work.workSdate}" disabled/>
+					</td>
+					<td>
+						<input type="date" name="workEdate" class="form-control" value="\${work.workEdate}" disabled/>
+					</td>
+					<td>`
+					
+					if(work.workOrderCd == "WO001"){
+			projectWorkListHtml += "<button class='btn btn-square btn-secondary'>낮음</button>";									
+					}else if(work.workOrderCd == "WO002"){
+			projectWorkListHtml += "<button class='btn btn-square btn-primary'>보통</button>";									
+					}else{
+			projectWorkListHtml += "<button class='btn btn-square btn-danger'>높음</button>";
+					}
+						
+			projectWorkListHtml +=`
+					</td>
+				</tr>
+				`;
+		
+		return projectWorkListHtml;
+	}
+
+	// 내가 참여중인 프로젝트 목록 불러오기
+	$.ajax({
+		url :"${pageContext.request.contextPath }/project/myProject/proAll",
+		method : "get",
+		dataType : "json",
+		success : function(resp) {
+			console.log(resp);
+		},
+		error : function(jqXHR, status, error) {
+			console.log(jqXHR);
+			console.log(status);
+			console.log(error);
+		}
+	});
+	
+	// 모든 프로젝트에서 나에게 담당된 작업 목록 가져오기
+	f_AllMyWorkList();
+	function f_AllMyWorkList(){
+		let myEmail = '${authMember.memEmail}';	
+		let data = {
+				"memEmail" : myEmail
+			}
+		$.ajax({
+			url : "${pageContext.request.contextPath}/project/project/allMyWorkListView",
+			method : "post",
+			data : JSON.stringify(data),
+			contentType : "application/json;charset=utf-8",
+			dataType : "json",
+			success : function(resp) {
+				console.log(resp.proCode);
+				let proWorkArray = [];
+				// 프로젝트 별로 작업을 담기 위한 프로젝트 객체 생성
+				for(let i=0; i<resp.length; i++){
+					let array = [];
+					
+					if(!proWorkArray.indexOf(resp.proCode)){
+						let proObject = {};
+						proObject['resp.proCode'] = [];
+					}
+					
+				}
+				let trTags = [];
+				console.log("모든작업",resp);
+				for(let i=0; i<resp.length;i++){
+					trTags.push(makeProjectWorkListHtml(resp[i]));						
+				}
+				
+				$("#proWorkListDsip").html(trTags);
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});		
+	}
+	
+</script>

@@ -1,0 +1,138 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>	
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+<!-- JStree -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jstree-bootstrap-theme@1.0.1/dist/themes/proton/style.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+
+
+
+
+<main class="content pt-0">
+	<div class="container-fluid p-0">
+		<div class="row">
+			<div class="col-md-5 col-xl-3">
+				<div class="card mb-3">
+					<div class="card-header">
+						<h5 class="card-title mb-0">파일 저장소</h5>
+					</div>
+					<!-- jstree -->
+					<div id="jstree" class="m-3">
+					</div>
+					
+				</div>
+			</div>
+			<div class="col-md-7 col-xl-9">
+				<div class="card">
+					<div class="card-header">
+
+						<h5 class="card-title mb-0">Activities</h5>
+					</div>
+					<div class="card-body h-100">
+					<div class="row">
+						<div class="col-lg-3">
+							<div class="card">
+								<img class="card-img-top" src="img/photos/unsplash-2.jpg" alt="Unsplash">
+								<div class="card-header">
+									<h5 class="card-title mb-0">Card with image and button</h5>
+								</div>
+								<div class="card-body">
+									<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+									<a href="#" class="btn btn-primary">Go somewhere</a>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-3">
+							<div class="card">
+								<img class="card-img-top" src="img/photos/unsplash-2.jpg" alt="Unsplash">
+								<div class="card-header">
+									<h5 class="card-title mb-0">Card with image and button</h5>
+								</div>
+								<div class="card-body">
+									<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+									<a href="#" class="btn btn-primary">Go somewhere</a>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-3">
+							<div class="card">
+								<img class="card-img-top" src="img/photos/unsplash-2.jpg" alt="Unsplash">
+								<div class="card-header">
+									<h5 class="card-title mb-0">Card with image and button</h5>
+								</div>
+								<div class="card-body">
+									<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+									<a href="#" class="btn btn-primary">Go somewhere</a>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-3">
+							<div class="card">
+								<img class="card-img-top" src="img/photos/unsplash-2.jpg" alt="Unsplash">
+								<div class="card-header">
+									<h5 class="card-title mb-0">Card with image and button</h5>
+								</div>
+								<div class="card-body">
+									<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+									<a href="#" class="btn btn-primary">Go somewhere</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</main>
+<script>
+let proCode ="${proCode}";
+$.ajax({
+	url : "/project/project/fileTree",
+	method : "post",
+	data : proCode, // JSON.stringify() 쓰면 ""로 묶여감
+	dataType : "json", // 안써도 됨
+	contentType : "application/json;charset=utf-8", // 안쓰면 P202302150077= 로 감
+    success: function(data){
+    	console.log("결과값은 : 배열인가? ",data)
+ 		
+    	$('#jstree').jstree({ 
+			'core' : {
+				'data' : data,
+				"check_callback" : true
+			},
+			"plugins": ["contextmenu", "dnd", "search", "state", "types", "cookies"],
+			"search" : {
+			    "show_only_matches" : true,
+			    "show_only_matches_children" : true,
+			}
+		})
+        .bind('loaded.jstree', function(event, data){ //트리 로딩 완료 이벤트
+        	
+        })
+        .bind('select_node.jstree', function(event, data){ // 노드 선택 이벤트
+        	var id = data.instance.get_node(data.selected).id; 
+            console.log("nodeId : ", data.node.id);
+            console.log("nodeId : ", id);
+        })
+        .bind("move_node.jstree", function (evt, data) { // 노드가 이동한 뒤 처리할 이벤트
+            console.log("nodeId : " + data.node.id);
+            console.log("parentId : " + data.node.parent);
+            console.log("position : " + data.position);
+            console.log("oldParendId : " + data.old_parent);
+            console.log("oldPosition : " + data.old_position);    
+        })
+    },
+	error : function(jqXHR, status, error) {
+		console.log(jqXHR);
+		console.log(status);
+		console.log(error);
+	}
+});
+
+
+
+</script>

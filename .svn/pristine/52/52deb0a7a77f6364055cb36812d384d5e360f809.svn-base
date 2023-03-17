@@ -1,0 +1,30 @@
+package kr.or.ddit.member.vo;
+
+import java.util.Collection;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.userdetails.User;
+
+public class MemberVOWrapper extends User {
+	private MemberVO realMember;
+	
+/*	public MemberVOWrapper(String memEmail, String memPass, Collection<? extends GrantedAuthority> authorities) {
+		super(memEmail,memPass,authorities);
+	}*/
+
+	public MemberVOWrapper(MemberVO realMember) {
+		super(realMember.getMemEmail(), realMember.getMemPass()
+				, AuthorityUtils.createAuthorityList(realMember.getMemRole()));
+		this.realMember = realMember;
+	}
+	
+	public MemberVO getRealMember() {
+		return realMember;
+	}
+	
+	@Override
+	public boolean isEnabled() {
+		return !realMember.isMemEdate();
+	}
+}

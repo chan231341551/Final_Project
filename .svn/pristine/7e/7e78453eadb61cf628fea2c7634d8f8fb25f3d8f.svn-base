@@ -1,0 +1,78 @@
+package kr.or.ddit.main.help.controller;
+
+import java.security.Principal;
+
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.main.help.service.QNAService;
+import kr.or.ddit.main.help.vo.QNAVO;
+import kr.or.ddit.ui.PaginationRenderer;
+import kr.or.ddit.vo.PagingVO;
+import kr.or.ddit.vo.SearchVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/help")
+public class QNAController {
+	
+	@Inject
+	private QNAService service;
+	
+	@Resource(name="bootstrapPaginationRender")
+	private PaginationRenderer renderer;
+	
+	@GetMapping("/qnaList")
+	public String qnaList(
+			@RequestParam(value="page", required=false, defaultValue="1")int currentPage,
+			@ModelAttribute("simpleCondition") SearchVO searchVO,
+			Model model
+	){
+		PagingVO<QNAVO> pagingVO = new PagingVO<>(3,3);
+		pagingVO.setCurrentPage(currentPage);
+		service.retrieveQNAList(pagingVO);
+		model.addAttribute("pagingVO", pagingVO);
+		if(!pagingVO.getDataList().isEmpty()) {
+			model.addAttribute("pagingHTML", renderer.renderPagination(pagingVO));
+		}
+		return "jsonView";
+	}
+	
+	@PostMapping(value="/insertQNA", produces="text/plain;charset=utf-8")
+	@ResponseBody
+	public String qnaInsert(@RequestBody QNAVO qna, Principal principal) {
+		
+		log.info("qna 생성" + qna);
+		int rowcnt = service.createQNA(qna);
+		String memEmail = principal.getName();
+		qna.setMemEmail(memEmail);
+		String message = "";
+		if(rowcnt > 0) {
+			message = "OK";
+		}else {
+			message = "FAIL";
+		}
+		return message;
+	}
+	
+	@GetMapping("/qnaDetail/{qnaNo}")
+	public QNAVO detail(@PathVariable int qnaNo, Model model) {
+		QNAVO qna = service.retrieveQNA(qnaNo);
+		model.addAttribute("qna", qna);
+		return qna;
+	}
+	
+	
+}

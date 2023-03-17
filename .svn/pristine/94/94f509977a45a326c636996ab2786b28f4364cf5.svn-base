@@ -1,0 +1,12 @@
+defaultEncoding=UTF-8
+inMemorySize=10240
+perFileSize=20480000
+maxFileCount=3
+
+saveFiles=file:D:/saveFiles
+imageFolder=/resources/images
+
+#\ud30c\uc77c \uc77d\ub294 \uacbd\ub85c \ub9f5\ud551 \uc544\ub798 url \ud638\ucd9c\uc2dc D:/saveFiles\uc5d0\uc11c \ucc3e\uc74c
+saveFile=file:///D:/saveFiles/
+filePath=/file/**
+ 

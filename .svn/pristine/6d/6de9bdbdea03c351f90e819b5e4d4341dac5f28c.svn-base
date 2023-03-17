@@ -1,0 +1,58 @@
+package kr.or.ddit.project.wiki.vo;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+ * 
+ * 위키 VO 
+ * @author 전혜수
+ * @since 2023. 2. 20.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일                  수정자               수정내용
+ * --------     --------    ----------------------
+ * 2023. 2. 20.      PC-21       최초작성
+ * 
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+
+@NoArgsConstructor
+@Data
+public class WikiVO {
+	
+	private Integer rnum; //순번
+	private Integer wikiNo; //위키번호
+	private String memEmail; //이메일
+	private String proCode; //프로젝트코드
+	private String wikiTitle; //위키제목
+	private String wikiCont; //위키내용
+	private String wikiClsCd; //위키분류
+	private String wikiDate; //위키등록날짜
+	 
+	private Integer wikiPntNo; //위키원글번호
+	private Integer wikiGroupord; //위키그룹
+	private Integer wikiLayer; 
+	private String mcodeNm; //위키분류테이블값
+	
+	//첨부파일 정보
+	private Integer wikiAttNo;
+	//파일처리
+	private MultipartFile[] files;
+	
+    //첨부파일 경로
+    private String wikiAttPath;
+    
+	
+	
+	
+	
+	
+	
+
+}

@@ -1,0 +1,18 @@
+package kr.or.ddit.project.issue.vo;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(of="issCommNo")
+public class IssCommVO {
+
+	private Integer issCommNo;
+	private Integer issCommPntNo;
+	private Integer issNo;
+	private String  memEmail;
+	private String  memName;
+	private String  issCommCont;
+	private String  issCommDate;
+	private String  memAttPath;
+}

@@ -1,0 +1,179 @@
+package kr.or.ddit.project.management.controller;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.enumpkg.ServiceResult;
+import kr.or.ddit.project.home.service.ProjectService;
+import kr.or.ddit.project.home.vo.ParticipateVO;
+import kr.or.ddit.project.home.vo.ProjectVO;
+import kr.or.ddit.project.management.service.ManagementService;
+import kr.or.ddit.project.news.vo.NewsVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/project")
+public class ManagementController {
+	
+	@Inject
+	private ProjectService service;
+	@Inject
+	private ManagementService managementService;
+	
+	@GetMapping("/project/management/{proCode}")
+	public String projectManagement(
+			@PathVariable String proCode
+			, Model model
+			) {
+		ProjectVO project = service.retrieveProject(proCode);
+		model.addAttribute("project", project);
+		return "project/management/management";
+	}
+
+	// 공지 목록
+	@PostMapping("/project/noticeList")
+	@ResponseBody
+	public List<NewsVO> NoticeSelectList(
+			@RequestBody NewsVO news
+			){
+		return managementService.retrieveNoticeList(news);
+	}
+	
+	// 공지 등록
+	@PostMapping("/project/noticeInsert")
+	@ResponseBody
+	public String NoticeInsert(
+			@RequestBody NewsVO news
+		) {
+		String resultStr = "0";
+		ServiceResult result = managementService.createNotice(news);
+
+		switch (result) {
+		case OK:
+			log.info("Ok");
+			resultStr = "1";
+			break;
+		case FAIL:
+			log.info("FAIL");
+			resultStr = "0";
+			break;
+		}
+		return resultStr;
+	}
+	
+	// 공지 삭제
+	@ResponseBody
+	@PostMapping("/project/deleteNotice")
+	public String deleteNews(
+			@RequestBody NewsVO news) {
+		String resultStr = "";
+		
+		ServiceResult result = managementService.removeNotice(news);
+
+		switch (result) {
+		case OK:
+			log.info("Ok");
+			resultStr = "1";
+			break;
+		case FAIL:
+			log.info("FAIL");
+			resultStr = "0";
+			break;
+		}
+		return resultStr;
+	}
+	
+	
+	// 프로젝트 관리 
+	@GetMapping(value="/project/management/projectSetting/{proCode}", produces="application/json;charset=utf-8")
+	@ResponseBody
+	public ProjectVO projectSettingDetail(
+			@PathVariable String proCode
+			, Model model
+			) {
+		ProjectVO project = service.retrieveProject(proCode);
+		model.addAttribute("project",project);
+		return project;
+	}
+	
+	// 멤버 관리
+	@GetMapping(value="/project/management/memberManagementList/{proCode}", produces="application/json;charset=utf-8")
+	@ResponseBody
+	public HashMap<String, Object> memberManagementList(
+			@PathVariable String proCode
+			){
+		HashMap<String, Object> map = managementService.retrieveParticipateList(proCode);
+		return map;
+	}
+	
+	// 초대하기
+	@PostMapping("/participateInsert")
+	@ResponseBody
+	public String participateInsert(
+			@ModelAttribute("participate") ParticipateVO participate
+			) {
+		String resultStr = "0";
+		ServiceResult result = managementService.createParticipate(participate);
+		
+		switch(result) {
+		case OK:
+			log.info("OK");
+			resultStr = "1";
+			break;
+		case FAIL:
+			log.info("FAIL");
+			resultStr = "0";
+			break;
+		}
+		return resultStr;
+	}
+
+	// 초대 삭제하기
+	@ResponseBody
+	@PostMapping(value="/participateDelete")
+	public String projectDelete(
+			@RequestBody Map<String, Object> map
+			) {
+		ServiceResult result = managementService.removeParticipate(map);
+		String resultStr = "0";
+		switch(result) {
+		case OK:
+			log.info("OK");
+			resultStr = "1";
+			break;
+		case FAIL:
+			log.info("FAIL");
+			resultStr = "0";
+			break;
+		}
+		return resultStr;
+	}
+	
+	// 다시 초대하기
+	@ResponseBody
+	@PostMapping(value="/participateAgain")
+	public String projectAgain(
+			@RequestBody Map<String, Object> map
+			) {
+		managementService.modifyParticipateAgain(map);
+		String resultStr = "0";
+		return resultStr;
+	}
+	
+}

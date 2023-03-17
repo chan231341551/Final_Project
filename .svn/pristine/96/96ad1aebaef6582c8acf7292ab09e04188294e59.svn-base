@@ -1,0 +1,139 @@
+package kr.or.ddit.project.work.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.enumpkg.ServiceResult;
+import kr.or.ddit.project.home.service.ProjectService;
+import kr.or.ddit.project.home.vo.ProjectVO;
+import kr.or.ddit.project.work.dao.WorkDAO;
+import kr.or.ddit.project.work.service.WorkService;
+import kr.or.ddit.project.work.vo.WorkChargerVO;
+import kr.or.ddit.project.work.vo.WorkVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/project")
+public class WorkController {
+	
+	@Inject
+	private ProjectService service;
+	@Inject
+	private WorkService workService;
+	@Inject
+	private WorkDAO workDAO;
+	
+	@GetMapping("/myWork")
+	public String myWorkList() {
+		return "pms/mywork/workList";
+	}
+	
+	@GetMapping("/project/workList/{proCode}")
+	public String projectWorkList(
+			@PathVariable String proCode
+			, Model model
+			) {
+		ProjectVO project = service.retrieveProject(proCode);
+		model.addAttribute("project", project);
+		return "project/work/workList";
+	}
+	
+	
+	
+	// 작업 전체 목록 가져오기
+	@ResponseBody
+	@GetMapping("/project/workListView/{proCode}")
+	public List<WorkVO> projectWorkList(
+			@PathVariable String proCode
+			){
+		List<WorkVO> workList = workService.retrieveWorkList(proCode);
+		return workList;
+	}
+	
+	// 작업 나에게 담당된 작업 목록 가져오기
+	@ResponseBody
+	@PostMapping("/project/myWorkListView")
+	public List<WorkVO> projectMyWorkList(
+			@RequestBody WorkVO work			
+			){
+		log.info("work222 {}",work);
+		List<WorkVO> workList = workService.retrieveMyWorkList(work);
+		return workList;
+	}
+	
+	// 작업 Detail
+	@ResponseBody
+	@PostMapping("/project/workDetail")
+	public WorkVO projectWorkDetail(
+			@RequestBody WorkVO work
+			) {
+		WorkVO workVO = workService.retrieveWorkDetail(work);
+		return workVO;
+	}
+	
+	// 작업 등록하기
+	@ResponseBody
+	@PostMapping("/project/workInsert")
+	public int projectWorkInsert(
+			@ModelAttribute("work") WorkVO work
+			) {
+		String resultStr = "0";
+		ServiceResult result = workService.createWork(work);
+		switch(result) {
+		case OK:
+			log.info("OK");
+			resultStr = "1";
+			break;
+		case FAIL:
+			log.info("FAIL");
+			resultStr = "0";
+			break;
+		}
+		WorkVO workNo1 = workDAO.selectWorkLastNo();
+		int workNo = (workNo1.getWorkNo()-1);
+		return workNo;
+	}
+	
+	// 작업 담당자 등록하기
+	@ResponseBody
+	@PostMapping("/project/workChargerInsert")
+	public String projectWorkChargerInsert(
+			@RequestBody List<WorkChargerVO> list
+			) {
+		
+		String resultStr = "0";
+		
+		log.info("map22: {}",list);
+		WorkVO work = new WorkVO();
+		work.setWorkChargerList(list);
+		ServiceResult result = workService.createWorkCharger(work);
+		
+		switch(result) {
+		case OK:
+			log.info("OK");
+			resultStr = "1";
+			break;
+		case FAIL:
+			log.info("FAIL");
+			resultStr = "0";
+			break;
+		}
+		
+		return resultStr;
+	}
+}
+
+

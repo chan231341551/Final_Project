@@ -1,0 +1,260 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%@ taglib uri="http://www.springframework.org/security/tags"
+	prefix="security"%>
+
+<security:authentication property="principal.realMember"
+	var="authMember" />
+<!-- ======= Header ======= -->
+<nav class="navbar navbar-expand navbar-light navbar-bg">
+	<a class="sidebar-toggle js-sidebar-toggle"> <i
+		class="hamburger align-self-center"></i>
+	</a>
+
+	<div class="navbar-collapse collapse">
+		<ul class="navbar-nav navbar-align">
+		
+			<!-- 알림 -->
+			<li class="nav-item dropdown">
+				<a class="nav-icon dropdown-toggle hidden" id="alertsDropdown" data-bs-toggle="dropdown" aria-expanded="true">
+					<div class="position-relative">
+						<i id="alarmBtn" class="align-middle alarmBtn" data-feather="bell"></i> 
+						<span class="alCount"></span>
+					</div>
+				</a>
+				<div class="dropdown-menu dropdown-menu-lg dropdown-menu-end py-0 alerts" id="msgStack" aria-labelledby="alertsDropdown" style="right: 0;">
+					<div class="dropdown-menu-header alHead"></div>
+					<div class="list-group"><input type="hidden" id="alContent"></input></div>
+					<div class="dropdown-menu-footer">
+						<a href="#" class="text-muted">Show all notifications</a>
+					</div>
+				</div>
+			</li>
+			
+			
+
+			<!-- 자동화 페이지로 이동 -->
+			<li class="nav-item"><a class="nav-icon" id="auto"
+				href="<c:url value='/auto/projectCreate'/>">
+					<div class="position-relative">
+						<i class="align-middle"> <img
+							src="${pageContext.request.contextPath }/resources/images/icon/robot.svg"
+							width="22px" style="padding-bottom: 8px">
+						</i>
+					</div>
+			</a></li>
+
+
+			<!-- 마이페이지 페이지 -->
+			<li class="nav-item dropdown"><a
+				class="nav-icon pe-md-0 dropdown-toggle hidden"
+				data-bs-toggle="dropdown" aria-expanded="true"> <i
+					class="align-middle accountBtn" data-feather="user"></i> <!-- <img src="img/avatars/avatar.jpg" class="avatar img-fluid rounded" alt="Charles Hall"> 프로필 적용 예정-->
+			</a>
+
+				<div class="dropdown-menu dropdown-menu-end mypage"
+					data-bs-popper="static" style="left: auto; right: 0;">
+					<a class="dropdown-item "
+						href="<c:url value='/member/mypageList'/>"> <svg
+							xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+							viewBox="0 0 24 24" fill="none" stroke="currentColor"
+							stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+							class="feather feather-user align-middle me-1">
+							<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+							<circle cx="12" cy="7" r="4"></circle></svg> ${authMember.memName }[${authMember.memRole }]님
+					</a> </a>
+					<div class="dropdown-divider"></div>
+					<a class="dropdown-item" href="<c:url value='/help/noticeList'/>">
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+							viewBox="0 0 24 24" fill="none" stroke="currentColor"
+							stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+							class="feather feather-help-circle align-middle me-1">
+							<circle cx="12" cy="12" r="10"></circle>
+							<path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+							<line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Help Center
+					</a>
+					<div class="dropdown-divider"></div>
+					<a class="dropdown-item" href="#" onclick="logoutForm.submit();"> 
+						<i class="align-middle" data-feather="log-out"></i> Log out
+					</a>
+				</div></li>
+
+		</ul>
+	</div>
+</nav>
+<form name="logoutForm" style="display:none;" action="${pageContext.request.contextPath }/logout" method="post">
+		<security:csrfInput />
+</form>
+
+
+<script>
+	//전역변수 설정
+	var socket = null;
+ 	$(document).ready(function() {
+		// 웹소켓 연결
+		sock = new SockJS("<c:url value="/alarm-ws"/>");
+		socket = sock;
+	
+		// 데이터를 전달 받았을때 
+		sock.onmessage = onMessage; // toast 생성
+// 		console.log("onmessage", onmessage)
+	}); 
+ 	
+	// toast생성 및 추가
+	function onMessage(evt) {
+		var data = typeof evt=="string"? evt: evt.data;
+		var strs = [];
+		
+// 		console.log("data",data)
+		if (data != null) {
+			if(data.includes(",")){
+				strs = data.split(",");
+// 				console.log("strs",strs)
+				var sender = strs[0];
+				var cont = strs[1];
+				var alNo = strs[2];
+				var time = strs[3]==null? new Date(): strs[3];
+// 				console.log("cont1",cont)
+				
+	            if(cont=="AC001"){
+	            	cont = "프로젝트 멤버 초대"
+	            }else if(cont=="AC002"){
+	            	cont = "언급" // 멘션
+	            }else if(cont=="AC003"){
+	            	cont = "새 프로젝트 생성됨"
+	            }else if(cont=="AC004"){
+	            	cont = "이슈 담당자 배정"
+	            }else if(cont=="AC005"){
+	            	cont = "작업 담당자 배정"
+	            }
+// 				console.log("cont2",cont)
+				// 알림 내용 toast
+				let toast = "<a href='#' class='list-group-item mess'>";
+				toast += "<div class='row g-0 align-items-center'>";
+				toast += "<div class='col-2'>";
+				toast += "<i class='text-danger' data-feather='bell'></i></div>";
+				toast += "<div class='col-10'>";
+				toast += "<div class='text-dark'>" + cont + "</div>";
+				toast += "<div class='text-muted small mt-1'>" + sender + '님께서 ' + cont + '하셨습니다' + "</div>";
+				toast += "<div class='text-muted small mt-1'>" + time.toLocaleString()+ "</div>";
+				toast += "<input type='hidden' id='alNo' value='"+alNo+"'/></div></div></a>";
+				$("#alContent").after(toast);
+// 				console.log("완료??")
+				}else{
+				var count = data;
+				$(".alHead").text(count); //head부분 알림 설명
+			}
+		}
+	};
+
+	//7초마다 상품테이블 조회한뒤 dbcount 값이 증가하면 메시지 전송
+ 	var dbcount = 0;
+	setInterval(function () {
+		//db에서 알림 개수 조회
+		$.ajax({
+			url:"${pageContext.request.contextPath}/project/count",
+			type:"get",
+			success:function(data){
+				if(dbcount < data){
+					//이전 상품개수와 현재 상품개수를 비교하여 메시지 전송
+					//메시지 구성은 ','를 기준으로
+					//1.전송할 메시지
+					//2.전송 대상
+					//으로 이루어져 있고 메시지 구현을 어떤순서로 하느냐에 따라 바뀔 수 있다
+					var msg = data+" New Notifications,me"; 
+					socket.send(msg);
+					dbcount = data;
+				}else{
+					var msg = "새로운 알림 없음,me";
+					socket.send(msg);
+				}
+			}
+		});
+	}, 7000);/* 시간을 설정하는 부분(1000 = 1초)*/
+	 
+	//0.5초마다 알림의 개수 표기
+	setInterval(function () {
+		//알림목록에 표기된 메시지의 개수를 확인하여 badge에 개수를 표기
+		var lecount = $(".mess").length;
+		if(lecount>0){
+			$(".alCount").attr("class", "alCount indicator").text(lecount);// 종모양에 알림 갯수
+		}else{
+			$(".indicator").attr("class", "alCount").text("")
+		}
+	}, 500);/* 시간을 설정하는 부분(1000 = 1초)*/
+	
+	//알림목록에서 메시지 클릭시 알림목록에서 제거
+	$(document).on("click",".mess",function(){
+		let alNo = $("#alNo").val();
+		$(this).remove();
+		
+		$.ajax({
+			url : '${pageContext.request.contextPath}/project/alarmUpdate/'+alNo,
+			type : 'POST',
+			beforeSend : function(xhr) {   // 데이터 전송 전  헤더에 csrf값 설정
+                xhr.setRequestHeader("${_csrf.headerName}", "${_csrf.token}");
+            },
+			success : function(resp) {
+				console.log(resp)
+			},
+			error : function(xhr, error, msg) {
+				console.log(xhr, error, msg);
+			},
+		}) 
+	});
+	
+	// 안읽은 내 알람 리스트
+	$.ajax({
+		url : '${pageContext.request.contextPath}/project/alarmList/',
+		type : 'GET',
+        dataType : 'json',
+		success : function(resp) {
+			console.log("resp",resp)
+			 $.each(resp,function(i,v){
+				var data = v.memName+","+v.alContCd+","+v.alNo+","+v.alSdate; 
+				onMessage(data)
+			 });
+		}
+	 })
+	
+	// 드롭다운 토글처리
+	$(function() {
+		$(".accountBtn").bind("click", function() {
+
+			if ($(".accountBtn").val() == 0) {
+				$(".accountBtn").val(1);
+			} else {
+				$(".accountBtn").val(0);
+			}
+			var acc = $(".accountBtn").val();
+			if (acc == 1) {
+				// Button 보이기
+				$(".mypage").show();
+				$(".alerts").hide();
+				$(".alarmBtn").val(0);
+			} else if (acc == 0) {
+				// Button 숨기기
+				$(".mypage").hide();
+			}
+		});
+		$(".alarmBtn").bind("click", function() {
+			if ($(".alarmBtn").val() == 0) {
+				$(".alarmBtn").val(1);
+			} else {
+				$(".alarmBtn").val(0);
+			}
+			var al = $(".alarmBtn").val();
+			if (al == 1) {
+				// Button 보이기
+				$(".alerts").show();
+				$(".mypage").hide();
+				$(".accountBtn").val(0);
+			} else if (al == 0) {
+				// Button 숨기기
+				$(".alerts").hide();
+			}
+		});
+	});
+</script>

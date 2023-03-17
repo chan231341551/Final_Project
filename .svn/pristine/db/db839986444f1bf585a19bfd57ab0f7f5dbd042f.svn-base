@@ -1,0 +1,13 @@
+package kr.or.ddit.project.alarm.dao;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.project.alarm.vo.AlarmVO;
+
+@Mapper
+public interface AlarmDAO {
+	public int insertAlarm(AlarmVO alarm);
+	
+	public int count(String memEmail);
+
+}

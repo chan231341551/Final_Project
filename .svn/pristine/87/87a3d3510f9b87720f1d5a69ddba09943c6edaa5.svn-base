@@ -1,0 +1,86 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+   pageEncoding="UTF-8" buffer="8kb"%>
+<%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>   
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>  
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %> 
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %> 
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="security" %> 
+
+
+<!DOCTYPE html>
+<html>
+
+<head>
+   <meta charset="utf-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+   <title>BlueMine</title>
+   <tiles:insertAttribute name="preScript" />
+<%--    <security:csrfMetaTags/> --%>
+</head>
+
+<body>
+	<c:if test="${not empty message }">
+		<script>
+ 			alert("${message}");
+ 		</script> 
+	</c:if>
+	<security:authentication property="principal.realMember" var="authMember"/>
+	<div class="wrapper">
+		<tiles:insertAttribute name="leftMenu" />
+
+		<!-- Main Content Area start -->
+		<div class="main">
+			<tiles:insertAttribute name="headerMenu" />
+			<tiles:insertAttribute name="projectInsertModal" />
+			<tiles:insertAttribute name="content" />
+
+			<!-- 사이드 메뉴 버튼  -->
+			<c:import url="../project/memo/memoList.jsp"></c:import>
+			<c:import url="../project/api/papago.jsp"></c:import>
+			<c:import url="../project/api/capture.jsp"></c:import>
+<%-- 			<c:import url="../pms/mychat/chatDetail.jsp"></c:import> --%>
+
+			<!-- mention JS -->
+			<jsp:include page="../project/mention/mention.jsp"></jsp:include>
+			
+		</div>
+
+		<!-- Main Content Area end -->
+	</div>
+	<tiles:insertAttribute name="postScript" />
+</body>
+
+
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

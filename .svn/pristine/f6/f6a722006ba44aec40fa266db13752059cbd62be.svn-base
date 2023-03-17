@@ -1,0 +1,40 @@
+package kr.or.ddit.project.board.controller;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.project.home.service.ProjectService;
+import kr.or.ddit.project.home.vo.ProjectVO;
+
+@Controller
+@RequestMapping("/project")
+public class BoardController {
+	
+	@Inject
+	private ProjectService service;
+	
+	@GetMapping("/project/boardList/{proCode}")
+	public String freeBoardList(
+			@PathVariable String proCode
+			, Model model
+			) {
+		ProjectVO project = service.retrieveProject(proCode);
+		model.addAttribute("project", project);
+		return "project/board/boardList";
+	}
+
+	@GetMapping("/project/boardForm")
+	public String freeBoardForm() {
+		return "project/board/boardForm";
+	}
+	
+	@GetMapping("/project/boardDetail")
+	public String freeBoardDetail() {
+		return "project/board/boardDetail";
+	}
+}

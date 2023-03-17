@@ -1,0 +1,164 @@
+package kr.or.ddit.project.wiki.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.enumpkg.ServiceResult;
+import kr.or.ddit.project.home.service.ProjectService;
+import kr.or.ddit.project.home.vo.ProjectVO;
+import kr.or.ddit.project.news.vo.NewsVO;
+import kr.or.ddit.project.wiki.dao.WikiDAO;
+import kr.or.ddit.project.wiki.service.WikiService;
+import kr.or.ddit.project.wiki.vo.WikiVO;
+import lombok.extern.slf4j.Slf4j;
+
+
+/**
+ * 
+ * 위키 CONTROLLER 
+ * @author 전혜수
+ * @since 2023. 2. 20.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일                  수정자               수정내용
+ * --------     --------    ----------------------
+ * 2023. 2. 20.      PC-21       수정
+ * 
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+
+
+@Slf4j
+@Controller
+@RequestMapping("/project")
+public class WikiController {
+	
+	@Inject
+	private ProjectService projectservice;
+	
+	@Inject
+	private WikiService service;
+	
+	
+	//첫 페이지로 이동함 
+	@GetMapping("/project/wiki/{proCode}")
+	public String projectWiki(
+			@PathVariable String proCode
+			,Model model
+			) {
+		ProjectVO project = projectservice.retrieveProject(proCode);
+		model.addAttribute("project", project);
+		return "project/wiki/wiki";
+	}
+	
+	
+	
+	//목록 가져오기 
+	@ResponseBody
+	@GetMapping("/project/wikiListView/{proCode}")
+	public List<WikiVO> wikiList(
+			@PathVariable String proCode
+			, Model model){
+		
+		List<WikiVO> wikiList = service.retrieveWikiList(proCode);
+		
+		model.addAttribute(wikiList);
+		System.out.println("위키리스트"+wikiList);
+		return wikiList;
+	}
+	
+	//상세보기
+	@PostMapping("/project/wikiDetail")
+	@ResponseBody
+	public WikiVO wikiDetail(@RequestBody WikiVO wiki){
+		WikiVO wikiVo =  service.retrieveWiki(wiki);
+		log.info("위키브이오{}",wikiVo);
+		return wikiVo;
+	}
+	
+	
+	//생성하기
+	@ResponseBody
+	@PostMapping("/project/wikiInsert")
+	public String wikiInsert(
+			@RequestBody WikiVO wiki
+	) {
+		String resultStr = "0";
+		log.info("위키!!!!!!!!!!!!!!!!!!!!!{}",wiki);
+		
+		ServiceResult result =  service.createWiki(wiki);
+		switch(result) {
+		case OK:
+			log.info("OK");
+			resultStr = "1";
+			break;
+		case FAIL:
+			log.info("FAIL");
+			resultStr = "0";
+			break;
+		}
+		return resultStr;
+	}
+	
+	
+	//위키 삭제하기
+	@ResponseBody
+	@PostMapping("/project/deleteWiki")
+	public String wikiDelete(
+			@RequestBody WikiVO wiki  
+			//json(내용)---> 자바 객체로 매핑하는 역할
+	) {
+		log.info("여기왔나?{}",wiki);
+		
+		String resultStr = "0";
+		ServiceResult result =  service.deleteWiki(wiki);
+		switch(result) {
+			case OK:
+				log.info("OK");
+				resultStr = "성공";
+				break;
+			case FAIL:
+				log.info("FAIL");
+				resultStr = "실패";
+				break;
+		}
+		return resultStr;  //@ResponseBody
+	}
+	
+	
+	//위키 수정하기 
+	@ResponseBody
+	@PostMapping("/project/updateWiki")
+	public String wikiUpdate(
+			@RequestBody WikiVO wiki
+			) {
+		log.info("수정예정?{}",wiki);
+		String resultStr ="0";
+		ServiceResult result = service.modifyWiki(wiki);
+		switch(result) {
+		case OK:
+			log.info("OK");
+			resultStr = "1";
+			break;
+		case FAIL:
+			log.info("FAIL");
+			resultStr = "0";
+			break;
+	}
+		return resultStr;
+	}
+}

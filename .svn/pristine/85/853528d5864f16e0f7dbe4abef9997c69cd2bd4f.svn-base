@@ -1,0 +1,17 @@
+package kr.or.ddit.project.board.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.project.board.vo.BoardVO;
+@Mapper
+public interface BoardDao {
+	public int insertBoard(BoardVO board);
+	public List<BoardVO> selectBoardList(String proCode);
+	public BoardVO selectBoard(int boardNo);
+	public int updateBoard(BoardVO board);
+	public int deleteBoard(int boardNo);
+	public int incrementHit(int boardNo);
+
+}

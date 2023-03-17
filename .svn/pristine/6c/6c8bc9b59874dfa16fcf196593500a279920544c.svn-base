@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.member.dao.MemberDAO">
+
+	<select id="selectMember" parameterType="string" resultType="MemberVO">
+		SELECT 
+		 MEM_NAME
+		 , MEM_EMAIL
+		 , MEM_PASS
+		 , MEM_TEL
+		 , MEM_SDATE
+		 , MEM_ROLE
+		FROM
+		 MEMBER
+		WHERE
+		 MEM_EMAIL = #{memEmail}                                           
+	</select>
+	
+	<insert id="insertMember" parameterType="MemberVO">	
+		INSERT
+		 INTO MEMBER(
+		 MEM_EMAIL
+		 , MEM_NAME
+		 , MEM_PASS
+		 , MEM_ROLE
+		 , MEM_SDATE
+		 )VALUES (
+		 #{memEmail,jdbcType=VARCHAR}
+		 ,#{memName,jdbcType=VARCHAR} 
+		 ,#{memPass,jdbcType=VARCHAR} 
+		 ,'ROLE_ADMIN' 
+		 ,SYSDATE
+		 )
+	</insert>
+	
+	<!-- Email 인증 -->
+	<update id="updateMailKey" parameterType="MemberVO">
+    	UPDATE
+    	 MEMBER 
+    	SET
+    	 MAIL_KEY = #{mailKey,jdbcType=VARCHAR} 
+    	WHERE
+    	 MEM_EMAIL = #{memEmail,jdbcType=VARCHAR} 
+	</update>
+	<update id="updateMailAuth" parameterType="MemberVO">
+  	  	UPDATE
+  	  	 MEMBER 
+  	 	SET
+  	 	 MAIL_AUTH=1 
+  	 	WHERE
+  	 	 MEM_EMAIL = #{memEmail,jdbcType=VARCHAR} 
+  	  	AND
+  	  	 MAIL_KEY = #{mailKey,jdbcType=VARCHAR}
+	</update>
+	<!-- Email 인증 끝-->
+	
+	<select id="emailCheck" parameterType="String" resultType="int">
+		SELECT
+		 COUNT(MEM_EMAIL)
+		FROM
+		 MEMBER
+		WHERE
+		 MEM_EMAIL = #{memEmail,jdbcType=VARCHAR}
+	</select>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

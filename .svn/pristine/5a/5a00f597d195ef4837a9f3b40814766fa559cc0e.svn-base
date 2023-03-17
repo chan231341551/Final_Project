@@ -1,0 +1,77 @@
+package kr.or.ddit.project.file.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+
+import kr.or.ddit.member.vo.MemberVO;
+import kr.or.ddit.project.attach.service.AttatchService;
+import kr.or.ddit.project.file.service.TreeService;
+import kr.or.ddit.project.file.vo.TreeVO;
+import kr.or.ddit.project.home.service.ProjectService;
+import kr.or.ddit.project.home.vo.ProjectVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/project")
+public class FileController {
+	
+	@Inject
+	private ProjectService proService;
+	@Inject
+	private TreeService service;
+	@Inject
+	private AttatchService attService;
+
+	@GetMapping("/project/file/{proCode}")
+	public String fileView(
+			@PathVariable String proCode
+			, Model model
+			) {
+		ProjectVO project = proService.retrieveProject(proCode);
+		model.addAttribute("project", project);
+		return "project/file/fileHome";
+
+	}
+	
+	@GetMapping("/project/myFile")
+	public String myFileList() {
+		return "pms/myfile/fileList";
+	}
+	
+	@PostMapping("/project/fileTree")
+	@ResponseBody
+	public List<TreeVO> fileTree(@RequestBody String proCode) {
+		log.info("프로코드 뭐지??{}",proCode);
+		List<TreeVO> treeList = service.retrieveTreeList(proCode);
+		return treeList;
+	}
+	
+	// 파일 업로드
+	@ResponseBody
+	@PostMapping("/project/fileUpload")
+	public int fileUpload(
+		@RequestPart("files") MultipartFile[] files
+		, String proCode
+	) {
+		log.info("프로코드 뭐지??{}",proCode);
+		log.info("파일받앙? 뭐지??{}",files);
+		int fileAttNo = attService.createAttatch(files, proCode);
+		return fileAttNo; 
+	}
+	
+	
+}

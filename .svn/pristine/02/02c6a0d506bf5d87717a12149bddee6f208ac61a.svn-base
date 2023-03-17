@@ -1,0 +1,328 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/security/tags"
+	prefix="security"%>
+
+<section id="portfolio" class="portfolio" style="padding-top: 160px;">
+	<div class="container aos-init aos-animate" data-aos="fade-up">
+
+		<div class="section-title">
+			<h2>고객센터</h2>
+		</div>
+		<ul id="portfolio-flters"
+			class="d-flex justify-content-center aos-init aos-animate"
+			data-aos="fade-up" data-aos-delay="100">
+			<li data-filter=".filter-notice" class="filter-active">공지사항</li>
+			<li data-filter=".filter-app">1:1문의</li>
+			<li data-filter=".filter-card">자주묻는 질문</li>
+		</ul>
+
+		<!-- 공지사항 게시판  -->
+		<div class="row portfolio-container aos-init aos-animate"
+			data-aos="fade-up" data-aos-delay="200"
+			style="position: relative; height: 1097.33px;">
+
+			<!-- -------------- 공지사항 시작 ---------------------- -->
+
+			<div class="col-lg-4 col-md-6 portfolio-item filter-notice"
+				style="position: absolute; left: 0px; top: 0px;">
+				<div class="content">
+					<div class="container" style="width: 1000px; margin-left: 150px;">
+						<div class="table-responsive custom-table-responsive"
+							id="divNotice">
+							<table class="table custom-table">
+								<thead>
+									<tr>
+										<th scope="col">글 번호</th>
+										<th scope="col">글 제목</th>
+										<th scope="col">글 작성일</th>
+										<th scope="col">조회수</th>
+									</tr>
+								</thead>
+								<tbody>
+									<c:forEach items="${pagingVO.dataList}" var="noticeList">
+										<tr scope="row">
+											<td>${noticeList.rnum }</td>
+											<td><a href="#" class="noticeTitle"
+												data-notice-no="1392">${noticeList.noticeTitle }</a></td>
+											<td>${noticeList.noticeDate }</td>
+											<td>${noticeList.noticeHit }</td>
+										</tr>
+									</c:forEach>
+								</tbody>
+							</table>
+							<!-- Modal -->
+							<button id="newBtn" type="button" class="btn btn-primary"
+								data-bs-toggle="modal" data-bs-target="#exampleModal">
+								새 글 작성</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Modal -->
+			<div class="modal fade" id="exampleModal" tabindex="-1"
+				aria-labelledby="exampleModalLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h1 class="modal-title fs-5" id="exampleModalLabel">Modal
+								title</h1>
+							<button type="button" class="btn-close" data-bs-dismiss="modal"
+								aria-label="Close"></button>
+						</div>
+						<div id="insertForm" class="modal-body"></div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary"
+								data-bs-dismiss="modal">Close</button>
+							<button type="button" class="btn btn-primary">Save
+								changes</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- -------------- 공지사항 끝 ---------------------- -->
+
+			<!-- 1:1 문의 게시판 -->
+
+			<div class="col-lg-4 col-md-6 portfolio-item filter-app"
+				style="position: absolute; left: 0px; top: 0px;">
+				<div class="content">
+					<div class="container" style="width: 1000px; margin-left: 150px;">
+						<div class="table-responsive custom-table-responsive">
+							<table class="table custom-table">
+								<thead>
+									<tr>
+										<th scope="col">글 번호</th>
+										<th scope="col">글 제목</th>
+										<th scope="col">글 내용</th>
+										<th scope="col">글 작성자</th>
+										<th scope="col">조회수</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr scope="row">
+										<td>1392</td>
+										<td><a href="#">James Yates</a></td>
+										<td>Web Designer <small class="d-block">Far far
+												away, behind the word mountains</small>
+										</td>
+										<td>+63 983 0962 971</td>
+										<td>NY University</td>
+									</tr>
+									<tr class="spacer">
+										<td colspan="100"></td>
+									</tr>
+									<tr>
+										<td>4616</td>
+										<td><a href="#">Matthew Wasil</a></td>
+										<td>Graphic Designer <small class="d-block">Far
+												far away, behind the word mountains</small>
+										</td>
+										<td>+02 020 3994 929</td>
+										<td>London College</td>
+									</tr>
+									<tr class="spacer">
+										<td colspan="100"></td>
+									</tr>
+									<tr>
+										<td>9841</td>
+										<td><a href="#">Sampson Murphy</a></td>
+										<td>Mobile Dev <small class="d-block">Far far
+												away, behind the word mountains</small>
+										</td>
+										<td>+01 352 1125 0192</td>
+										<td>Senior High</td>
+									</tr>
+									<tr class="spacer">
+										<td colspan="100"></td>
+									</tr>
+									<tr>
+										<td>9548</td>
+										<td><a href="#">Gaspar Semenov</a></td>
+										<td>Illustrator <small class="d-block">Far far
+												away, behind the word mountains</small>
+										</td>
+										<td>+92 020 3994 929</td>
+										<td>College</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- </div> -->
+
+			<!-- 자주묻는 질문 게시판  -->
+			<!-- <div class="row portfolio-container aos-init aos-animate" -->
+			<!-- 	data-aos="fade-up" data-aos-delay="200" -->
+			<!-- 	style="position: relative; height: 1097.33px;"> -->
+
+			<div class="col-lg-4 col-md-6 portfolio-item filter-card"
+				style="position: absolute; left: 0px; top: 0px;">
+
+				<div class="container aos-init aos-animate" data-aos="fade-up"
+					style="width: 1000px; margin-left: 150px;">
+
+					<section id="faq" class="faq section-bg">
+
+						<div class="faq-list">
+							<ul>
+								<li data-aos="fade-up" data-aos-delay="100"
+									class="aos-init aos-animate"><i
+									class="bx bx-help-circle icon-help"></i> <a
+									data-bs-toggle="collapse" class="collapse"
+									data-bs-target="#faq-list-1">자주묻는 질문~~ <i
+										class="bx bx-chevron-down icon-show"></i><i
+										class="bx bx-chevron-up icon-close"></i>
+								</a>
+									<div id="faq-list-1" class="collapse show"
+										data-bs-parent=".faq-list">
+										<p>Feugiat pretium nibh ipsum consequat. Tempus iaculis
+											urna id volutpat lacus laoreet non curabitur gravida.
+											Venenatis lectus magna fringilla urna porttitor rhoncus dolor
+											purus non.</p>
+									</div></li>
+								<li data-aos="fade-up" data-aos-delay="200"
+									class="aos-init aos-animate"><i
+									class="bx bx-help-circle icon-help"></i> <a
+									data-bs-toggle="collapse" data-bs-target="#faq-list-2"
+									class="collapsed">자주묻는 질문~~ <i
+										class="bx bx-chevron-down icon-show"></i><i
+										class="bx bx-chevron-up icon-close"></i></a>
+									<div id="faq-list-2" class="collapse"
+										data-bs-parent=".faq-list">
+										<p>Dolor sit amet consectetur adipiscing elit pellentesque
+											habitant morbi. Id interdum velit laoreet id donec ultrices.
+											Fringilla phasellus faucibus scelerisque eleifend donec
+											pretium. Est pellentesque elit ullamcorper dignissim. Mauris
+											ultrices eros in cursus turpis massa tincidunt dui.</p>
+									</div></li>
+								<li data-aos="fade-up" data-aos-delay="300"
+									class="aos-init aos-animate"><i
+									class="bx bx-help-circle icon-help"></i> <a
+									data-bs-toggle="collapse" data-bs-target="#faq-list-3"
+									class="collapsed">자주묻는 질문~~ <i
+										class="bx bx-chevron-down icon-show"></i><i
+										class="bx bx-chevron-up icon-close"></i></a>
+									<div id="faq-list-3" class="collapse"
+										data-bs-parent=".faq-list">
+										<p>Eleifend mi in nulla posuere sollicitudin aliquam
+											ultrices sagittis orci. Faucibus pulvinar elementum integer
+											enim. Sem nulla pharetra diam sit amet nisl suscipit. Rutrum
+											tellus pellentesque eu tincidunt. Lectus urna duis convallis
+											convallis tellus. Urna molestie at elementum eu facilisis sed
+											odio morbi quis</p>
+									</div></li>
+								<li data-aos="fade-up" data-aos-delay="400"
+									class="aos-init aos-animate"><i
+									class="bx bx-help-circle icon-help"></i> <a
+									data-bs-toggle="collapse" data-bs-target="#faq-list-4"
+									class="collapsed">자주묻는 질문~~ <i
+										class="bx bx-chevron-down icon-show"></i><i
+										class="bx bx-chevron-up icon-close"></i>
+								</a>
+									<div id="faq-list-4" class="collapse"
+										data-bs-parent=".faq-list">
+										<p>Molestie a iaculis at erat pellentesque adipiscing
+											commodo. Dignissim suspendisse in est ante in. Nunc vel risus
+											commodo viverra maecenas accumsan. Sit amet nisl suscipit
+											adipiscing bibendum est. Purus gravida quis blandit turpis
+											cursus in.</p>
+									</div></li>
+								<li data-aos="fade-up" data-aos-delay="500"
+									class="aos-init aos-animate"><i
+									class="bx bx-help-circle icon-help"></i> <a
+									data-bs-toggle="collapse" data-bs-target="#faq-list-5"
+									class="collapsed">자주묻는 질문~~ <i
+										class="bx bx-chevron-down icon-show"></i><i
+										class="bx bx-chevron-up icon-close"></i>
+								</a>
+									<div id="faq-list-5" class="collapse"
+										data-bs-parent=".faq-list">
+										<p>Laoreet sit amet cursus sit amet dictum sit amet justo.
+											Mauris vitae ultricies leo integer malesuada nunc vel.
+											Tincidunt eget nullam non nisi est sit amet. Turpis nunc eget
+											lorem dolor sed. Ut venenatis tellus in metus vulputate eu
+											scelerisque.</p>
+									</div></li>
+							</ul>
+						</div>
+
+					</section>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<script type="text/javascript">
+	$(function() {
+
+		$(".filter-card").hide();
+		$(".filter-app").hide();
+	});
+
+	$(".noticeTitle").on("click", function() {
+		//<td><a href="#" class="noticeTitle" data-id="1392">James Yates</a></td>
+		let noticeNo = $(this).data("noticeNo");
+		console.log("noticeNo : " + noticeNo);
+
+		let str = "";
+
+		//아작났어유.피씨다타써
+		$.ajax({
+			url : "/help/noticeDetail?noticeNo=" + noticeNo,
+			type : "get",
+			success : function(result) {
+				console.log("result : " + JSON.stringify(result));
+				let no = result.noticeNo;
+				let title = result.noticeTitle;
+				str += "<input type='text' value='" + no + "' />";
+				str += "<input type='text' value='" + title + "' />";
+				$("#divNotice").html(str);
+			}
+		});
+	});
+
+	$(".filter-active").on("click", function() {
+
+		$.ajax({
+			url : "/help/noticeDetail",
+			method : "get",
+			dataType : "json",
+			success : function(resp) {
+				console.log(resp);
+			},
+			error : function(jqXHR, status) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});
+	})
+	let insertForm = $("#insertForm")
+	$("#newBtn").on("click", function() {
+
+		$.ajax({
+			url : "/help/noticeForm",
+			method : "get",
+			dataType : "html",
+			success : function(resp) {
+				console.log(resp);
+				// 				insertForm.empty()
+				insertForm.html(resp)
+
+			},
+			error : function(jqXHR, status) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});
+
+	})
+</script>

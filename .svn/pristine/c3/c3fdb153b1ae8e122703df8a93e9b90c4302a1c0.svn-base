@@ -1,0 +1,81 @@
+package kr.or.ddit.project.news.service;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.enumpkg.ServiceResult;
+import kr.or.ddit.project.news.vo.NewsVO;
+import kr.or.ddit.vo.PagingVO;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * 
+ * 뉴스 서비스 인터페이스
+ * @author 전혜수
+ * @since 2023. 2. 7.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일                  수정자               수정내용
+ * --------     --------    ----------------------
+ * 2023. 2. 7.      PC-21       최초작성
+ * 
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Service
+public interface NewsService {
+	
+	/**
+	 * 뉴스 리스트조회
+	 * @param pagingVO
+	 */
+	public List<NewsVO> retrieveNewsList(PagingVO pagingVO);
+	
+	/**
+	 * 프로젝트에 해당하는 뉴스 리스트 조회
+	 * @param memEmail
+	 * @return
+	 */
+	public List<NewsVO> retrieveMyNewsList(@Param("proCode") String proCode);
+	
+	
+	/**
+	 * 뉴스 상세 조회 
+	 * @param newsNo
+	 * @return 
+	 */
+	public NewsVO retrieveNews(int newsNo);
+	
+	
+	/**
+	 * 뉴스 생성 
+	 * @param news
+	 * @return
+	 */
+	public ServiceResult createNews(NewsVO news);
+	
+	/**
+	 * 뉴스 수정 
+	 * @param news
+	 * @return
+	 */
+	public ServiceResult modifyNews(NewsVO news);
+	
+	/**
+	 * 뉴스 삭제
+	 * @param newsNo
+	 * @return
+	 */
+	public ServiceResult removeNews(NewsVO news);
+	
+	/**
+	 * 조회수 증가
+	 * @param newsNo
+	 */
+	public void incrementHit(int newsNo);
+}

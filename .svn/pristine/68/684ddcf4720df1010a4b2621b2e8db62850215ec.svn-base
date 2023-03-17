@@ -1,0 +1,56 @@
+package kr.or.ddit.member.vo;
+
+import java.io.Serializable;
+
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import javax.validation.groups.Default;
+
+import kr.or.ddit.validate.DeleteGroup;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+@Data
+public class MemberVO implements Serializable{
+	
+//	MEM_NO       NOT NULL NUMBER        
+//	MEM_NAME     NOT NULL VARCHAR2(15)  
+//	MEM_EMAIL    NOT NULL VARCHAR2(50)  
+//	MEM_PASS     NOT NULL VARCHAR2(200) 
+//	MEM_TEL      NOT NULL VARCHAR2(11)  
+//	MEM_SDATE    NOT NULL VARCHAR2(8)   
+//	MEM_EDATE             VARCHAR2(8)   
+//	MEM_STTS_CD           VARCHAR2(20)  
+//	MEM_DATE_LOG          DATE          
+//	MEM_ROLE              VARCHAR2(20)  
+//	MEM_IMG               BLOB     
+	public MemberVO(String memEmail, String memPass) {
+		super();
+		this.memEmail = memEmail;
+		this.memPass = memPass;
+	}
+
+	@NotBlank
+	private String memName;
+	@NotBlank
+	private String memEmail;
+	@NotBlank
+	private String memPass;
+	private String memTel;
+	
+	@NotBlank
+	private String memSdate;
+	private boolean memEdate;
+	private String memSttsCd;
+	private String memDateLog;
+	private String memRole;
+	
+	private String mailKey;
+	private String mailAuth;
+	
+	private byte[] memImg;
+
+}

@@ -1,0 +1,33 @@
+package kr.or.ddit.project.attach.controller;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.project.attach.service.AttatchService;
+import kr.or.ddit.project.attach.vo.AttatchVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/project")
+public class AttatchController {
+	@Inject
+	private AttatchService service;
+	
+	@ResponseBody
+	@PostMapping("/project/fileList")
+	public List<AttatchVO> fileList(
+			@RequestBody String proCode
+	) {
+		List<AttatchVO> fileList = service.retrieveProjectFileList(proCode);
+		return fileList;
+	}
+}
+

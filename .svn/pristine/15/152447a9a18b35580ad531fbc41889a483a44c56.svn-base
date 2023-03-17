@@ -1,0 +1,91 @@
+package kr.or.ddit.project.wiki.service;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.enumpkg.ServiceResult;
+import kr.or.ddit.project.wiki.dao.WikiDAO;
+import kr.or.ddit.project.wiki.vo.WikiVO;
+import lombok.extern.slf4j.Slf4j;
+import oracle.security.crypto.core.SREntropySource;
+/**
+ * 
+ * Wiki ServiceImpl
+ * @author 전혜수
+ * @since 2023. 2. 20.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일                  수정자               수정내용
+ * --------     --------    ----------------------
+ * 2023. 2. 20.      PC-21       최초작성
+ * 
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+@Slf4j
+@Service
+public class WikiServieceImpl implements WikiService{
+	
+	@Inject
+	private WikiDAO wikiDAO;
+	
+	
+	
+	//위키 목록 
+	@Override
+	public List<WikiVO> retrieveWikiList(String proCode) {
+		List<WikiVO> wikiList = wikiDAO.selectWikiList(proCode); 
+		return wikiList;
+	}
+	
+	
+	//위키 생성
+	@Override
+	public ServiceResult createWiki(WikiVO wiki) {
+		ServiceResult result = null;
+		int rowcnt =  wikiDAO.insertWiki(wiki);
+		result = rowcnt > 0 ? ServiceResult.OK : ServiceResult.FAIL;
+		return result;
+	}
+
+	//위키 1건 조회 
+	@Override
+	public WikiVO retrieveWiki(WikiVO wiki) {
+		WikiVO wikiVO = wikiDAO.selectWiki(wiki);
+		return wikiVO;
+	}
+
+	//위키 삭제 
+	@Override
+	public ServiceResult deleteWiki(WikiVO wiki) {
+		ServiceResult result = null; 
+		int rowcnt = wikiDAO.deleteWiki(wiki);
+		result = rowcnt > 0 ?ServiceResult.OK : ServiceResult.FAIL;
+		return result;
+	}
+
+
+	@Override
+	public ServiceResult modifyWiki(WikiVO wiki) {
+		ServiceResult result = null;
+		log.info("위키서비스");
+		int rowcnt = wikiDAO.updateWiki(wiki);
+		result = rowcnt > 0 ? ServiceResult.OK : ServiceResult.FAIL;
+		return result;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+
+}

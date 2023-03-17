@@ -1,0 +1,253 @@
+package kr.or.ddit.project.board.controller;
+
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.project.board.service.BoardService;
+import kr.or.ddit.project.board.vo.BoardCommVO;
+import kr.or.ddit.project.board.vo.BoardVO;
+import kr.or.ddit.project.home.service.ProjectService;
+import kr.or.ddit.project.home.vo.ProjectVO;
+import kr.or.ddit.project.sidemenu.vo.MemoVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/project")
+public class BoardController {
+	
+	@Inject
+	private ProjectService proService; //의존성을 성립한 서비스 인터페이스의 변수
+	//DI
+	@Inject
+	private BoardService service;
+	
+	//게시판 목록 조회
+	//요청URI 경로 : http://localhost/project/project/boardList/P202302280097
+	//경로 변수(PathVariable)
+	//proCode : P202302280097
+	
+	@GetMapping("/project/boardList/{proCode}")
+	public String boardListView(
+			@PathVariable String proCode
+			,Model model
+			) {
+		ProjectVO project = proService.retrieveProject(proCode);
+		model.addAttribute("project", project);
+		return "project/board/boardList";
+	}
+	
+	//메소드가 Get인 요청을 받아들이는 메소드(Mapping)을 통해 프로젝트 코드를 받아옴
+	@GetMapping("/project/boardListData/{proCode}") //경로
+	@ResponseBody
+	public List boardList( //public(접근제한자,제한없음) String(메소드 반환 타입,문자열) boardList(메소드)
+			@PathVariable String proCode //경로변수(@PathVariable)을 통해 proCode를 가져옴, String(변수 타입,문자열) proCode(변수)
+			 //Model(인터페이스) model(변수)
+			) {
+		
+		//proService(의존성을 성립한 서비스 인터페이스의 변수)의 retrieveProject(메소드 이름)를 통해 proCode(파라미터)를 가져와
+		//ProjectVO타입의 project라는 변수에 담음
+//		ProjectVO project = proService.retrieveProject(proCode);
+		List<BoardVO> boardList = service.retrieveBoardList(proCode);
+//		model.addAttribute("project", project); //view단으로 가져갈 데이터(model(변수).addAttribute(메소드) : 모델에 담는 역할)
+//		model.addAttribute("boardList",boardList); //"boardList"라는 이름으로 boardList(데이터 값)을 담음
+		
+		System.out.println(boardList); //출력(콘솔)
+		
+		//forwarding : project폴더/board폴더/boardList.jsp
+		return boardList; //view반환(jsp경로) /model에 담긴 값을 가지고 가서 view 반환
+	}
+	
+	
+	
+	//게시글 조회
+	@GetMapping("/project/boardDetail/{boardNo}")
+	@ResponseBody
+	public BoardVO boardDetail(
+		@PathVariable int boardNo
+		) {
+		
+		BoardVO boardVO = service.retrieveBoard(boardNo);
+//		service.incrementHit(boardNo);
+//		model.addAttribute("boardVO",boardVO);
+		
+		System.out.println(boardVO);
+		return boardVO;
+		
+	}
+	
+	
+	// 메모 검색 리스트 
+	@ResponseBody
+	@PostMapping(value="/boardSearch")
+	public List boardSelectList(
+		@RequestBody Map<String, String> map	
+		,Model model
+		,Principal principal
+			) {
+		log.info("searchOption : " + map.get("searchOption"));
+	    log.info("searchWord :" + map.get("searchWord"));
+	    log.info("map :" + map);
+	    
+//		PagingVO<MemoVO> pagingVO = new PagingVO<>();
+//		pagingVO.setCurrentPage(currentPage);
+//		pagingVO.setDetailCondition(detailCondition);
+		
+	    List<BoardVO> retrieveSearchBoard = service.retrieveSearchBoard(map);
+//		model.addAttribute("pagingVO",map);
+//		if(!pagingVO.getDataList().isEmpty()) {
+//			model.addAttribute("pagingHTML",renderer.renderPagination(pagingVO));
+//		}
+		return retrieveSearchBoard;
+
+	}
+	
+	//게시글 작성 화면
+	//요청URI : http://localhost/project/project/boardForm?proCode=P202302280097
+	//요청파라미터 : proCode=P202302280097
+	//요청방식 : get
+	@GetMapping("/project/boardForm")
+	public String boardForm() {
+		//forwarding : /views/project폴더/board/boardForm.jsp
+		return "project/board/boardForm";
+	}
+	
+	//게시글 작성 등록
+	//요청URI : http://localhost/project/project/boardForm
+	//요청파라미터 : {proCode=P202302280097,boardTitle=ㄴㅁㅇㄻㅇㄴ,boardCont=ㅇㄴㄻㄹㄴㅇㅁㅇㄴㅁ}
+	//요청방식 : post
+	//요청파라미터를 vo로 받을 수 있음. 골뱅이ModelAttribute
+	@PostMapping("/project/boardInsert")
+	@ResponseBody
+	public String boardForm(
+			@ModelAttribute BoardVO boardVO
+			,Principal principal
+			) {
+		//boardVO : BoardVO(boardNo=null, memEmail=null, proCode=P202302280097, boardTitle=제목, boardCont=<p>내용</p>
+//		, boardDate=null, hit=null, boardAttNo=null)
+		log.info("boardVO : " + boardVO);
+		
+		//로그인 생략
+		boardVO.setMemEmail(principal.getName());
+		int result = service.createBoard(boardVO);
+		log.info("result : " + result);
+		
+		if(result>0) {
+//			return "redirect:/project/project/boardListData/"+boardVO.getProCode();
+			return Integer.toString(result);
+		}else {
+			return "project/project/boardForm";
+		}
+		
+		//저장 후 목록으로 이동
+		//redirect : http://localhost/project/project/boardList/P202302280097
+	}
+	
+	//게시글 수정 화면
+	@GetMapping("/project/boardUpdate/{boardNo}")
+	public String boardUpdateForm(
+		@PathVariable int boardNo
+		,Model model
+	) {
+		BoardVO boardVO = service.retrieveBoard(boardNo);
+		model.addAttribute("boardVO",boardVO);
+		log.info("boardVO : "+boardVO);
+		return "project/board/boardUpdateForm";
+	}
+	
+	//게시글 수정 등록
+	@ResponseBody
+	@PostMapping(value = "/project/boardUpdate/{boardNo}",produces = "application/json;charset=utf-8")
+	public String boardUpdate(
+		@PathVariable int boardNo
+		, @RequestBody BoardVO boardVO
+	) {
+		log.info("수정 왔나?");
+		int result = service.modifyBoard(boardVO);
+		if(result>0) {
+//			return "redirect:/project/project/boardDetail/" + boardVO.getBoardNo();
+			return Integer.toString(result);
+		}else {
+			return Integer.toString(result);
+		}
+		
+	}
+	
+	//게시글 삭제
+	@PostMapping("/project/boardDelete/{boardNo}")
+	@ResponseBody
+	public int boardDelete(
+		@PathVariable int boardNo
+	) {
+		log.info("boardNo : "+boardNo);
+		int result = service.removeBoard(boardNo);
+		
+		return result;
+	}
+	
+	////////////////////////////////게시판 댓글//////////////////////////////////////
+	
+	// 게시판 댓글 목록 출력
+	@ResponseBody
+	@GetMapping("/project/boardCommList/{boardNo}")
+	public List<BoardCommVO> boardCommList(
+			@PathVariable int boardNo
+			){
+		List<BoardCommVO> boardCommList = service.retriveBoardCommList(boardNo);
+		
+		log.info("boardCommList : " + boardCommList);
+		
+		return boardCommList;
+	}
+	
+	// 게시판 댓글 생성
+	@ResponseBody
+	@PostMapping(value = "/project/boardCommInsert/{boardNo}")
+	public int insertBoardComm(
+			@PathVariable int boardNo
+			,@RequestBody BoardCommVO boardComm
+			){
+		
+		log.info("insertBoardComm에서 boardCommVO {}: ",boardComm);
+		
+		int result = service.createBoardComm(boardComm);
+		
+		log.info("insertBoardComm에서 insert한 결과 : "+result);
+		
+		return result;
+	}
+	
+	// 게시판 댓글 수정
+	
+	
+	// 게시판 댓글 삭제ㅗ 어쩔
+	
+	
+	
+	
+	
+}
+
+
+
+
+
+
+
+
+
+

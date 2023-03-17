@@ -1,0 +1,513 @@
+<!--
+	사이드 툴 바 메모장 jsp
+  -->
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="security" %>
+
+
+
+<a data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling"
+	style="position: fixed; bottom: 30px; right: 30px; width: 50px;"
+	aria-controls="offcanvasScrolling"> <img id="memoImg"
+	src="${pageContext.request.contextPath }/resources/images/icon/memo.png"
+	width="60" height="60" />
+</a>
+
+<security:authentication property="principal.realMember" var="authMember"/>
+<div class="offcanvas offcanvas-end" data-bs-scroll="true"
+	data-bs-backdrop="false" tabindex="-1" id="offcanvasScrolling"
+	aria-labelledby="offcanvasScrollingLabel">
+	<div class="offcanvas-header memoHeader">
+		<h5 class="offcanvas-title" id="offcanvasScrollingLabel"></h5>
+		<button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+			aria-label="Close"></button>
+	</div>
+	<div class="offcanvas-body memoBody">
+		<div class="card-header">
+			<h5 class="card-title">메모장</h5>
+		</div>
+		<div class="card-body">
+			<!-- 			<div id="wrapper"> -->
+
+			<form id="memoForm">
+
+				<div id="margin">
+					제목: <input id="title" type="text" name="memoTitle">
+				</div>
+				<div id="margin">
+					<input id="title" type="hidden" name="memEmail" value="${authMember.memEmail }" readonly>
+				</div>
+				<textarea placeholder="메모 내용 입력." id="text" name="memoCont" rows="4"
+					style="word-wrap: break-word; resize: none; width: 350px; height: 281px;">
+				</textarea>
+
+				<input id="insertButton" type="submit" value="저장">
+
+			</form>
+		</div>
+
+		<div id="searchUI" class="input-group" style="padding-top: 30px;">
+			<input id="searchWord" type="text" class="form-control"
+				aria-label="Text input with segmented dropdown button">
+			<input type="button" class="btn btn-outline-secondary" value="검색" id="searchBtn" />
+			<select id="searchOption" class="form-select" aria-label="Default select example">
+				<option value>옵션</option>
+				<option value="memoTitle">제목</option>
+				<option value="memoCont">내용</option>
+			</select>
+		</div>
+		<div id="memoDisp">
+		
+		</div>
+	</div>
+</div>
+<!-- <form id="searchForm"> -->
+<!-- 	<input type="text" name="memoTitle"> -->
+<!-- 	<input type="text" name="memoCont"> -->
+	
+<!-- </form> -->
+<script>
+	
+	
+	// 수정 완료 버튼 누름 ajax
+	function memoUpdateSubmit(memoNo){
+			$("#memoUpdateForm").on("submit",function(event){
+			event.preventDefault();
+			let data = $("#memoUpdateForm").serialize();
+			console.log("data : ",data);
+			$.ajax({
+				url : "${pageContext.request.contextPath }/project/memoUpdate/"+memoNo,
+				method : "post",
+				data : data,
+				dataType : "json",
+				success : function(resp) {
+					console.log(resp);
+					$(".memoBody").html("");
+					offcanvasBody();
+					memoList();
+					memoInsert();
+					memoUpdateSubmit();
+					
+					
+				},
+				error : function(jqXHR, status, error) {
+					console.log(jqXHR);
+					console.log(status);
+					console.log(error);
+				}
+			});
+			
+		});
+	}
+	
+	// 메모 수정폼 ajax
+	function memoUpdateForm(memoNo,data){
+		console.log("data : ",data);
+	    let formStr = "";
+		formStr += `
+			
+			<form id=\"memoUpdateForm\">
+
+				<div id=\"margin\">
+				제목: <input id=\"title\" type=\"text\" name=\"memoTitle\" value="\${data.memoTitle}">
+				</div>
+				<textarea placeholder=\"메모 내용 입력.\" id=\"text\"
+					name=\"memoCont\" rows=\"4\"
+					style=\"/* overflow: hidden; */ word-wrap: break-word; resize: none; width: 370px; height: 40em;\"
+				>
+				\${data.memoCont}
+				</textarea>
+				
+				<input class="btn btn-primary" id=\"updateButton\" type=\"submit\" value=\"수정\">
+
+			</form>
+		`;
+		$(".memoBody").html(formStr);
+		
+		memoUpdateSubmit(memoNo);
+		
+	}
+	
+	// 메모 삭제 ajax
+	function memoDelete(memoNo,data){ 
+		return $.ajax({
+			url : "${pageContext.request.contextPath }/project/memoDelete/"+memoNo,
+			method : "post",
+			data : JSON.stringify(data),
+			dataType : "json",
+			contentType:"application/json;charset=utf-8",
+			success : function(resp) {
+				console.log(resp);
+				let str = resp.result
+				if(str > 0){
+// 					alert("댓글을 삭제하였습니다.");
+					$(".memoBody").html("");
+					offcanvasBody();
+					memoList();
+					memoInsert();
+					memoUpdateSubmit();
+				}
+				else{
+// 					alert("삭제 실패. 다시 시도해주세요.");
+					$(".memoBody").html("");
+					offcanvasBody();
+					memoList();
+					memoInsert();
+					memoUpdateSubmit();
+				}
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});
+			 
+	}
+	
+	// 메모 상세 조회 ajax
+	function memoDetail(){
+		return $('.memoPaper').on("click",function(){
+	 	  $(".memoBody").html("");
+		  let paperNo = $(this).children('input').text()
+		  
+		  $.ajax({
+			url : "${pageContext.request.contextPath }/project/memoDetail/"+paperNo+"",
+			method : "get",
+			data : paperNo,
+			dataType : "json",
+			success : function(resp) {
+				console.log(resp);
+				let str1 = "";
+				let str2 = "";
+				str1 += `
+					
+					<div class=\"container bootstrap snippets bootdey\">
+					<div class=\"row\">
+						<ul class=\"notes\">
+							<li>
+		                		<div class=\"rotate-1 lazur-bg\">
+		                 		    <small>\${resp.memoDate}</small>
+		                    		<h4>\${resp.memoTitle}</h4>
+		                    		<p>\${resp.memoCont}</p>
+		                    		<a><img class=\"deleteBtn\" id=\"\${resp.memoNo}\" src=\"${pageContext.request.contextPath}/resources/images/icon/trash3-fill.svg\" /></a>
+		                    		<a><img class=\"updateBtn\" id=\"\${resp.memoNo}\" src=\"${pageContext.request.contextPath}/resources/images/icon/pencil-fill.svg" /></a>
+		                		</div>
+		            		</li>   
+						</ul>  
+					</div>
+					</div>
+				`;
+	
+				str2 += `
+					<a id=\"backBtn\"><img src=\"${pageContext.request.contextPath}/resources/images/icon/arrow-left.svg\" /></a>
+					<button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"offcanvas\"
+						aria-label=\"Close\"></button>
+				`;
+				
+				$(".memoBody").html(str1);
+				$(".memoHeader").html(str2);
+				
+				$(".deleteBtn").on("click",function(){
+					let memoNo = $(this).attr('id');
+					console.log(memoNo);
+					
+					let data = {"memoNo":memoNo};
+					console.log(data);
+					
+					
+					Swal.fire({
+						   title: '삭제 하시겠습니까?',
+						   text: '다시 되돌릴 수 없습니다. 신중하세요.',
+						   icon: 'warning',
+						   
+						   showCancelButton: true, // cancel버튼 보이기. 기본은 원래 없음
+						   confirmButtonColor: '#3085d6', // confrim 버튼 색깔 지정
+						   cancelButtonColor: '#d33', // cancel 버튼 색깔 지정
+						   confirmButtonText: '승인', // confirm 버튼 텍스트 지정
+						   cancelButtonText: '취소', // cancel 버튼 텍스트 지정
+						   
+						   reverseButtons: true, // 버튼 순서 거꾸로
+						   
+						}).then(result => {
+						   // 만약 Promise리턴을 받으면,
+						   if (result.isConfirmed) { // 만약 모달창에서 confirm 버튼을 눌렀다면
+							   memoDelete(memoNo,data);
+						       Swal.fire('삭제 완료되었습니다.', '화끈하시네요~!', 'success');
+						   }
+						   else{
+							   Swal.fire('', '삭제 취소하였습니다.', "failed");
+							   return;
+						   }
+						});					
+					
+				})
+
+				$(".updateBtn").on("click",function(){
+					$(".memoBody").html("");
+					let memoNo = $(this).attr('id');
+					console.log("memoNo : "+memoNo);
+
+					// let data = {"memoNo":memoNo};
+					console.log("resp : ",resp);
+
+					memoUpdateForm(memoNo,resp);
+					
+				})
+				
+				$("#backBtn").on("click",function(){
+					console.log("체크");
+					$(".memoBody").html("");
+					offcanvasBody();
+					memoList();
+					searchMemoEnter();						
+					memoInsert();
+					memoUpdateSubmit();
+					
+					
+				})
+				
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});//END AJAX
+		
+	  });
+	}
+	
+	// 메모장 tag만들기
+	let makeDivTag = function(memo){
+		console.log("memo : ",memo);
+		let ulTag = $("<ul>").append(
+			$("<li>").html(memo.memoDate)
+		);
+      return $("<div contenteditable>").attr({
+    	  	class : "post-it memoPaper",
+    	  	}).append(
+               $("<input contenteditable>").attr({
+            	   type : "hidden"
+               }).html(memo.memoNo)   
+               , $("<h1>").html(memo.memoTitle)   
+			   ,ulTag          
+               
+            ).prop("contenteditable",false);
+   }
+
+	// 메모장 리스트 조회 ajax
+	function memoList(){
+		
+		$.ajax({
+			url : "${pageContext.request.contextPath}/project/memoList",
+			method : "get",
+			dataType : "json",
+			success : function(resp) {
+				let divTags = [];
+				if(resp){
+					$.each(resp,function(i,v){
+						divTags.push(makeDivTag(v));
+					});
+				}
+				else{
+					divTags.push($("<h2>").html("메모지 없음"));
+				}
+				$("#memoDisp").html(divTags);
+				
+				memoDetail();	
+				
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});
+	}
+	
+	memoList();
+	
+	
+	// 메모장 등록 ajax
+	function memoInsert(){
+			$("#memoForm").on("submit",function(event){
+			event.preventDefault();
+			
+			let url = "${pageContext.request.contextPath }/project/memoInsert";
+			let method = "post";
+			console.log($(this).serialize());
+			let data = $(this).serialize();
+// 			let queryString = {
+// 				memoTitle : $("input[name='memTitle']").val(),
+// 				memoCont : $("input[name='memoCont']").val(),
+// 				memEmail : $("input[name='memEmail']").val()
+// 			}
+			console.log(data);
+			
+			$.ajax({
+				url : url,
+				method : method,
+// 				contentType : "application/json;charset=utf-8",
+				data : data,
+				dataType : "json",
+				success : function(resp) {
+					console.log(resp);
+					$("input[name='memoTitle']").val("");
+					$("textarea[name='memoCont']").val("");
+// 					let dataList = resp.dataList;
+// 					console.log(dataList.length);
+					let divTags = [];
+					if(resp){
+		               // datalist가 존재
+		               $.each(resp, function(i, v){
+		               		divTags.push(makeDivTag(v));
+		
+		               });
+		               
+		            }else{
+		            	$("<h2>").html("메모지 없음");
+		            }
+					$("#memoDisp").empty();
+					$("#memoDisp").html(divTags);
+					
+					
+					memoDetail();
+		
+					
+				},
+				error : function(jqXHR, status, error) {
+					console.log(jqXHR);
+					console.log(status);
+					console.log(error);
+				}
+			});
+			return false;
+		})
+	}
+	
+	memoInsert();
+	
+	// 오프캔버스 헤더 바디 부분
+	function offcanvasBody(){
+		let bodyValue = "";
+		bodyValue += `
+			<div class="card-header">
+				<h5 class="card-title">메모장</h5>
+			</div>
+			<div class="card-body">
+				<!-- 			<div id="wrapper"> -->
+	
+				<form id="memoForm">
+	
+					<div id="margin">
+						제목: <input id="title" type="text" name="memoTitle">
+					</div>
+					<div id="margin">
+						<input id="title" type="hidden" name="memEmail" value="${authMember.memEmail }" readonly>
+					</div>
+					<textarea placeholder="메모 내용 입력." id="text" name="memoCont" rows="4"
+						style="word-wrap: break-word; resize: none; width: 350px; height: 281px; overflow: scroll;">
+					</textarea>
+	
+					<input id="insertButton" type="submit" value="저장">
+	
+				</form>
+			</div>
+	
+			<div id="searchUI" class="input-group" style="padding-top: 30px;">
+				<input id="searchWord" type="text" class="form-control"
+					aria-label="Text input with segmented dropdown button">
+				<input type="button" class="btn btn-outline-secondary" value="검색" id="searchBtn" />
+				<select id="searchOption" class="form-select" aria-label="Default select example">
+					<option value>옵션</option>
+					<option value="memoTitle">제목</option>
+					<option value="memoCont">내용</option>
+				</select>
+			</div>
+			<div id="memoDisp">
+		
+			</div>
+
+		`;
+		$(".memoBody").html(bodyValue);
+	}
+
+	
+//엔터키 누르면 검색실행되게 하는 코드
+let searchMemoEnter = function(){
+	
+	$(document).ready(function(){
+	
+	    let searchMemo = function(){
+		    $("#searchBtn").on("click", function(){
+		    	console.log("체크");
+		        searchList();
+		    });
+	    }
+	    searchMemo();
+	    
+	    searchList = function (){
+	        //검색 찾는 로직 구현
+	      let searchOption = $("#searchOption option:selected").val();
+	      let searchWord = $("#searchWord").val();
+	      
+	      console.log(searchOption);
+	      console.log(searchWord);
+	      
+	//       if(!searchWord){
+	//          alert('검색 실패!', "검색어를 입력해주세요", 'error');
+	//          return;
+	//       }
+	      
+	      let data = {
+	         searchOption:searchOption,
+	         searchWord:searchWord
+	      }
+	      console.log("data : " ,data);
+	      
+	      $.ajax({
+	         url : "${pageContext.request.contextPath }/project/memoSearch",
+	         method : "post",
+	         data : JSON.stringify(data),
+	//          data : data,
+	         contentType : "application/json;charset=utf-8",
+	         dataType : "json",
+	         success : function(result) { 
+	        	$("#memoDisp").html("");
+	            console.log(result);
+	            console.log(result.length);
+	            
+	            console.log("result",result);
+				let divTags = [];
+				if(result){
+					$.each(result,function(i,v){
+						divTags.push(makeDivTag(v));
+					});
+				}
+				else{
+					$("<h2>").html("메모지 없음");
+				}
+				$("#memoDisp").html(divTags);
+				
+				memoDetail();	
+	            
+	         },
+	         error : function(jqXHR, status, error) {
+	            console.log(jqXHR);
+	            console.log(status);
+	            console.log(error);
+	         }
+	      });
+	      
+	//       $("#searchWord").val("");
+	    };
+	});
+}
+searchMemoEnter();
+	
+	
+</script>
+

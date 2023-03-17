@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.project.news.dao.NewsDAO">
+	
+
+	<select id="selectTotalRecord" resultType="int" parameterType="PagingVO">
+		SELECT COUNT(*)
+		FROM NEWS
+		<foreach collection="dataList" item="item">
+		 WHERE PRO_CODE = #{item.proCode}
+		</foreach>
+		
+	</select>
+	<!-- 페이징 처리해야할 목록  -->
+	<select id="selectNewsList" parameterType="PagingVO" resultType="kr.or.ddit.project.news.vo.NewsVO">
+		SELECT 
+   			 A.*
+		FROM(
+		    SELECT 
+		      	  ROWNUM RNUM,	
+                  NEWS_NO,
+                  PRO_CODE,
+                  MEM_EMAIL,
+                  NEWS_TITLE,
+                  NEWS_CONT,
+                  TO_CHAR(NEWS_DATE,'YYYY-MM-DD') NEWS_DATE,
+                  NEWS_HIT 
+		    FROM NEWS 
+		    ORDER BY NEWS_NO DESC
+		)A
+		WHERE RNUM BETWEEN #{startRow} AND #{endRow}
+		<foreach collection="dataList" item="item">
+		AND PRO_CODE = #{item.proCode}
+		</foreach>
+	</select>
+	
+	<select id="selectMyNewsList" parameterType="String" resultType="NewsVO">
+		SELECT 
+			NEWS_NO, NEWS_TITLE, NEWS_CONT,TO_CHAR(NEWS_DATE,'YYYY-MM-DD') NEWS_DATE, NEWS_HIT 
+		FROM NEWS
+		WHERE PRO_CODE= #{proCode}
+	</select>
+	
+	<resultMap type="NewsVO" id="newsMap" autoMapping="true">
+		<id property="newsNo" column="NEWS_NO"/>
+	</resultMap>
+	
+	<select id="selectNews" parameterType="int" resultMap="newsMap">
+	
+	SELECT 
+	    NEWS_NO,NEWS_TITLE, NEWS_CONT,NEWS_DATE,NEWS_HIT,NEWS_PASS,PRO_CODE,MEM_EMAIL
+	    FROM NEWS
+	    WHERE NEWS_NO=#{newsNo}
+	</select>
+	
+	<update id="incrementHit" parameterType="int">
+		UPDATE NEWS
+		SET 
+		NEWS_HIT = NEWS_HIT+1
+		WHERE NEWS_NO= #{newsNo}
+	</update>
+	
+	<insert id="insertNews" parameterType="NewsVO">
+		
+		<selectKey order="BEFORE" resultType="int" keyProperty="newsNo">
+			SELECT NEWS_SEQ.NEXTVAL
+			FROM DUAL
+		</selectKey>
+	
+		INSERT INTO NEWS (
+		    NEWS_NO,
+		    MEM_EMAIL,
+		    PRO_CODE,
+		    NEWS_TITLE,
+		    NEWS_CONT,
+		    NEWS_DATE,
+		    NEWS_PASS
+		
+		) VALUES (
+		  #{newsNo,jdbcType=NUMERIC}
+		, #{memEmail,jdbcType=VARCHAR}
+		, #{proCode,jdbcType=VARCHAR}
+		, #{newsTitle,jdbcType=VARCHAR}
+		, #{newsCont,jdbcType=CLOB}
+		, SYSDATE
+		, #{newsPass,jdbcType=NUMERIC}
+		
+		)
+	</insert>
+	
+	<delete id="deleteNews" parameterType="NewsVO" >	
+		DELETE 
+		FROM NEWS
+		WHERE NEWS_NO = #{newsNo,jdbcType=NUMERIC}
+	</delete>
+	
+	<update id="updateNews" parameterType="NewsVO">
+		UPDATE NEWS
+		SET 
+			 NEWS_TITLE = #{newsTitle} 
+			,NEWS_CONT = #{newsCont}
+			, NEWS_PASS =  #{newsPass}
+		WHERE NEWS_NO = #{newsNo}
+				
+	</update>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</mapper>

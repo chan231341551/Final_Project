@@ -1,0 +1,15 @@
+package kr.or.ddit.project.alarm.service;
+
+import kr.or.ddit.project.alarm.vo.AlarmVO;
+
+public interface AlarmService {
+	
+	/**
+	 * 알람 생성
+	 * @param alCode
+	 * @return 존재여부(NotExistBoardException)
+	 */
+	public int createAlarm(AlarmVO alarm);
+	
+	public int count(String memEmail);
+}

@@ -1,0 +1,21 @@
+package kr.or.ddit.project.file.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping("/project")
+public class FileController {
+
+	@GetMapping("/file")
+	public String fileView() {
+		return "/project/file/fileHome";
+
+	}
+	
+	@GetMapping("/myFile")
+	public String myFileList() {
+		return "pms/myfile/fileList";
+	}
+}

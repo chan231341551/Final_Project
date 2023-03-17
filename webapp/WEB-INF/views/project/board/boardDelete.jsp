@@ -1,0 +1,97 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>    
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="security" %>
+
+<main class="content" style="padding-top:0px;">
+
+<div class="container-fluid p-0">
+	<div class="row">
+		<div class="col-12 col-md-12 col-lg-12">
+				<div class="card">
+					<div class="card-header px-4 pt-4">
+
+						<h5 class="card-title">자유게시판</h5>
+						<table class="table table-sm mt-2 mb-4">
+							<tbody>
+								<tr>
+									<th>제목</th>
+									<td>${boardVO.boardTitle}</td>
+								</tr>
+								<tr>
+									<th>No</th>
+									<td>${boardVO.boardNo}</td>
+								</tr>
+								<tr>
+									<th>작성자</th>
+									<td>${boardVO.memName }</td>
+								</tr>
+								<tr>
+									<th>작성일자</th>
+									<td>${boardVO.boardDate }</td>
+								</tr>
+								<tr>
+									<th>Email</th>
+									<td>${boardVO.memEmail}</td>
+								</tr>
+								<tr>
+									<th>프로젝트 번호</th>
+									<td>${boardVO.proCode}</td>
+								</tr>
+								<tr>
+									<th>조회수</th>
+									<td>${boardVO.hit}</td>
+								</tr>
+							</tbody>
+						</table>
+						
+					</div>
+					<div class="card-body px-4 pt-2">
+						<p>${boardVO.boardCont}</p>
+						<hr>
+					</div>
+<!-- 					<div calss="card"> -->
+<!-- 						<div class="card-body"> -->
+<!-- 							<ul class="timeline mt-2 mb-0"> -->
+<!-- 								<li class="timeline-item"> -->
+<!-- 									<strong>Signed out</strong> -->
+<!-- 									<span class="float-end text-muted text-sm">30m ago</span> -->
+<!-- 									<p>Nam pretium turpis et arcu. Duis arcu tortor, suscipit...</p> -->
+<!-- 								</li> -->
+<!-- 							</ul> -->
+<!-- 						</div> -->
+<!-- 					</div> -->
+					
+					<div class="card">
+						<div class="card-header">
+							<h5 class="card-title">댓글 작성</h5>
+						</div>
+						<div class="card-body">
+							<form>
+								<div class="row">
+									<div class="col-md-12">
+										<div class="mb-3">
+											<label class="form-label" for="inputUsername">Username</label>
+											<input type="text" class="form-control" id="inputUsername" placeholder="Username">
+										</div>
+										<div class="mb-3">
+											<label class="form-label" for="inputUsername">Biography</label>
+											<textarea rows="2" class="form-control" id="inputBio" placeholder="Tell something about yourself"></textarea>
+										</div>
+									</div>
+								</div>
+								<a class="btn btn-success" href="/project/project/update/${boardVO.boardNo}">수정</a>
+								<button type="submit" class="btn btn-success">삭제</button>
+								<a class="btn btn-secondary" href="/project/project/boardList/${boardVO.proCode}" >목록으로</a>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+	
+
+	</div>
+</div>
+
+
+</main>

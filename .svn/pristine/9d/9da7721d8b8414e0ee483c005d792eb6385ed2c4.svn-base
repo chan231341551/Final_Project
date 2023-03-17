@@ -1,0 +1,168 @@
+package kr.or.ddit.project.issue.controller;
+
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.member.service.MemberService;
+import kr.or.ddit.member.vo.MemberVO;
+import kr.or.ddit.project.home.service.ProjectService;
+import kr.or.ddit.project.home.vo.ProjectVO;
+import kr.or.ddit.project.issue.service.IssueService;
+import kr.or.ddit.project.issue.vo.IssueVO;
+import kr.or.ddit.project.work.vo.WorkVO;
+import kr.or.ddit.validate.InsertGroup;
+import lombok.extern.slf4j.Slf4j;
+
+
+@Slf4j
+@Controller
+@RequestMapping("/project")
+public class IssueController {
+	@Inject
+	private ProjectService proService;
+	@Inject
+	private IssueService service;
+	
+	// mention
+	@GetMapping("/mention/{proCode}")
+	public String mention(
+		 @PathVariable String proCode	
+		, Model model
+	) {
+		model.addAttribute("proCode", proCode);
+		return "project/mention/mention";
+	}
+	
+	// 이슈목록 화면으로 이동(select List)
+	@GetMapping("/project/issueList/{proCode}")
+	public String issueList(
+		@PathVariable String proCode
+		,Model model
+	) {
+		ProjectVO project = proService.retrieveProject(proCode);
+		model.addAttribute("project", project);
+		return "project/issue/issueRetrieve";
+	}
+	
+	// 이슈목록 데이터 호출(select List)
+	@GetMapping("/project/issue/{proCode}")
+	public String issue(
+		  Model model
+		, @PathVariable String proCode
+	) {
+		List<IssueVO> issueList = service.retrieveIssueList(proCode);
+		model.addAttribute("issueList", issueList);
+		log.info("issueList : {}",issueList);
+		return "jsonView";
+	}
+	
+	// insert화면 작업목록 호출
+	@GetMapping("/issueForm")
+	public String issueForm(
+			IssueVO issue
+			, Principal principal
+			, Model model
+	) {
+		List<WorkVO> workList = service.retrieveWork(principal.getName());
+		log.info("workList:", workList);
+		model.addAttribute("workList", workList);
+		
+		return "project/issue/issueForm";
+	} 
+	
+	// insert화면 회원목록 비동기
+//	@ResponseBody -> List<MemberVO>
+	@GetMapping("/issueMemList")
+	public String issueForm(
+			  MemberVO member
+			, WorkVO work
+			, Model model
+	) {
+		List<MemberVO> memList = service.retrieveMember(work.getWorkNo());
+		log.info("memList:", memList);
+		model.addAttribute("memList", memList);
+		
+//		return memList;
+		return "jsonView";
+	}
+	
+	// 이슈 만들기(insert)
+//	@ResponseBody
+	@PostMapping("/issueForm")
+	public String issueInsert(
+			@ModelAttribute("issue") IssueVO issue
+			, Errors errors
+			, Model model
+			, Principal principal
+	) {
+		log.info("Issue : " + issue);
+		String memEmail = principal.getName();
+		MemberVO member = new MemberVO();
+		member.setMemEmail(memEmail);
+		issue.setMember(member);
+	
+		int rowcnt = service.createIssue(issue);
+		if (rowcnt < 0) {
+			model.addAttribute("message", "이슈 만들기 실패");
+		}
+		return "jsonView";
+	}
+	
+	
+	// 이슈 수정(update)
+	@PostMapping("/issueUpdate/{issNo}")
+	public String issueUpdate(
+			@ModelAttribute("issue") IssueVO issue
+			, @PathVariable int issNo
+			, Errors errors
+			, Model model
+	) {
+		log.info("Issue : " + issue);
+		
+		int rowcnt = service.modifyIssue(issue);
+		if (rowcnt < 0) {
+			model.addAttribute("message", "이슈 만들기 실패");
+		}
+		return "jsonView";
+	}
+	
+	// 이슈 상세조회(select)
+	@ResponseBody
+	@PostMapping("/issueDetail/{issNo}")
+	public Map<String, Object> issueDetail(
+		@PathVariable int issNo
+	) {
+		log.info("들어옴{}",issNo);
+		IssueVO issue = service.retrieveIssue(issNo);
+		List<Map<String, String>> member = service.retrieveChargerMem(issNo);
+		
+		Map<String, Object> issData = new HashMap<String, Object>();
+		issData.put("issue", issue);
+		issData.put("member",member);
+		
+		return issData;
+	}
+	
+	
+	
+	
+	
+	
+	
+}

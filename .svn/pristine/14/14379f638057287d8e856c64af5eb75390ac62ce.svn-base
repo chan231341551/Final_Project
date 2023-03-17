@@ -1,0 +1,66 @@
+package kr.or.ddit.main.help.controller;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.main.help.service.NoticeService;
+import kr.or.ddit.main.help.vo.NoticeVO;
+import kr.or.ddit.vo.PagingVO;
+import kr.or.ddit.vo.SearchVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/help")
+public class NoticeController {
+	@Inject
+	private NoticeService service;
+	
+//	@GetMapping("")
+//	public String noticeMain(){
+//		
+//	}
+	
+	
+	@GetMapping("/noticeList")
+	public String noticeList(
+			@RequestParam(value="page", required=false, defaultValue="1") int currentPage
+			, @ModelAttribute("simpleCondition") SearchVO searchVO
+			, Model model
+	) {
+		PagingVO<NoticeVO> pagingVO = new PagingVO<>(1,2);
+		pagingVO.setCurrentPage(currentPage);
+		pagingVO.setSimpleCondition(searchVO);
+		
+		service.retrieveNoticeList(pagingVO);
+		model.addAttribute("pagingVO",pagingVO);
+		
+		return "/help/noticeList";
+	}
+	
+	//url:"/help/noticeDetail",
+	//let data = {"noticeNo":1392};
+	//json이 들어올 때는 RequestBody로 받고
+	//json으로 나갈 때는 ResponseBody로 내보냄
+	@ResponseBody
+	@GetMapping("/noticeDetail")
+	public NoticeVO detail(@ModelAttribute NoticeVO noticeVO) {
+		log.info("noticeVO : " + noticeVO);
+		
+		//1392를 기본키 데이터로하는 1행을 검색
+		noticeVO = new NoticeVO();
+		noticeVO.setNoticeNo(1392);
+		noticeVO.setNoticeTitle("Web Designer");
+		noticeVO.setNoticeCont("Far far away, behind the word mountains");
+		
+		return noticeVO;
+	}
+
+}

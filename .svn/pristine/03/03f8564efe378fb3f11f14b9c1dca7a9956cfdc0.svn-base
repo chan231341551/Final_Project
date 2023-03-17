@@ -1,0 +1,40 @@
+package kr.or.ddit.project.issue.vo;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(of="issNo")
+public class IssueVO {
+	@NotNull
+	private Integer issNo;
+	@NotNull
+	private Integer workNo;
+	@NotNull
+	private String memEmail;
+	@NotBlank
+	private String 	issTitle;
+	@NotBlank
+	private String 	issCont;
+	private String 	issRdate;
+	private String 	issSdate;
+	private String 	issEedate;
+	private String 	issEdate;
+	@NotBlank
+	private String 	issEmerCd;
+	@NotBlank
+	private String 	issStatusCd;
+	@NotBlank
+	private String 	issLabelCd;
+	
+	
+	// ISSSUE_CHARGER
+	private String 	issReadYn;
+	// WORK
+	private String 	workTitle;
+	// MEMBER
+	private String memName;
+}

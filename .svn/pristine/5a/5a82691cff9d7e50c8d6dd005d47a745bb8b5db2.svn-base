@@ -1,0 +1,36 @@
+// 프로젝트 생성 모달창
+/*const loremIpsum = document.getElementById("lorem-ipsum")*/
+const newProjectModal = document.getElementById("newProjectModal")
+
+function modalOn() {
+	newProjectModal.style.display = "flex"
+}
+function modalOn2() {
+	sideToolModal.style.display = "flex"
+}
+function isModalOn() {
+	return newProjectModal.style.display === "flex"
+}
+function modalOff() {
+	newProjectModal.style.display = "none"
+}
+const btnModal = document.getElementById("newProjectBtn")
+btnModal.addEventListener("click", e => {
+	modalOn()
+})
+const closeBtn = newProjectModal.querySelector(".close-area")
+closeBtn.addEventListener("click", e => {
+	modalOff()
+})
+//modal.addEventListener("click", e => {
+//	const evTarget = e.target
+//	if(evTarget.classList.contains("modal-overlay")) {
+//		modalOff()
+//	}
+//})
+window.addEventListener("keyup", e => {
+	if(isModalOn() && e.key === "Escape") {
+		modalOff()
+	}
+})
+

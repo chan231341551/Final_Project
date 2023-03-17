@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.main.help.dao.QNADAO">
+	<sql id="searchFrag">
+	    <where>
+	    	<if test="simpleCondition neq null and @org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+	    		<choose>
+	    			<when test="simpleCondition.searchOption eq '제목'">
+	    				INSTR(QNA_TITLE, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<when test="simpleCondition.searchOption eq '내용'">
+	    				INSTR(QNA_CONT, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<otherwise>
+	    				INSTR(QNA_TITLE, #{simpleCondition.searchWord}) > 0
+	    				OR
+	    				INSTR(QNA_CONT, #{simpleCondition.searchWord}) > 0
+	    			</otherwise>
+	    		</choose>
+	    	</if>
+	    </where>
+	</sql>
+
+	<!-- 페이징 시 전체 레코드 수 -->
+	<select id="selectTotalRecord" parameterType="PagingVO" resultType="int">
+		SELECT COUNT(*)
+		  FROM QNA
+		<include refid="searchFrag" />
+	</select>
+	
+	<!-- 전체 QNA리스트
+	detailCondition = qnaVO
+	  -->
+	<select id="selectQNAList" parameterType="PagingVO" resultType="kr.or.ddit.main.help.vo.QNAVO">
+		WITH QNABOARD AS (
+		SELECT 
+			QNA_NO,
+			MEM_EMAIL,
+			QNA_TITLE,
+			QNA_DATE,
+			QNA_ATT_NO,
+			QNA_CONT,
+			QNA_ANS,
+			ANS_DATE
+		FROM QNA
+		WHERE 1 = 1
+		AND MEM_EMAIL = #{detailCondition.memEmail}
+		<include refid="searchFrag" />
+			ORDER BY QNA_NO DESC
+		)
+		SELECT A.*
+		  FROM (
+		         SELECT ROWNUM RNUM, QNABOARD.*
+		           FROM QNABOARD
+		        ) A
+		WHERE RNUM BETWEEN #{startRow} AND #{endRow}
+	</select>
+	
+	<!-- 사용자가 질문 -->
+	<insert id="insertQNA" parameterType="QNAVO">
+		<selectKey order="BEFORE" resultType="int" keyProperty="qnaNo">
+			SELECT QNA_ANSWER_SEQ.NEXTVAL
+  			  FROM DUAL
+		</selectKey>
+		INSERT INTO QNA (
+		    QNA_NO,
+		    QNA_TITLE,
+		    QNA_DATE,
+		    QNA_ATT_NO,
+		    QNA_CONT,
+		    MEM_EMAIL
+		) VALUES (
+			#{qnaNo,jdbcType=NUMERIC},
+			#{qnaTitle,jdbcType=VARCHAR},
+			TO_CHAR(SYSDATE,'YYYY-MM-DD HH24:MI'),
+			#{qnaAttNo,jdbcType=NUMERIC},
+		    #{qnaCont,jdbcType=CLOB},
+			#{memEmail,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<!-- 운영자가 답변 등록(수정형태) 
+	QNAVO(rnum=0, qnaNo=35, memEmail=null, qnaTitle=null, qnaCont=null, qnaDate=null, qnaAttNo=null, qnaAns=<p>답변</p>, isAns=처리중)
+	-->
+	<update id="insertAns" parameterType="QNAVO">
+		UPDATE QNA
+  		   SET
+		   QNA_ANS =  #{qnaAns,jdbcType=CLOB},
+		   ANS_DATE = TO_CHAR(SYSDATE,'YYYY-MM-DD HH24:MI'),
+		   ANS_ATT_NO = #{ansAttNo,jdbcType=NUMERIC}
+		 WHERE QNA_NO = #{qnaNo,jdbcType=NUMERIC}
+	</update>
+	
+	<!-- 상세조회(1:1문의) -->
+	<select id="selectQNA" parameterType="int" resultType="QNAVO">
+		SELECT 
+			QNA_NO,
+			MEM_EMAIL,
+			QNA_TITLE,
+			QNA_DATE,
+			QNA_ATT_NO,
+			QNA_CONT,
+			NVL(QNA_ANS ,' ') QNA_ANS,
+			NVL(ANS_DATE, ' ') ANS_DATE,
+            ANS_ATT_NO,
+            
+           (SELECT ATT_PATH || ATT_SAVENAME
+		   FROM ATTATCH
+		   WHERE ATT_NO = A.QNA_ATT_NO) AS QNA_ATT_PATH,
+		   (SELECT ATT_FILENAME
+		   FROM ATTATCH
+		 WHERE ATT_NO = A.QNA_ATT_NO) AS QNA_ATT_FILENAME,
+		 
+           (SELECT ATT_PATH || ATT_SAVENAME
+		   FROM ATTATCH
+		   WHERE ATT_NO = A.ANS_ATT_NO) AS ANS_ATT_PATH,
+		   (SELECT ATT_FILENAME
+		   FROM ATTATCH
+		 WHERE ATT_NO = A.ANS_ATT_NO) AS ANS_ATT_FILENAME
+		 
+		FROM QNA A
+		WHERE QNA_NO = #{qnaNo}
+	</select>
+		
+	<delete id="deleteQNA" parameterType="int">
+		DELETE
+		  FROM QNA
+		 WHERE QNA_NO = #{qnaNo}
+	</delete>
+</mapper>

@@ -1,0 +1,78 @@
+package kr.or.ddit.member.vo;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Base64;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.groups.Default;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import kr.or.ddit.validate.DeleteGroup;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+@Data
+@NoArgsConstructor
+@EqualsAndHashCode(of="memEmail")
+@ToString(exclude= {"memPass","memImage", "memImg"})
+public class MemberVO implements Serializable{
+	
+	public MemberVO(
+			@NotBlank(groups = { Default.class, DeleteGroup.class }) String memEmail,
+			@NotBlank(groups = { Default.class, DeleteGroup.class }) String memPass
+	) {
+		super();
+		this.memEmail = memEmail;
+		this.memPass = memPass;
+	}
+	private int rnum;
+	@NotBlank(groups= {Default.class, DeleteGroup.class})
+	private String memEmail;
+	@NotBlank
+	private String memName;
+	@JsonIgnore
+	@NotBlank(groups= {Default.class, DeleteGroup.class})
+	private String memPass;
+	private String memTel;
+	
+	@NotBlank
+	private String memSdate;
+	private boolean memEdate;
+	private String memSttsCd;
+	private String memDateLog;
+	private String memRole;
+	
+	private String mailKey;
+	private String mailAuth;
+	
+	@JsonIgnore
+	private transient byte[] memImg; // db
+	@JsonIgnore
+	private transient MultipartFile memImage; //client
+	
+	public void setMemImage(MultipartFile memImage) throws IOException {
+		if(memImage!=null && !memImage.isEmpty()) {
+			this.memImage = memImage;
+			this.memImg = memImage.getBytes();
+		}
+	}
+	
+	public String getBase64MemImg() {
+		if(memImg!=null)
+			return Base64.getEncoder().encodeToString(memImg);
+		else 
+			return null;
+	}
+	
+	// 프로젝트 코드 리스트 - 1:N
+	// private List<ProjectVO> projectCodeList
+	// 프로젝트 역할 - 1:N
+	// private List<MemRole> memRoleList
+
+}

@@ -1,0 +1,100 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+
+
+	<h5 class="card-title">제목</h5>
+	<h6 class="card-subtitle text-muted">이슈 진짜 ㅎㅎ</h6>
+	<hr>
+	<h5 class="card-title">시작일</h5>
+	<h6 class="card-subtitle text-muted">2022-00-00</h6>
+	<h5 class="card-title">종료 예정일</h5>
+	<h6 class="card-subtitle text-muted">2022-00-00</h6>
+	<hr>
+	<h5 class="card-title">상태</h5>
+	<h6 class="card-subtitle text-muted">이슈 진짜 ㅎㅎ</h6>
+	<hr>
+	<h5 class="card-title">내용</h5>
+	<h6 class="card-subtitle text-muted">이슈 진짜 ㅎㅎ</h6>
+	<hr>
+	
+	
+	<form:form modelAttribute="Issue" enctype="multipart/form-data" method="post">
+	<table class="table table-bordered">
+		<tr>
+			<th>
+				<spring:message code="issue.issTitle" />
+			</th>
+			<td>
+				<form:input path="issTitle" type="text" cssClass="form-control"  />
+				<form:errors path="issTitle" element="span" cssClass="text-danger" />
+			</td>
+		</tr>
+		<tr>
+			<th><spring:message code="issue.issCont" /></th>
+			<td>
+				<form:input path="issCont" type="text" cssClass="form-control"  />
+				<form:errors path="issCont" element="span" cssClass="text-danger" />
+			</td>
+		</tr>
+		<tr>
+			<th><spring:message code="issue.issSdate" /></th>
+			<td>
+				<input type="date" name="issSdate" class="form-control"/>
+				<form:errors path="issSdate" element="span" cssClass="text-danger" />
+			</td>
+		</tr>
+		<tr>
+			<th><spring:message code="issue.issEedate" /></th>
+			<td>
+				<input name="issEedate" type="text" readonly value="${pageContext.request.remoteAddr }"/>
+				<form:errors path="issEedate" element="span" cssClass="text-danger" />
+			</td>
+		</tr>
+		<tr>
+			<th><spring:message code="issue.issEmerCd" /></th>
+			<td>
+				<form:input path="issEmerCd" type="text" cssClass="form-control" />
+				<form:errors path="issEmerCd" element="span" cssClass="text-danger" />
+			</td>
+		</tr>
+		<tr>
+			<th>첨부파일</th>
+			<td>
+<!-- 							<input type="file" name="boFiles" /> -->
+<!-- 							<input type="file" name="boFiles" /> -->
+<!-- 							<input type="file" name="boFiles" /> -->
+			</td>
+		</tr>
+		<tr>
+			<th><spring:message code="issue.issStatusCd" /></th>
+			<td>
+				<form:textarea path="issStatusCd" type="text"
+					cssClass="form-control" />
+				<form:errors path="issStatusCd" element="span" cssClass="text-danger" />
+			</td>
+		</tr>
+		<tr>
+			<th><spring:message code="issue.issLabelCd" /></th>
+			<td>
+				<form:textarea path="issLabelCd" type="text"
+					cssClass="form-control" />
+				<form:errors path="issLabelCd" element="span" cssClass="text-danger" />
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<form:button type="submit" class="btn btn-success">저장</form:button>
+				<a class="btn btn-secondary" href="<c:url value='/issue/issueList.do'/>">목록으로</a>
+			</td>
+		</tr>
+	</table>
+	</form:form>
+<script>
+	CKEDITOR.replace('issCont', {
+		filebrowserUploadUrl: '${pageContext.request.contextPath}/issue/issueImage.do?command=QuickUpload&type=Files&responseType=json'
+	});
+</script>
+				

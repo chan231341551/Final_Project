@@ -1,0 +1,60 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://www.springframework.org/security/tags"
+	prefix="security"%>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
+<script
+	src="${pageContext.request.contextPath }/resources/ckeditor/ckeditor.js"></script>
+<link
+	href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i"
+	rel="stylesheet">
+
+<!-- Main CSS-->
+<link href="/resources/css/noticeFormmain.css" rel="stylesheet"
+	media="all">
+<div class="card card-6">
+	<div class="card-body">
+		<form action="insertNotice" method="POST">
+			<div class="form-row">
+				<div class="name">제목</div>
+				<div class="value">
+					<input class="input--style-6" type="text" name="full_name">
+				</div>
+			</div>
+			<div class="form-row">
+				<div class="name">내용</div>
+				<div class="value">
+					<form>
+						<textarea name="editor1" id="editor1" rows="10" cols="80">
+					        	This is my textarea to be replaced with CKEditor 4.
+					    	</textarea>
+						<script>
+							CKEDITOR.replace('editor1');
+						</script>
+					</form>
+				</div>
+			</div>
+			<div class="form-row">
+				<div class="name" style="font-size: 15px">파일 업로드</div>
+				<div class="value">
+					<div class="input-group js-input-file">
+						<input class="input-file" type="file" name="file_cv" id="file">
+						<label class="label--file" for="file">Choose file</label> <span
+							class="input-file__info">No file chosen</span>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	<div class="card-footer">
+		<button id="createBtn" class="btn btn--radius-2 btn--blue-2" type="submit">작성하기</button>
+		<button class="btn btn--radius-2 btn--blue-2" id="closeBtn">닫기</button>
+	</div>
+</div>
+<script>
+	
+</script>

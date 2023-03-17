@@ -1,0 +1,63 @@
+package kr.or.ddit.project.home.service;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.enumpkg.ServiceResult;
+import kr.or.ddit.project.home.dao.ProjectDAO;
+import kr.or.ddit.project.home.vo.ProjectVO;
+
+@Service
+public class ProjectServiceImpl implements ProjectService {
+	
+	@Inject
+	private ProjectDAO projectDAO;
+
+	@Override
+	public ProjectVO retrieveProject(String proCode) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<ProjectVO> ProjectListAll() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
+	@Override
+	public List<ProjectVO> retrieveProjectList(int memNo) {
+		List<ProjectVO> projectList = projectDAO.selectProjectList(memNo);
+		return projectList;
+	}
+
+	@Override
+	public ServiceResult createProject(ProjectVO project) {
+		ServiceResult result = null;
+		int rowcnt = projectDAO.insertProject(project);
+		result = rowcnt > 0 ? ServiceResult.OK : ServiceResult.FAIL;
+		return result;
+	}
+
+	@Override
+	public ServiceResult modifyProject(ProjectVO project) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ServiceResult removeProject(String proCode) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
+
+
+}

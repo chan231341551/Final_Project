@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.project.attach.dao.AttatchDAO">
+	
+	<delete id="deleteAttatch" parameterType="AttatchVO">
+		DELETE FROM ATTATCH
+		WHERE ATT_NO = #{attNo,jdbcType=NUMERIC} 
+		AND ATT_SN IN
+
+		<foreach collection="delAttSns" item="attSn" open="(" close=")" separator=",">
+			#{attSn,jdbcType=NUMERIC}
+		</foreach>
+	</delete>
+	
+	<!-- 파일 저장 전에 기본키 먼저 생성 -->
+	<select id="selectAttNo" resultType="int">
+		SELECT NVL(MAX(ATT_NO), 0)+1
+		FROM ATTATCH
+	</select>
+	
+	<!-- 파일 저장 -->
+	<insert id="insertAttatch" parameterType="AttatchVO">
+		<selectKey order="BEFORE" resultType="int" keyProperty="attSn">
+			SELECT NVL(MAX(ATT_SN), 0)+1
+			FROM ATTATCH
+			WHERE ATT_NO = #{attNo,jdbcType=NUMERIC}
+		</selectKey>
+	
+		INSERT INTO ATTATCH(
+			ATT_NO
+			, ATT_SN
+			, ATT_CTGRY
+			, ATT_SAVENAME
+			, ATT_FILENAME
+			, ATT_MIME
+			, ATT_FILESIZE
+			, ATT_DOWNLOAD
+			, ATT_FANCYSIZE
+		)VALUES(
+			#{attNo,jdbcType=NUMERIC}
+			, #{attSn}
+			, #{attCtgry,jdbcType=VARCHAR}
+			, #{attSavename,jdbcType=VARCHAR}
+			, #{attFilename,jdbcType=VARCHAR}
+			, #{attMime,jdbcType=VARCHAR}
+			, #{attFilesize,jdbcType=NUMERIC}
+			, 0
+			, #{attFancysize,jdbcType=VARCHAR}
+		)
+		
+	</insert>
+	
+	<select id="selectAttatchList" parameterType="int" resultType="AttatchVO">
+		SELECT 
+			ATT_NO
+			, ATT_SN
+			, ATT_CTGRY
+			, ATT_SAVENAME
+			, ATT_FILENAME
+			, ATT_MIME
+			, ATT_FILESIZE
+			, ATT_DOWNLOAD
+			, ATT_FANCYSIZE
+		FROM ATTATCH
+		WHERE ATT_NO = #{attNo,jdbcType=NUMERIC}
+	</select>
+</mapper>

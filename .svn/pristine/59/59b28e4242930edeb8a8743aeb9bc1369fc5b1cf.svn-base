@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.project.work.dao.WorkDAO">
+
+	<!-- issue 작업목록 조회 -->
+	<select id="selectISWork" resultType="kr.or.ddit.project.work.vo.WorkVO" parameterType="String">
+		SELECT 
+		    A.WORK_TITLE
+		    , A.WORK_NO
+		FROM WORK A, WORK_CHARGER B 
+		WHERE A.WORK_NO = B.WORK_NO
+		AND B.MEM_EMAIL=#{memEmail,jdbcType=VARCHAR}
+	</select>
+	
+	
+	<!-- issue 회원목록 조회 -->
+	<select id="selectISMember" parameterType="int" resultType="kr.or.ddit.member.vo.MemberVO">
+		SELECT 
+		     B.MEM_NAME
+		     , B.MEM_EMAIL
+		FROM WORK_CHARGER A, MEMBER B 
+		WHERE A.MEM_EMAIL = B.MEM_EMAIL
+		AND A.WORK_NO= #{workNo,jdbcType=NUMERIC}
+	</select>
+	
+	<!-- 작업 리스트 조회 -->
+	<resultMap type="kr.or.ddit.project.work.vo.WorkVO" id="workMap" autoMapping="true">
+		<id property="workNo" column="WORK_NO"/>
+		<collection property="workChargerList" ofType="kr.or.ddit.project.work.vo.WorkChargerVO" autoMapping="true"></collection>
+	</resultMap>
+
+	<select id="selectWorkList" parameterType="string" resultMap="workMap">		
+  SELECT ROWNUM, WORKLIST.*
+    FROM (SELECT
+		    A.WORK_NO,
+		    A.PRO_CODE,
+		    A.WORK_PNT_NO,
+		    A.WORK_TITLE,
+		    A.WORK_DETAIL,
+		    TO_CHAR(WORK_SDATE,'YYYY-MM-DD') AS WORK_SDATE,
+		    TO_CHAR(WORK_EDATE,'YYYY-MM-DD') AS WORK_EDATE,
+		    A.WORK_STATE_CD,
+		    A.WORK_ORDER_CD,
+		    B.MEM_EMAIL,
+		    B.WORK_PROGRESS
+		FROM
+		    WORK A INNER JOIN WORK_CHARGER B ON A.WORK_NO = B.WORK_NO
+		WHERE PRO_CODE = #{proCode}
+		ORDER BY WORK_NO DESC) WORKLIST
+
+	</select>
+	
+	<!-- 상위 작업 목록 -->
+	<select id="selectPntUpWorkList" parameterType="string" resultMap="workMap">
+		SELECT
+		    A.WORK_NO,
+		    A.PRO_CODE,
+		    A.WORK_PNT_NO,
+		    A.WORK_TITLE,
+		    A.WORK_DETAIL,
+		    TO_CHAR(WORK_SDATE,'YYYY-MM-DD') AS WORK_SDATE,
+		    TO_CHAR(WORK_EDATE,'YYYY-MM-DD') AS WORK_EDATE,
+		    A.WORK_STATE_CD,
+		    A.WORK_ORDER_CD,
+		    B.MEM_EMAIL,
+		    B.WORK_PROGRESS
+		FROM
+		    WORK A INNER JOIN WORK_CHARGER B ON A.WORK_NO = B.WORK_NO
+		WHERE PRO_CODE = #{proCode}
+		AND WORK_PNT_NO = 0
+		ORDER BY WORK_NO DESC
+	</select>
+	
+	<!-- 프로젝트 안에서 나에게 담당된 작업 리스트 목록 -->
+	<select id="selectMyWorkList" parameterType="kr.or.ddit.project.work.vo.WorkVO" resultMap="workMap">
+		SELECT
+		    A.WORK_NO,
+		    A.PRO_CODE,
+		    A.WORK_PNT_NO,
+		    A.WORK_TITLE,
+		    A.WORK_DETAIL,
+		    A.WORK_SDATE,
+		    A.WORK_EDATE,
+		    A.WORK_STATE_CD,
+		    A.WORK_ORDER_CD,
+		    B.MEM_EMAIL,
+		    B.WORK_PROGRESS
+		FROM
+		    WORK A INNER JOIN WORK_CHARGER B ON (A.WORK_NO = B.WORK_NO)
+		WHERE PRO_CODE = #{proCode,jdbcType=VARCHAR}
+		AND B.MEM_EMAIL = #{memEmail,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 진행중 작업중에 오늘 날짜 작업 목록 (시작~종료 날짜 안에 오늘 날짜가 포함된 전체 목록) -->
+	<select id="selectTodayWorkList" parameterType="string" resultMap="workMap">
+		SELECT
+		    A.WORK_NO,
+		    A.PRO_CODE,
+		    A.WORK_PNT_NO,
+		    A.WORK_TITLE,
+		    A.WORK_DETAIL,
+		    TO_CHAR(WORK_SDATE,'YYYY-MM-DD') AS WORK_SDATE,
+		    TO_CHAR(WORK_EDATE,'YYYY-MM-DD') AS WORK_EDATE,
+		    A.WORK_STATE_CD,
+		    A.WORK_ORDER_CD,
+		    B.MEM_EMAIL,
+		    B.WORK_PROGRESS
+		FROM
+		    WORK A INNER JOIN WORK_CHARGER B ON A.WORK_NO = B.WORK_NO
+		WHERE PRO_CODE = #{proCode}
+		  AND TO_CHAR(SYSDATE,'YYYY-MM-DD') BETWEEN WORK_SDATE AND WORK_EDATE
+		ORDER BY WORK_NO DESC
+	</select>
+	
+	<!-- 나에게 배정 된 모든 작업 목록 (다른 프로젝트 포함) -->
+	<select id="selectAllMyWorkList" parameterType="WorkVO" resultMap="workMap">
+		SELECT A.WORK_NO, 
+		       A.PRO_CODE, 
+              (SELECT PRO_TITLE
+         		 FROM PROJECT
+        	    WHERE PRO_CODE = A.PRO_CODE) AS PRO_TITLE,
+		       A.WORK_PNT_NO, 
+		       A.WORK_TITLE, 
+		       A.WORK_DETAIL, 
+		       A.WORK_SDATE, 
+		       A.WORK_EDATE, 
+		       A.WORK_STATE_CD,
+		       A.WORK_ORDER_CD,
+		       B.MEM_EMAIL,
+		       B.WORK_PROGRESS,
+		       C.PRO_DEL_YN
+		FROM WORK A INNER JOIN WORK_CHARGER B ON A.WORK_NO = B.WORK_NO INNER JOIN PROJECT C ON A.PRO_CODE = C.PRO_CODE
+		WHERE B.MEM_EMAIL = #{memEmail, jdbcType=VARCHAR}
+		AND C.PRO_DEL_YN = 'N'
+	</select>
+	
+	
+	<!-- 작업 자세히보기 -->
+	<select id="selectWorkDetail" parameterType="kr.or.ddit.project.work.vo.WorkVO" resultMap="workMap">
+		SELECT
+		    A.WORK_NO,
+		    A.PRO_CODE,
+		    A.WORK_PNT_NO,
+		    A.WORK_TITLE,
+		    A.WORK_DETAIL,
+		    TO_CHAR(WORK_SDATE,'YYYY-MM-DD') AS WORK_SDATE,
+		    TO_CHAR(WORK_EDATE,'YYYY-MM-DD') AS WORK_EDATE,
+		    A.WORK_STATE_CD,
+		    A.WORK_ORDER_CD,
+		    B.MEM_EMAIL,
+		    B.WORK_PROGRESS
+		FROM
+		    WORK A INNER JOIN WORK_CHARGER B ON A.WORK_NO = B.WORK_NO
+		WHERE PRO_CODE = #{proCode,jdbcType=VARCHAR}
+		AND A.WORK_NO = #{workNo,jdbcType=NUMERIC}
+	</select>
+	
+	<!-- 하위작업 전체 NO 불러오기 -->
+	<select id="selectDownWorkList" parameterType="WorkVO" resultType="WorkVO">
+		SELECT WORK_NO
+		  FROM WORK
+          WHERE WORK_PNT_NO = #{workNo,jdbcType=NUMERIC}
+	</select>
+	
+	<!-- 작업 등록 -->
+	<insert id="insertWork" parameterType="kr.or.ddit.project.work.vo.WorkVO">
+	
+		INSERT INTO WORK (
+		    WORK_NO,
+		    PRO_CODE,
+		    WORK_PNT_NO,
+		    WORK_TITLE,
+		    WORK_DETAIL,
+		    WORK_SDATE,
+		    WORK_EDATE,
+		    WORK_STATE_CD,
+		    WORK_ORDER_CD
+		) VALUES (
+		    WORK_SEQ.NEXTVAL
+		    , #{proCode,jdbcType=VARCHAR}
+			, #{workPntNo,jdbcType=NUMERIC}
+			, #{workTitle,jdbcType=VARCHAR}
+			, #{workDetail,jdbcType=VARCHAR}
+			, #{workSdate,jdbcType=DATE}
+			, #{workEdate,jdbcType=DATE}
+			, #{workStateCd,jdbcType=VARCHAR}
+			, #{workOrderCd,jdbcType=VARCHAR}
+		)
+
+	</insert>
+	
+	<!-- 작업 수정하기 -->
+	<update id="updateWork" parameterType="WorkVO">
+		UPDATE WORK
+		   SET
+		      PRO_CODE = #{proCode,jdbcType=VARCHAR}
+			, WORK_PNT_NO = #{workPntNo,jdbcType=NUMERIC}
+			, WORK_TITLE = #{workTitle,jdbcType=VARCHAR}
+			, WORK_DETAIL = #{workDetail,jdbcType=VARCHAR}
+			, WORK_SDATE = #{workSdate,jdbcType=DATE}
+			, WORK_EDATE = #{workEdate,jdbcType=DATE}
+			, WORK_STATE_CD = #{workStateCd,jdbcType=VARCHAR}
+			, WORK_ORDER_CD = #{workOrderCd,jdbcType=VARCHAR}
+		WHERE WORK_NO = #{workNo,jdbcType=NUMERIC}
+	</update>
+	
+	<!-- 작업 날짜만 수정하기 -->
+	<update id="updateWorkDate" parameterType="WorkVO">
+		UPDATE WORK
+		   SET
+		      WORK_SDATE = #{workSdate,jdbcType=DATE}
+			, WORK_EDATE = #{workEdate,jdbcType=DATE}
+		WHERE WORK_NO = #{workNo,jdbcType=NUMERIC}
+	</update>
+	
+	<!-- 마지막 작업 No 값 가져오기 -->
+	<select id="selectWorkLastNo" resultType="kr.or.ddit.project.work.vo.WorkVO">
+		SELECT (SELECT 
+            		LAST_NUMBER 
+         		  FROM 
+           		 	USER_SEQUENCES 
+       			 WHERE 
+           		 	SEQUENCE_NAME = 'WORK_SEQ') AS WORK_NO
+		FROM DUAL
+	</select>
+	
+	<!-- 작업 담당자 등록 -->
+	<insert id="insertWorkCharger" parameterType="kr.or.ddit.project.work.vo.WorkVO">
+		INSERT ALL
+		<foreach collection="workChargerList" item="workCharger" index="idx">
+			INTO WORK_CHARGER (
+			    WORK_NO
+			    , MEM_EMAIL
+			    , WORK_PROGRESS
+			) VALUES (
+			    #{workCharger.workNo,jdbcType=NUMERIC}
+			    , #{workCharger.memEmail,jdbcType=VARCHAR}
+			    , 0
+			)
+		</foreach>
+		SELECT * FROM DUAL
+	</insert>
+	
+	<!-- 작업 담당자 수정 
+	파라미터 : List<WorkChargerVO>
+	-->
+	<update id="updateWorkCharger" parameterType="java.util.List">
+		<foreach collection="list" item="workChargerVO" index="idx"
+		open="DECLARE BEGIN " separator=";" close="; END;">
+			 UPDATE WORK_CHARGER
+		     SET    WORK_PROGRESS = #{workChargerVO.workProgress}
+		     WHERE  WORK_NO = #{workChargerVO.workNo} AND MEM_EMAIL = #{workChargerVO.memEmail}
+		</foreach>
+	</update>
+	
+	<!-- 작업 담당자 삭제 -->
+	<delete id="deleteWorkCharger" parameterType="kr.or.ddit.project.work.vo.WorkVO">
+		DELETE FROM WORK_CHARGER
+		 WHERE WORK_NO = #{workNo,jdbcType=NUMERIC}
+	</delete>
+	
+	<!-- 작업 하나 삭제하기 -->
+	<delete id="deleteWork" parameterType="kr.or.ddit.project.work.vo.WorkVO">
+		DELETE FROM WORK
+		 WHERE WORK_NO = #{workNo,jdbcType=NUMERIC}
+	</delete>
+	
+	<!-- 작업 WORK_STATE_CD 수정 -->
+	<update id="updateWorkStateCd" parameterType="WorkVO">
+		UPDATE WORK
+		SET WORK_STATE_CD = #{workStateCd,jdbcType=VARCHAR}
+		WHERE WORK_NO = #{workNo,jdbcType=NUMERIC}
+	</update>
+	
+	<!-- 작업 댓글 작성 -->
+	<insert id="insertWorkComm" parameterType="WorkCommVO">
+		INSERT INTO WORK_COMM (
+		    WORK_COMM_NO,
+		    WORK_NO,
+		    WORK_COMM_CONT,
+		    WORK_COMM_DATE,
+		    MEM_EMAIL,
+		    WORK_COMM_PNT_NO
+		) VALUES (
+			WORK_COMM_SEQ.NEXTVAL
+			, #{workNo,jdbcType=NUMERIC}
+			, #{workCommCont,jdbcType=VARCHAR}
+			, TO_CHAR(SYSDATE,'YYYYMMDD')
+		    , #{memEmail,jdbcType=VARCHAR}
+		    , 0
+		)
+	</insert>
+	
+	<!-- 작업 댓글 목록 불러오기 -->
+	<select id="selectWorkCommList" parameterType="WorkCommVO" resultType="WorkCommVO">
+	
+		SELECT WORK_COMM_NO,
+		       WORK_NO,
+		       WORK_COMM_CONT,
+		       WORK_COMM_DATE,
+		       MEM_EMAIL,
+		       WORK_COMM_PNT_NO
+		FROM WORK_COMM
+		WHERE WORK_NO = #{workNo,jdbcType=NUMERIC}
+	
+	</select>
+	
+</mapper>

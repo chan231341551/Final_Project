@@ -1,0 +1,193 @@
+package kr.or.ddit.project.news.controller;
+
+import java.security.Principal;
+import java.util.List;
+
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.enumpkg.ServiceResult;
+import kr.or.ddit.project.home.service.ProjectService;
+import kr.or.ddit.project.home.vo.ParticipateVO;
+import kr.or.ddit.project.home.vo.ProjectVO;
+import kr.or.ddit.project.news.service.NewsService;
+import kr.or.ddit.project.news.vo.NewsVO;
+import kr.or.ddit.ui.PaginationRenderer;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/project")
+public class NewsController {
+
+	@Inject
+	private NewsService service;
+
+	@Inject
+	private ProjectService proservice;
+	
+	@Resource(name="bootstrapPaginationRender")
+	private PaginationRenderer renderer;
+
+	
+	// 페이징 처리해야 할것 ! 
+/*	@GetMapping("/project/news/{proCode}")
+	public String projectNews(
+			@RequestParam(value = "page", required = false, defaultValue = "1") int currentPage,
+			@ModelAttribute("simpleCondition") SearchVO searchVO, 
+			Model model
+			,@PathVariable String proCode
+	) {
+		 //프로젝트 
+		 ProjectVO project = proservice.retrieveProject(proCode);
+		 model.addAttribute("project", project);
+		 
+		PagingVO<NewsVO> pagingVO = new PagingVO<>();
+		pagingVO.setCurrentPage(currentPage);
+		pagingVO.setSimpleCondition(searchVO);
+
+		service.retrieveNewsList(pagingVO);
+		model.addAttribute("pagingVO", pagingVO);
+	
+		if(!pagingVO.getDataList().isEmpty()) {
+			model.addAttribute("pagingHTML", renderer.renderPagination(pagingVO));
+		}
+		return "project/news/news";
+		//return "jsonView";
+	}
+	*/
+	
+	//내 뉴스 화면 
+	@GetMapping("/project/news/{proCode}")
+	public String newsList(
+			Model model
+			,@PathVariable String proCode) {
+		ProjectVO project = proservice.retrieveProject(proCode);
+		model.addAttribute("project", project);
+		return "project/news/news";
+	}
+	
+	//리스트목록
+	@ResponseBody
+	@GetMapping("/project/newsListView/{proCode}")
+	public List<NewsVO> newsListView(
+			@PathVariable String proCode) {
+		List<NewsVO> newsList = service.retrieveMyNewsList(proCode);
+		log.info("뉴스리스트목록 : {}",newsList);
+		return newsList;
+	}
+
+	// 상세보기
+	@ResponseBody
+	@GetMapping(value="/project/newsDetail/{newsNo}" ,produces="application/json;charset=utf-8")
+	public NewsVO newsDetail(
+			@PathVariable int newsNo
+			) {
+		service.incrementHit(newsNo);
+		NewsVO news = service.retrieveNews(newsNo);
+
+		return news;
+	}	
+	
+	
+	// 글 작성
+	@GetMapping("/project/newsInsert/{proCode}")
+	public String newsForm(
+			NewsVO news
+			,Principal principal
+			,Model model) {
+		return "/project/news/news";
+	}
+	
+	
+	//뉴스 등록
+	@PostMapping("/project/newsInsert/{proCode}")
+	@ResponseBody
+	public String newsInsert(
+			@ModelAttribute("news") NewsVO news,
+			@PathVariable String proCode
+		) {
+
+		log.info("뉴스등록", news);
+		
+		//프로젝트
+		ProjectVO project = proservice.retrieveProject(proCode);
+		
+		String resultStr = "0";
+		ServiceResult result = service.createNews(news);
+	
+		switch(result) {
+		case OK:
+			log.info("Ok"); 
+			resultStr = "1";
+			break;
+		case FAIL:
+			log.info("FAIL"); 
+			resultStr = "0"; 
+			break;
+		}
+		return resultStr;
+	}
+	
+	
+	//글 수정 아직 미확인 
+	@PostMapping("/project/modifyNews")
+	@ResponseBody
+	public String modifyNews(@RequestBody NewsVO news) {
+		log.info("수정");
+		
+		String resultStr = "0";
+		ServiceResult result = service.modifyNews(news);
+		
+		switch(result) {
+		case OK:
+			log.info("Ok"); 
+			resultStr = "1";
+			break;
+		case FAIL:
+			log.info("FAIL"); 
+			resultStr = "0"; 
+			break;
+		}
+		return resultStr;
+	}
+	
+	
+	
+	//글 삭제 
+	@PostMapping("/project/deleteNews/{newsNo}")
+	@ResponseBody
+	public String deleteNews(
+			@PathVariable int newsNo) {
+			
+		log.info("글삭제??",newsNo);
+		
+		String resultStr = "0";
+		
+		ServiceResult result = service.removeNews(newsNo);
+		
+		switch(result) {
+		case OK:
+			log.info("Ok"); 
+			resultStr = "1";
+			break;
+		case FAIL:
+			log.info("FAIL"); 
+			resultStr = "0"; 
+			break;
+		}
+		return resultStr;
+	}
+	
+}

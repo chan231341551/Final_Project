@@ -1,0 +1,59 @@
+package kr.or.ddit.project.attach.service;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import kr.or.ddit.project.attach.dao.AttatchDAO;
+import kr.or.ddit.project.attach.vo.AttatchVO;
+
+@Service
+public class AttatchServiceImpl implements AttatchService {
+	@Inject
+	private AttatchDAO attatchDAO; 
+	
+	@Value("#{appInfo.saveFiles}")
+	private File saveFiles;
+
+	@Override
+	public int createAttatch(MultipartFile[] files, String attCtgry) {
+		if(files==null || files.length==0) return 0; 
+		List<AttatchVO> attatchList = Arrays.stream(files)
+							.filter((f)->!f.isEmpty())
+							.map((f)->{
+								return new AttatchVO(f);
+							}).collect(Collectors.toList());
+		int attNo = attatchDAO.selectAttNo();
+		try {
+			for(AttatchVO attatch : attatchList) {
+				attatch.setAttNo(attNo);
+				attatch.setAttCtgry(attCtgry);
+				//1. meatadata 저장 - DB (ATTATCH)
+				attatchDAO.insertAttatch(attatch);
+				//2. binary 저장 - Middle Tier (D:\saveFiles)
+				attatch.saveTo(saveFiles);
+			}
+			return attNo;
+		}catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	public List<AttatchVO> retrieveAttatchList(int attNo) {
+		return attatchDAO.selectAttatchList(attNo);
+	}
+
+	@Override
+	public List<AttatchVO> retrieveProjectFileList(String attCtgry) {
+		return attatchDAO.selectProjectFileList(attCtgry);
+	}
+}

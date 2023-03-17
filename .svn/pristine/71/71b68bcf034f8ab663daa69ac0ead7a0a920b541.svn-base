@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.project.issue.dao.IssueDAO">
+		
+	<sql id="searchFrag">
+	    <where>
+	    	<if test="simpleCondition neq null and @org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+	    		<choose>
+	    			<when test="simpleCondition.searchOption eq 'title'">
+	    				INSTR(PRO_TITLE, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<when test="simpleCondition.searchOption eq 'name'">
+	    				INSTR(MEM_NAME, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<otherwise>
+	    				INSTR(PRO_TITLE, #{simpleCondition.searchWord}) > 0
+	    				OR
+	    				INSTR(MEM_NAME, #{simpleCondition.searchWord}) > 0
+	    			</otherwise>
+	    		</choose>
+	    	</if>
+	    </where>
+	</sql>
+	
+	<select id="selelctTotalRecord" resultType="int" parameterType="IssueVO">
+		SELECT COUNT(*)
+		FROM ISSUE
+		<include refid="searchFrag" />
+	</select>
+	
+	<insert id="insertIssue" parameterType="IssueVO">
+		<selectKey order="BEFORE" resultType="int" keyProperty="issNo">
+			SELECT ISSUE_SEQ.NEXTVAL
+			  FROM DUAL
+		</selectKey>
+	
+		INSERT ALL
+		INTO ISSUE
+		(
+			ISS_NO,
+		    WORK_NO,
+		    MEM_EMAIL,
+		    ISS_TITLE,
+		    ISS_CONT,
+		    ISS_RDATE,
+		    ISS_SDATE,
+		    ISS_EEDATE,
+		    ISS_EMER_CD,
+		    ISS_STATUS_CD,
+		    ISS_LABEL_CD
+		)VALUES(
+        	  #{issNo}
+			, #{work.workNo,jdbcType=NUMERIC}
+			, #{memEmail,jdbcType=VARCHAR}
+			, #{issTitle,jdbcType=VARCHAR}
+			, #{issCont,jdbcType=VARCHAR}
+			, SYSDATE
+			, #{issSdate,jdbcType=DATE}
+			, #{issEedate,jdbcType=DATE}
+			, #{issEmerCd,jdbcType=VARCHAR}
+			, #{issStatusCd,jdbcType=VARCHAR}
+			, #{issLabelCd,jdbcType=VARCHAR}
+        )
+        <foreach collection="issChargerList">
+	        INTO ISS_CHARGER ( 
+	           ISS_NO,
+	           MEM_EMAIL,
+	           ISS_READ_YN
+			) VALUES(
+				#{issNo}
+				, #{issChargerList.memEmail,jdbcType=VARCHAR}
+				, 'N'
+			)
+        </foreach>
+			SELECT * FROM dual
+	</insert>
+	
+	<resultMap type="IssueVO" id="issueMap" autoMapping="true">
+		<id property="issNo" column="ISS_NO"/>
+		<association property="work" javaType="WorkVO" autoMapping="true" />
+		<association property="member" javaType="MemberVO" autoMapping="true" />
+		<collection property="issChargerList" ofType="kr.or.ddit.project.issue.vo.IssChargerVO" autoMapping="true">
+			<id property="memEmail" column="MEM_EMAIL"/>
+		</collection>
+	</resultMap>
+	
+	<!-- 목록 조회 -->
+	<select id="selectIssueList" resultType="IssueVO" parameterType="IssueVO">
+	SELECT 
+       A.WORK_TITLE,
+       B.ISS_NO,
+       B.ISS_TITLE,
+       B.ISS_CONT,
+       B.ISS_SDATE,
+       B.ISS_EEDATE,
+       B.ISS_EMER_CD,
+       B.ISS_STATUS_CD,
+       B.ISS_EMER_CD,
+       B.ISS_LABEL_CD,
+       D.MEM_NAME
+    FROM WORK A, ISSUE B, MEMBER D, PROJECT E
+    WHERE A.WORK_NO = B.WORK_NO
+    AND B.MEM_EMAIL = D.MEM_EMAIL
+    AND A.PRO_CODE = E.PRO_CODE
+    AND E.PRO_CODE = #{proCode}
+	</select>
+	
+	<!-- 상세조회 조회 -->
+	<select id="selectIssue" parameterType="int" resultMap="issueMap">
+		SELECT DISTINCT
+			A.WORK_TITLE, 
+			A.WORK_NO, 
+			B.ISS_NO, 
+			B.ISS_TITLE, 
+			B.ISS_CONT, 
+			B.ISS_SDATE, 
+			B.ISS_RDATE, 
+			B.ISS_EEDATE, 
+			B.ISS_EMER_CD, 
+			B.ISS_STATUS_CD,
+			B.ISS_LABEL_CD, 
+			C.ISS_READ_YN, 
+			D.MEM_NAME
+		FROM WORK A, ISSUE B, ISS_CHARGER C, MEMBER D 
+		WHERE A.WORK_NO = B.WORK_NO 
+		AND B.ISS_NO = C.ISS_NO 
+		AND B.MEM_EMAIL = D.MEM_EMAIL 
+		AND B.ISS_NO= #{issNo,jdbcType=NUMERIC}
+	</select>
+	
+	<!-- 상세조회 담당자 조회 -->
+	<select id="selectChargerMem" parameterType="int" resultType="map">
+		SELECT 
+		     B.MEM_NAME
+		     , B.MEM_EMAIL
+		FROM ISS_CHARGER A, MEMBER B 
+		WHERE A.MEM_EMAIL = B.MEM_EMAIL
+		AND A.ISS_NO= #{issNo,jdbcType=NUMERIC}
+		
+	</select>
+	
+	<!-- ISSUE 수정 -->
+	<update id="updateIssue" parameterType="IssueVO">
+		UPDATE ISSUE 
+		SET
+		  WORK_NO       =  #{work.workNo,jdbcType=NUMERIC}
+		, ISS_TITLE     =  #{issTitle,jdbcType=VARCHAR}
+		, ISS_CONT      =  #{issCont,jdbcType=VARCHAR}
+		, ISS_SDATE     =  #{issSdate,jdbcType=DATE}
+		, ISS_EEDATE    =  #{issEedate,jdbcType=DATE}
+		, ISS_EMER_CD   =  #{issEmerCd,jdbcType=VARCHAR}  
+		, ISS_STATUS_CD =  #{issStatusCd,jdbcType=VARCHAR}
+		, ISS_LABEL_CD  =  #{issLabelCd,jdbcType=VARCHAR}     
+		WHERE ISS_NO = #{issNo,jdbcType=NUMERIC}
+	</update>
+	<!-- ISSUE_CHARGER 수정 -->
+	<update id="updateIssCharher" parameterType="IssChargerVO">
+		UPDATE ISSUE 
+		SET MEM_EMAIL = #{memEmail,jdbcType=VARCHAR}
+		WHERE ISS_NO = #{issNo,jdbcType=NUMERIC}
+	</update>
+	
+	<!-- ISSUE 삭제 -->
+	<delete id="deleteIssue">
+		DELETE FROM ISSUE
+		WHERE ISS_NO = #{issNo}
+	</delete>
+	<delete id="deleteIssCharger">
+		DELETE FROM iss_charger
+		WHERE ISS_NO = #{issNo}
+	</delete>
+	
+</mapper>

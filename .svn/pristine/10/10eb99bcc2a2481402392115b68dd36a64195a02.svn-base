@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.project.news.dao.NewsDAO">
+	
+
+	<select id="selectTotalRecord" resultType="int" parameterType="PagingVO">
+		SELECT COUNT(*)
+		FROM NEWS
+		<foreach collection="dataList" item="item">
+		 WHERE PRO_CODE = #{item.proCode}
+		</foreach>
+	</select>
+	
+	<!-- 페이징 처리해야할 목록  -->
+	<select id="selectNewsList" parameterType="PagingVO" resultType="kr.or.ddit.project.news.vo.NewsVO">
+		SELECT A.*
+		FROM
+		(
+		SELECT ROW_NUMBER() OVER (ORDER BY NEWS_NO DESC) RNUM
+		     , NEWS_NO, PRO_CODE, MEM_EMAIL, NEWS_TITLE,NEWS_ATT_NO
+		     , TO_CHAR(NEWS_DATE,'YYYY-MM-DD') NEWS_DATE, NEWS_HIT ,
+		     (SELECT ATT_PATH || ATT_SAVENAME
+              FROM ATTATCH
+              WHERE ATT_NO = NEWS_ATT_NO) AS NEWS_ATT_PATH
+		FROM   NEWS
+		WHERE  1 = 1
+		AND NEWS_NOTICE = 'N'
+			<foreach collection="dataList" item="item">
+			AND PRO_CODE = #{item.proCode}
+			</foreach>
+		) A
+		WHERE A.RNUM BETWEEN #{startRow} AND #{endRow}
+	</select>
+
+	<!-- 일반뉴스리스트(안씀) -->
+	<select id="selectMyNewsList" parameterType="String" resultType="NewsVO">
+		SELECT 
+			NEWS_NO, NEWS_TITLE, NEWS_CONT,TO_CHAR(NEWS_DATE,'YYYY-MM-DD') NEWS_DATE, NEWS_HIT 
+		FROM NEWS
+		WHERE PRO_CODE= #{proCode}
+	</select>
+	
+	<resultMap type="NewsVO" id="newsMap" autoMapping="true">
+		<id property="newsNo" column="NEWS_NO"/>
+	</resultMap>
+	
+	
+	<!-- 뉴스 한건 조회 -->
+	<select id="selectNews" parameterType="int" resultMap="newsMap">
+	SELECT 
+		NEWS_NO,NEWS_TITLE, NEWS_CONT,NEWS_DATE,NEWS_HIT,NEWS_PASS,PRO_CODE,MEM_EMAIL,NEWS_ATT_NO,
+		(SELECT ATT_PATH || ATT_SAVENAME
+		 FROM ATTATCH
+		 WHERE ATT_NO = A.NEWS_ATT_NO) AS NEWS_ATT_PATH   
+	FROM NEWS A 
+	WHERE NEWS_NO=#{newsNo}
+ 
+	</select>
+	
+	<!-- 조회수  -->
+	<update id="incrementHit" parameterType="int">
+		UPDATE NEWS
+		SET 
+		NEWS_HIT = NEWS_HIT+1
+		WHERE NEWS_NO= #{newsNo}
+	</update>
+	
+	<!-- 뉴스 작성 -->
+	<insert id="insertNews" parameterType="NewsVO">
+		
+		<selectKey order="BEFORE" resultType="int" keyProperty="newsNo">
+			SELECT NEWS_SEQ.NEXTVAL
+			FROM DUAL
+		</selectKey>
+	
+		INSERT INTO NEWS (
+		    NEWS_NO,
+		    MEM_EMAIL,
+		    PRO_CODE,
+		    NEWS_TITLE,
+		    NEWS_CONT,
+		    NEWS_DATE,
+		    NEWS_PASS,
+		    NEWS_ATT_NO,
+		    NEWS_NOTICE
+		) VALUES (
+		  #{newsNo,jdbcType=NUMERIC}
+		, #{memEmail,jdbcType=VARCHAR}
+		, #{proCode,jdbcType=VARCHAR}
+		, #{newsTitle,jdbcType=VARCHAR}
+		, #{newsCont,jdbcType=CLOB}
+		, SYSDATE
+		, #{newsPass,jdbcType=NUMERIC}
+		,#{newsAttNo,jdbcType=NUMERIC}
+		, 'N'
+		
+		)
+	</insert>
+	
+	<!-- 뉴스 삭제 -->
+	<delete id="deleteNews" parameterType="NewsVO" >	
+		DELETE 
+		FROM NEWS
+		WHERE NEWS_NO = #{newsNo,jdbcType=NUMERIC}
+	</delete>
+	
+	<!--  뉴스 수정  (불가)-->
+	<update id="updateNews" parameterType="NewsVO">
+		UPDATE NEWS
+		SET 
+			 NEWS_TITLE = #{newsTitle} 
+			,NEWS_CONT = #{newsCont}
+			,NEWS_PASS =  #{newsPass}
+			,NEWS_ATT_NO = NVL2(NEWS_ATT_NO, #{newsAttNo}, 26)
+		WHERE NEWS_NO = #{newsNo}
+				
+	</update>
+	
+ 	<!-- 뉴스댓글 -->
+ 	<insert id="insertNewsComm" parameterType="kr.or.ddit.project.news.vo.NewsCommVO">
+		<selectKey resultType="int" order="BEFORE" keyProperty="newsCommNo">
+			SELECT NEWS_COMM_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+
+
+		INSERT INTO NEWS_COMM (
+			    NEWS_COMM_NO
+			    ,NEWS_NO
+			    ,MEM_EMAIL
+			    ,NEWS_COMM_CONT
+			    ,NEWS_COMM_DATE
+			    ,PRO_CODE
+			) VALUES (
+			  #{newsCommNo}
+			, #{newsNo,jdbcType=NUMERIC}
+			, #{memEmail,jdbcType=VARCHAR}
+			, #{newsCommCont,jdbcType=VARCHAR}
+			, SYSDATE
+			, #{proCode,jdbcType=VARCHAR}
+	
+		)
+	</insert>
+	
+	<!-- 뉴스댓글 리스트 출력 -->
+	<select id="selectNewsCommList" parameterType="NewsCommVO" resultType="NewsCommVO">
+		SELECT NEWS_COMM_NO, NEWS_NO, MEM_EMAIL, NEWS_COMM_PNT, NEWS_COMM_CONT, TO_CHAR(NEWS_COMM_DATE,'YYYY-MM-DD') NEWS_COMM_DATE, PRO_CODE
+		FROM   NEWS_COMM
+		WHERE  NEWS_NO = #{newsNo,jdbcType=NUMERIC}
+		ORDER BY NEWS_COMM_DATE DESC
+	</select> 
+	
+</mapper>

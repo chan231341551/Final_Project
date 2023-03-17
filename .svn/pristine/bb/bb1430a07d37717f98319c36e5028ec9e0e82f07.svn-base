@@ -1,0 +1,23 @@
+package kr.or.ddit.project.board.vo;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
+@Data
+@EqualsAndHashCode(of="boardNo")
+@AllArgsConstructor
+@NoArgsConstructor
+public class BoardVO {
+	
+	private Integer boardNo;
+	private String memEmail;
+	private String proCode;
+	private String boardTitle;
+	private String boardCont;
+	private String boardDate;
+	private Integer hit;
+	private Integer boardAttNo;
+
+}

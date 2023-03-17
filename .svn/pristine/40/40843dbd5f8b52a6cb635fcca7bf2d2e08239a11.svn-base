@@ -1,0 +1,50 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8" buffer="8kb"%>
+<%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>	
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>	
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="security" %>
+
+<!DOCTYPE html>
+<html lang="en" ng-app="mwl.calendar.docs">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<security:csrfMetaTags/>
+	<title>BlueMine</title>
+	<link href="<%=request.getContextPath()%>/resources/css/app.css" rel="stylesheet">
+
+</head>
+
+<body>
+	<tiles:insertAttribute name="preScript" />
+	<div class="wrapper">
+		<tiles:insertAttribute name="leftMenu" />
+		<!-- Main Content Area start -->
+		<div class="main">
+			<tiles:insertAttribute name="headerMenu" />
+			<tiles:insertAttribute name="subMenu" />
+			<tiles:insertAttribute name="content" />
+			<tiles:insertAttribute name="workModal" />
+			<tiles:insertAttribute name="workAddModal" />
+			<tiles:insertAttribute name="projectInsertModal" />
+			<!-- mention JS -->
+			<jsp:include page="../project/mention/mention.jsp"></jsp:include>			
+		</div>
+		<!-- 사이드 메뉴 버튼  -->
+			<c:import url="../project/memo/memoList.jsp"></c:import>
+			<c:import url="../project/api/papago.jsp"></c:import>
+			<c:import url="../project/api/capture.jsp"></c:import>
+			<c:import url="../pms/mychat/chatDetail.jsp"></c:import>
+			
+	</div>
+	
+	
+		<tiles:insertAttribute name="postScript" />
+</body>
+
+
+</html>
+

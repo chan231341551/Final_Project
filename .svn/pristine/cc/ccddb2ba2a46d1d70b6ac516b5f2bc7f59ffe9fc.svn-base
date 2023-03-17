@@ -1,0 +1,31 @@
+
+
+// 프로젝트 생성 모달창
+const loremIpsum = document.getElementById("lorem-ipsum")
+const moCont = document.getElementById("moCont")
+
+function modalOn() {
+	moCont.style.display = "flex"
+}
+function isModalOn() {
+	return moCont.style.display === "flex"
+}
+function modalOff() {
+	moCont.style.display = "none"
+}
+
+const isModal = document.getElementById("issueModal")
+isModal.addEventListener("click", e => {
+	modalOn()
+})
+
+//const closeBtn = moCont.querySelector(".close-area")
+//closeBtn.addEventListener("click", e => {
+//	modalOff()
+//})
+window.addEventListener("keyup", e => {
+	if(isModalOn() && e.key === "Escape") {
+		modalOff()
+	}
+})
+

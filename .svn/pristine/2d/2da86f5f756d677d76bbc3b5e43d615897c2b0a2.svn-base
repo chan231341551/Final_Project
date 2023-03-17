@@ -1,0 +1,11 @@
+package kr.or.ddit.project.attach.dao;
+
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface AttatchDAO {
+//	public int insertAttatches(BoardVO board);
+//	public List<AttatchVO> selectAttatchList(int boNo);
+//	public AttatchVO selectAttatch(int attNo);
+//	public int deleteAttatches(BoardVO board);
+}

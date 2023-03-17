@@ -1,0 +1,24 @@
+package kr.or.ddit.project.board.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping("/project")
+public class BoardController {
+	@GetMapping("/project/boardList")
+	public String freeBoardList() {
+		return "project/board/boardList";
+	}
+
+	@GetMapping("/project/boardForm")
+	public String freeBoardForm() {
+		return "project/board/boardForm";
+	}
+	
+	@GetMapping("/project/boardDetail")
+	public String freeBoardDetail() {
+		return "project/board/boardDetail";
+	}
+}

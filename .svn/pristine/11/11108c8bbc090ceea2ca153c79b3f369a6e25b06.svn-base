@@ -1,0 +1,10 @@
+package kr.or.ddit.project.statistics.vo;
+
+public class StatisticVO {
+	
+	private String proCode;
+	private String proSdate;
+	private String proEdate;
+	private int newscount;
+	
+}

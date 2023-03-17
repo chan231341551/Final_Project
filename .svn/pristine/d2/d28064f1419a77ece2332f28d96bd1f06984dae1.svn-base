@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.project.chat.dao.ChatDAO">
+	<select id="selectProjectListSearch" parameterType="string" resultType="hashMap" >
+		SELECT
+		    PRO_CODE,
+		    (
+		        SELECT MEM_NAME
+		        FROM MEMBER A
+		        WHERE A.MEM_EMAIL = B.MEM_EMAIL
+		    )MEM_NAME,
+		    PRO_TITLE,
+		    PRO_CDATE,
+		    PRO_SDATE,
+		    PRO_EDATE,
+		    PRO_DETAIL,
+		    PRO_END_YN,
+		    PRO_DEL_YN,
+		    PRO_CLS_CD
+		FROM
+		    PROJECT B
+		WHERE MEM_EMAIL = #{memEmail}
+		<if test="projSearchOption!=null">
+			<choose>
+				<when test="projSearchOption=='proTitle'">
+					AND B.PRO_TITLE LIKE '%' || #{projSearchWord} || '%'
+				</when>
+				<when test="projSearchOption=='proSdate'">
+					AND B.PRO_SDATE LIKE '%' || #{projSearchWord} || '%'
+				</when>
+				<otherwise>
+					AND B.PRO_TITLE LIKE '%' || #{projSearchWord} || '%'
+					AND B.PRO_SDATE LIKE '%' || #{projSearchWord} || '%'
+				</otherwise>
+			</choose>
+		</if>
+	</select>
+	
+	<select id="selectProjectList" parameterType="string" resultType="ProjectVO" >
+		SELECT
+		    PRO_CODE,
+		    (
+		        SELECT MEM_NAME
+		        FROM MEMBER A
+		        WHERE A.MEM_EMAIL = B.MEM_EMAIL
+		    )MEM_NAME,
+		    PRO_TITLE,
+		    PRO_CDATE,
+		    PRO_SDATE,
+		    PRO_EDATE,
+		    PRO_DETAIL,
+		    PRO_END_YN,
+		    PRO_DEL_YN,
+		    PRO_CLS_CD
+		FROM
+		    PROJECT B
+		WHERE MEM_EMAIL = #{memEmail}
+		
+	</select>
+	
+	<select id="selectProjectChatRoom" parameterType="kr.or.ddit.project.chat.vo.ChatVO" resultType="kr.or.ddit.project.chat.vo.ChatVO">
+		SELECT 
+		    A.CHATROOM_NO,
+		    (
+		        SELECT 
+		            MEM_NAME
+		        FROM 
+		            MEMBER
+		        WHERE
+		            MEM_ROLE = #{memRole}
+		            AND MEM_NAME = #{memName}
+		    )MEM_NAME,
+		    B.MEM_TEL,
+		    B.MEM_IMG,
+		    C.PRO_CODE,
+		    C.PRO_TITLE,
+		    A.CHATROOM_TITLE,
+		    A.CHATROOM_CLS_NO
+		FROM 
+		    CHATROOM A LEFT OUTER JOIN PROJECT C ON (A.PRO_CODE = C.PRO_CODE)
+		    INNER JOIN MEMBER B ON (C.MEM_EMAIL = B.MEM_EMAIL)
+		WHERE 
+		    A.CHATROOM_CLS_NO = 1
+	</select>
+</mapper>

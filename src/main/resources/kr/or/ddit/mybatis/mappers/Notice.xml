@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.main.help.dao.NoticeDAO">
+	
+	<sql id="searchFrag">
+	    <where>
+	    	<if test="simpleCondition neq null and @org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+	    		<choose>
+	    			<when test="simpleCondition.searchOption eq '제목'">
+	    				INSTR(NOTICE_TITLE, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<when test="simpleCondition.searchOption eq '내용'">
+	    				INSTR(NOTICE_CONT, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<otherwise>
+	    				INSTR(NOTICE_TITLE, #{simpleCondition.searchWord}) > 0
+	    				OR
+	    				INSTR(NOTICE_CONT, #{simpleCondition.searchWord}) > 0
+	    			</otherwise>
+	    		</choose>
+	    	</if>
+	    </where>
+	</sql>
+	
+	<!-- 전체 레코드 갯 수 -->
+	<select id="selectTotalRecord" parameterType="PagingVO" resultType="int">
+	 	SELECT COUNT(*)
+	 	  FROM NOTICE
+	 	<include refid="searchFrag" />	
+	</select>
+	
+	<!-- 전체 공지리스트 -->
+	<select id="selectNoticeList" parameterType="PagingVO" resultType="NoticeVO">
+		
+		WITH NOTICEBOARD AS (
+		SELECT
+		    NOTICE_NO,
+		    NOTICE_TITLE,
+		    NOTICE_CONT,
+		    NOTICE_DATE,
+		    NOTICE_HIT,
+		    NOTICE_TOP_YN,
+			NOTICE_ATT_NO
+		FROM
+		    NOTICE
+		<include refid="searchFrag" />
+		ORDER BY NOTICE_TOP_YN
+		)
+		SELECT A.*
+		  FROM (
+		         SELECT ROWNUM RNUM, NOTICEBOARD.*
+		           FROM NOTICEBOARD
+		        ) A
+		  WHERE RNUM BETWEEN #{startRow} AND #{endRow} 
+	</select>
+	
+	<!-- 공지 상세 조회 -->
+	<select id="selectNotice" parameterType="int" resultType="NoticeVO">
+		SELECT NOTICE_NO,NOTICE_TITLE, NOTICE_DATE, NOTICE_CONT, NOTICE_ATT_NO,
+		(SELECT ATT_PATH || ATT_SAVENAME
+		   FROM ATTATCH
+		 WHERE ATT_NO = A.NOTICE_ATT_NO) AS notice_att_path,
+		(SELECT att_filename
+		   FROM ATTATCH
+		 WHERE ATT_NO = A.NOTICE_ATT_NO) AS att_filename
+		 
+	FROM NOTICE A 
+	WHERE NOTICE_NO = #{noticeNo}
+    
+	</select>
+	
+	<!-- 조회수 증가 -->
+	<update id="incrementHit">
+		UPDATE NOTICE
+		SET
+		NOTICE_HIT = NOTICE_HIT + 1
+		WHERE NOTICE_NO = #{noticeNo}
+	</update>
+	
+	<!-- 생성기능 -->
+	<insert id="insertNotice" parameterType="NoticeVO" >
+	
+		<selectKey order="BEFORE" resultType="int" keyProperty="noticeNo">
+			SELECT NOTICE_SEQ.NEXTVAL
+			  FROM DUAL
+		</selectKey>
+		
+		INSERT INTO NOTICE (
+			NOTICE_NO ,
+			NOTICE_TITLE,
+			NOTICE_CONT,
+			NOTICE_DATE,
+			NOTICE_TOP_YN,
+			NOTICE_ATT_NO
+			)
+		VALUES (
+			#{noticeNo,jdbcType=NUMERIC},
+			#{noticeTitle, jdbcType=VARCHAR},
+			#{noticeCont, jdbcType=VARCHAR},
+			TO_CHAR(SYSDATE,'YYYY-MM-DD'),
+			#{noticeTopYn,jdbcType=VARCHAR},
+			#{noticeAttNo,jdbcType=NUMERIC}
+			)
+	</insert>
+	
+	<!-- 수정기능 -->
+	<update id="updateNotice" parameterType="NoticeVO" >
+		UPDATE NOTICE
+  		   SET
+		   NOTICE_TITLE = #{noticeTitle,jdbcType=VARCHAR},
+		   NOTICE_CONT =  #{noticeCont,jdbcType=VARCHAR},
+		   NOTICE_DATE = SYSDATE,
+		   NOTICE_TOP_YN = #{noticeTopYn,jdbcType=VARCHAR},
+		   NOTICE_ATT_NO = #{noticeAttNo,jdbcType=NUMERIC}
+		WHERE NOTICE_NO = #{noticeNo,jdbcType=NUMERIC}
+	</update>
+	
+	<delete id="deleteNotice" parameterType="int" >
+		DELETE 
+		  FROM NOTICE
+		 WHERE NOTICE_NO = #{noticeNo,jdbcType=NUMERIC}
+	</delete>
+	 
+</mapper>

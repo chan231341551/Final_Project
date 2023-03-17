@@ -1,0 +1,55 @@
+
+/* 프로젝트 생성 모달창 css */
+#newProjectModal.modal-overlay {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(1.5px);
+    -webkit-backdrop-filter: blur(1.5px);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+#newProjectModal .modal-window {
+	display:flex;
+	flex-direction: column;
+    align-items: center;
+	justify-content: center;
+	text-align: center;
+    background: ffffff;
+    /* box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 ); */
+    /* backdrop-filter: blur( 13.5px ); */
+    backdrop-filter: invert(80%);
+    background-color:ffffff;
+    -webkit-backdrop-filter: blur( 13.5px );
+    border-radius: 10px;
+    border: 1px solid rgba( 255, 255, 255, 0.18 );
+    width: 300px;
+    height: 200px;
+    position: relative;
+    top: -100px;
+    padding: 10px;
+}
+.btn-outline-info{
+/* 	margin:0px 20px 10px 0px; */
+}
+.inline{
+	display: inline
+}
+.padding5{
+	padding-right: 5px
+}
+.dateForm{
+	width: 50%;
+	display: inline-block;
+}
+.rtl{
+	direction: rtl;
+}

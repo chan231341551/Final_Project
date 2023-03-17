@@ -1,0 +1,147 @@
+package kr.or.ddit.project.work.service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import kr.or.ddit.enumpkg.ServiceResult;
+import kr.or.ddit.project.work.dao.WorkDAO;
+import kr.or.ddit.project.work.vo.WorkChargerVO;
+import kr.or.ddit.project.work.vo.WorkCommVO;
+import kr.or.ddit.project.work.vo.WorkVO;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+public class WorkServiceImpl implements WorkService {
+
+	@Inject
+	private WorkDAO workDAO;
+	
+	@Override
+	public List<WorkVO> retrieveWorkList(String proCode) {
+		List<WorkVO> workList = workDAO.selectWorkList(proCode);
+		return workList;
+	}
+	
+	@Override
+	public List<WorkVO> retrieveMyWorkList(WorkVO work) {
+		List<WorkVO> workList = workDAO.selectMyWorkList(work);
+		return workList;
+	}
+	
+	@Override
+	public WorkVO retrieveWorkDetail(WorkVO work) {
+		WorkVO workVO = workDAO.selectWorkDetail(work);
+		return workVO;
+	}
+	
+	@Override
+	public ServiceResult createWork(WorkVO work) {
+		ServiceResult result = null;
+		int rowcnt = workDAO.insertWork(work);
+		result = rowcnt > 0 ? ServiceResult.OK : ServiceResult.FAIL;
+		return result;
+	}
+
+	@Override
+	public ServiceResult createWorkCharger(WorkVO work) {
+		ServiceResult result = null;
+		int rowcnt = workDAO.insertWorkCharger(work);
+		result = rowcnt > 0 ? ServiceResult.OK : ServiceResult.FAIL;
+		return result;
+	}
+
+	@Override
+	public ServiceResult deleteWorkCharger(List<WorkVO> workList) {
+		ServiceResult result = null;
+		int rowcnt = 0;
+		int rowcntAll=0;
+		for (int i = 0; i < workList.size(); i++) {
+			rowcnt = workDAO.deleteWorkCharger(workList.get(i));
+			rowcntAll += rowcnt;
+		}
+		result = rowcntAll > 0 ? ServiceResult.OK : ServiceResult.FAIL;
+		return result;
+	}
+
+	@Override
+	public ServiceResult deleteWork(List<WorkVO> workList) {
+		ServiceResult result = null;
+		int rowcnt = 0;
+		int rowcntAll = 0;
+		for (int i = 0; i < workList.size(); i++) {
+			rowcnt = workDAO.deleteWork(workList.get(i));
+			rowcntAll += rowcnt;
+		}
+		result = rowcntAll > 0 ? ServiceResult.OK : ServiceResult.FAIL;
+		return result;
+	}
+
+	@Override
+	public List<List<WorkVO>> retrieveDownWorkList(List<WorkVO> workList) {
+		List<List<WorkVO>> resultWorkVOList = new ArrayList();
+		for (int i = 0; i < workList.size(); i++) {
+			resultWorkVOList.add(i, workDAO.selectDownWorkList(workList.get(i)));
+		}
+		
+		return resultWorkVOList;
+	}
+
+	@Transactional
+	@Override
+	public int modifyWorkAndWorkCharger(WorkVO work) {
+		List<WorkChargerVO> workChargerVOList = work.getWorkChargerList();
+		log.info("workChargerVOList {}", workChargerVOList);
+		
+		int cnt1 = workDAO.updateWorkCharger(workChargerVOList);
+		int cnt2 = workDAO.updateWork(work);
+		return cnt1 + cnt2;
+	}
+
+	@Override
+	public List<WorkVO> retrieveTodayWorkList(String proCode) {
+		List<WorkVO> workList = workDAO.selectTodayWorkList(proCode);
+		return workList;
+	}
+
+	@Override
+	public int modifyWorkStateCd(WorkVO work) {
+		int rowcnt = workDAO.updateWorkStateCd(work);
+		return rowcnt;
+	}
+
+	@Override
+	public ServiceResult createWorkComm(WorkCommVO workComm) {
+		ServiceResult result = null;
+		int rowcnt = workDAO.insertWorkComm(workComm);
+		result = rowcnt > 0 ? ServiceResult.OK : ServiceResult.FAIL;
+		return result;
+	}
+
+	@Override
+	public List<WorkCommVO> retrieveWorkCommList(WorkCommVO workComm) {
+		List<WorkCommVO> workCommVOList = workDAO.selectWorkCommList(workComm);
+		return workCommVOList;
+	}
+
+	@Override
+	public List<WorkVO> retrievePntUpWorkList(String proCode) {
+		List<WorkVO> workList = workDAO.selectPntUpWorkList(proCode);
+		return workList;
+	}
+
+
+
+
+
+
+
+
+
+}

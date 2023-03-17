@@ -1,0 +1,103 @@
+package kr.or.ddit.project.wiki.service;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.enumpkg.ServiceResult;
+import kr.or.ddit.project.wiki.vo.WikiVO;
+
+/**
+ * 
+ * 위키 service interface
+ * @author 전혜수
+ * @since 2023. 2. 20.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일                  수정자               수정내용
+ * --------     --------    ----------------------
+ * 2023. 2. 20.      PC-21       최초작성
+ * 
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+
+public interface WikiService {
+	
+	
+	/**
+	 * 위키 리스트 조회 
+	 * @param memEamil
+	 * @return
+	 */
+	public List<WikiVO>  retrieveWikiList(@Param("proCode") String proCode);
+	
+	
+	/**
+	 * 위키 리스트 조회 (분류별)
+	 * @param memEamil
+	 * @return
+	 */
+	public List<WikiVO>  retrieveWikiListSort(@Param("proCode") String proCode);
+	
+	public List<WikiVO>  retrieveWikiListOne(@Param("proCode") String proCode);
+	
+	public List<WikiVO>  retrieveWikiListTwo(@Param("proCode") String proCode);
+	
+	public List<WikiVO>  retrieveWikiListThree(@Param("proCode") String proCode);
+	
+	
+	/**
+	 * 위키 한건 조회
+	 * @param wiki
+	 * @return
+	 */
+	public WikiVO retrieveWiki(WikiVO wiki);
+	
+	
+	
+	/**
+	 * 위키 생성
+	 * @param wiki
+	 * @return
+	 */
+	public ServiceResult createWiki(WikiVO wiki);
+	
+	/**
+	 * 위키 삭제 
+	 * @param wikiNo
+	 * @return
+	 */
+	public ServiceResult deleteWiki(WikiVO wiki);
+	
+	/**
+	 * 위키 수정
+	 * @param wiki
+	 * @return ServiceResult
+	 */
+	public ServiceResult modifyWiki(WikiVO wiki);
+	
+	/**
+	 * 위키 답글 생성
+	 * @param wiki
+	 * @return
+	 */
+	public ServiceResult createWikiComm(WikiVO wiki);
+	
+	
+	
+
+}
+
+
+
+
+
+
+
+
+
+

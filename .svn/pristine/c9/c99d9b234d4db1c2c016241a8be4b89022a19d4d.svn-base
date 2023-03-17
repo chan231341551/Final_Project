@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.main.pay.dao.PayDAO">
+
+	<insert id="insertPay" parameterType="PayVO">
+		<selectKey order="BEFORE" resultType="int" keyProperty="payNo">
+			SELECT PAYMENT_SEQ.NEXTVAL
+  			  FROM DUAL
+		</selectKey>
+	
+		INSERT INTO PAYMENT (
+			PAY_NO,
+			MEM_EMAIL,
+			PAY_PRODUCT,
+			PAY_DATE,
+			PAY_AMOUNT,
+			PAY_YN,
+			PAY_CANCEL_DATE,
+			PAY_EDATE
+		)VALUES (
+			#{payNo,jdbcType=NUMERIC},
+			#{memEmail,jdbcType=VARCHAR},
+			#{payProduct,jdbcType=VARCHAR},
+			TO_CHAR(SYSDATE,'YYYY/MM/DD'),
+			#{payAmount,jdbcType=NUMERIC},
+			'Y',
+			NULL,
+			TO_DATE(#{payEdate}, 'YYYY-MM-DD HH24:MI:SS')
+		)
+		
+	</insert>
+
+</mapper>

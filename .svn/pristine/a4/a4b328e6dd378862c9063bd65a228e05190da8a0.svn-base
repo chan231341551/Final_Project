@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.project.wiki.dao.WikiDAO">
+
+
+	<select id="selectTotalRecord" parameterType="PagingVO" resultType="int">
+		SELECT COUNT(*)
+		FROM WIKI
+		<foreach collection="dataList" item="item">
+		WHERE PRO_CODE = #{item.proCode}
+		</foreach>
+	</select>
+
+<!-- 위키작성  -->
+	<insert id="insertWiki" parameterType="WikiVO">
+	
+		<selectKey order="BEFORE" resultType="int" keyProperty="wikiNo">
+			SELECT  WIKI_SEQ.NEXTVAL
+			FROM DUAL 
+		</selectKey>
+		INSERT INTO WIKI (
+		    WIKI_NO
+		   ,WIKI_PNT_NO
+		   ,MEM_EMAIL
+		   ,PRO_CODE
+		   ,WIKI_TITLE
+		   ,WIKI_DATE
+		   ,WIKI_CONT
+		   ,WIKI_CLS_CD
+		   ,WIKI_GROUPORD
+		   ,WIKI_ATT_NO
+		   
+		) VALUES (
+			  #{wikiNo,jdbcType=NUMERIC}
+			, WIKI_SEQ.CURRVAL
+			, #{memEmail,jdbcType=VARCHAR}
+			, #{proCode,jdbcType=VARCHAR}
+			, #{wikiTitle,jdbcType=VARCHAR}
+			, SYSDATE
+			, #{wikiCont,jdbcType=CLOB}
+			, #{wikiClsCd,jdbcType=VARCHAR}
+			, 0
+			, #{wikiAttNo,jdbcType=NUMERIC}
+		)
+	</insert>
+	
+<!-- 날짜별 정렬 -->
+	<select id="selectWikiList" parameterType="String" resultType="kr.or.ddit.project.wiki.vo.WikiVO" >
+			SELECT ROWNUM AS RNUM, TB.*
+			FROM 
+				(SELECT 
+					 A.WIKI_NO
+				    ,A.WIKI_PNT_NO
+				    ,A.MEM_EMAIL
+				    ,A.WIKI_TITLE
+				    ,TO_CHAR(WIKI_DATE,'YYYY-MM-DD') WIKI_DATE
+				    ,A.WIKI_GROUPORD,
+				    (SELECT MCODE_NM FROM COM_MCODE WHERE  MCODE_CD = A.WIKI_CLS_CD) MCODE_NM
+				     FROM WIKI A LEFT JOIN COM_MCODE B ON(A.WIKI_CLS_CD = B.MCODE_CD)
+				     WHERE PRO_CODE = #{proCode}
+			ORDER BY WIKI_PNT_NO DESC, WIKI_GROUPORD ASC) TB
+	</select>
+	
+<!-- 분류별 정렬 -->
+	<select id="selectWikiListSort" parameterType="String" resultType="WikiVO">
+	
+			SELECT ROW_NUMBER() OVER (ORDER BY WIKI_PNT_NO DESC, WIKI_CLS_CD , WIKI_GROUPORD ASC) RNUM,
+		       A.WIKI_NO,
+		       A.MEM_EMAIL,
+		       A.WIKI_TITLE, 
+               A.WIKI_PNT_NO,
+		       TO_CHAR(WIKI_DATE,'YYYY-MM-DD') WIKI_DATE,
+               A.WIKI_GROUPORD,
+               A.WIKI_CLS_CD,
+       		   (SELECT MCODE_NM FROM COM_MCODE WHERE  MCODE_CD = A.WIKI_CLS_CD) MCODE_NM
+		FROM WIKI A LEFT JOIN COM_MCODE B ON(A.WIKI_CLS_CD = B.MCODE_CD)
+		WHERE PRO_CODE = #{proCode}
+	</select>
+
+
+	<!-- 분류별 : 지식(WC001) -->
+	<select id="selectWikiListSort1" parameterType="String" resultType="WikiVO">
+		SELECT ROWNUM AS RNUM, TB.*
+		FROM 
+		(
+			SELECT 
+				A.WIKI_NO
+			   ,A.WIKI_PNT_NO
+			   ,A.MEM_EMAIL
+			   ,A.WIKI_TITLE
+			   ,TO_CHAR(WIKI_DATE,'YYYY-MM-DD') WIKI_DATE
+			   ,A.WIKI_GROUPORD,
+		    (SELECT MCODE_NM FROM COM_MCODE WHERE  MCODE_CD = A.WIKI_CLS_CD) MCODE_NM
+		    FROM WIKI A LEFT JOIN COM_MCODE B ON(A.WIKI_CLS_CD = B.MCODE_CD)
+		     WHERE PRO_CODE = #{proCode}
+		     AND WIKI_CLS_CD='WC001'
+		ORDER BY  MCODE_NM DESC, WIKI_PNT_NO DESC, WIKI_GROUPORD ASC) TB
+	</select>
+	
+		<!-- 분류별 : 참고자료(WC002) -->
+	<select id="selectWikiListSort2" parameterType="String" resultType="WikiVO">
+		SELECT ROWNUM AS RNUM, TB.*
+		FROM 
+		(
+			SELECT 
+				A.WIKI_NO
+			   ,A.WIKI_PNT_NO
+			   ,A.MEM_EMAIL
+			   ,A.WIKI_TITLE
+			   ,TO_CHAR(WIKI_DATE,'YYYY-MM-DD') WIKI_DATE
+			   ,A.WIKI_GROUPORD,
+		    (SELECT MCODE_NM FROM COM_MCODE WHERE  MCODE_CD = A.WIKI_CLS_CD) MCODE_NM
+		    FROM WIKI A LEFT JOIN COM_MCODE B ON(A.WIKI_CLS_CD = B.MCODE_CD)
+		     WHERE PRO_CODE = #{proCode}
+		     AND WIKI_CLS_CD='WC002'
+		ORDER BY  MCODE_NM DESC, WIKI_PNT_NO DESC, WIKI_GROUPORD ASC) TB
+	</select>
+	
+	
+	<!-- 분류별 : 기타(WC003) -->
+	<select id="selectWikiListSort3" parameterType="String" resultType="WikiVO">
+		SELECT ROWNUM AS RNUM, TB.*
+		FROM 
+		(
+			SELECT 
+				A.WIKI_NO
+			   ,A.WIKI_PNT_NO
+			   ,A.MEM_EMAIL
+			   ,A.WIKI_TITLE
+			   ,TO_CHAR(WIKI_DATE,'YYYY-MM-DD') WIKI_DATE
+			   ,A.WIKI_GROUPORD,
+		    (SELECT MCODE_NM FROM COM_MCODE WHERE  MCODE_CD = A.WIKI_CLS_CD) MCODE_NM
+		    FROM WIKI A LEFT JOIN COM_MCODE B ON(A.WIKI_CLS_CD = B.MCODE_CD)
+		     WHERE PRO_CODE = #{proCode}
+		     AND WIKI_CLS_CD='WC003'
+		ORDER BY  MCODE_NM DESC, WIKI_PNT_NO DESC, WIKI_GROUPORD ASC) TB
+	</select>
+	
+<!-- 위키한건 조회  -->
+	<select id="selectWiki" parameterType="int" resultType="WikiVO">
+		SELECT 
+			WIKI_NO,MEM_EMAIL, PRO_CODE,
+			WIKI_TITLE, WIKI_DATE, WIKI_CONT,
+			(SELECT MCODE_NM 
+			 FROM COM_MCODE 
+			 WHERE  MCODE_CD = A.WIKI_CLS_CD) MCODE_NM,
+             (SELECT ATT_FILENAME 
+             FROM ATTATCH 
+             WHERE ATT_NO = A.WIKI_ATT_NO) FILENAME
+		FROM WIKI A 
+			WHERE WIKI_NO = #{wikiNo}
+	</select>
+		
+<!-- 답글쓰기 -->
+	<insert id="insertWikiComm" parameterType="WikiVO" >
+		<selectKey order="BEFORE" resultType="int" keyProperty="wikiNo">
+			SELECT  WIKI_SEQ.NEXTVAL
+			FROM DUAL 
+		</selectKey>
+		
+		INSERT INTO WIKI (
+		    WIKI_NO
+		   ,WIKI_PNT_NO 
+		   ,MEM_EMAIL
+		   ,PRO_CODE
+		   ,WIKI_TITLE
+		   ,WIKI_DATE
+		   ,WIKI_CONT
+		   ,WIKI_CLS_CD
+		   ,WIKI_GROUPORD
+		   ,WIKI_ATT_NO
+		) VALUES (
+			  #{wikiNo}
+			, #{wikiPntNo}
+			, #{memEmail}
+			, #{proCode}
+			, '　RE:'|| #{wikiTitle}
+			, SYSDATE
+			, #{wikiCont}
+			, #{wikiClsCd}
+			, 1
+			, #{wikiAttNo,jdbcType=NUMERIC}
+		)
+	</insert>
+	
+	<!-- 위키 수정 -->
+	<update id="updateWiki" parameterType="WikiVO">
+		UPDATE WIKI
+			SET 
+			WIKI_TITLE= #{wikiTitle}
+		    ,MEM_EMAIL = #{memEmail}
+			,PRO_CODE = #{proCode}
+		    ,WIKI_CLS_CD = #{wikiClsCd}
+		    ,WIKI_CONT = #{wikiCont}
+		WHERE WIKI_NO = #{wikiNo}
+	</update>
+	
+	<!-- 위키 삭제 -->
+	<delete id="deleteWiki" parameterType="WikiVO" >
+		DELETE FROM WIKI 
+		WHERE WIKI_NO = #{wikiNo}
+	</delete>
+	
+	
+	
+	
+	
+  
+	
+
+</mapper>

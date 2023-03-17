@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.project.home.dao.ProjectDAO">
+
+	<select id="selectTotalRecord" parameterType="PagingVO" resultType="int">
+		SELECT COUNT(*)
+		FROM PROJECT
+	</select>
+
+	<insert id="insertProject" parameterType="kr.or.ddit.project.home.vo.ProjectVO">
+		<selectKey order="BEFORE" resultType="string" keyProperty="proCode">			
+			SELECT 'P'||
+			        TO_CHAR(SYSDATE,'YYYYMMDD')||
+			        TRIM(TO_CHAR(PROJECT_SEQ.NEXTVAL,'0000'))
+			FROM DUAL
+   	 	</selectKey>
+		INSERT INTO project (
+	        pro_code,
+		    mem_email,
+		    pro_title,
+		    pro_cdate,
+		    pro_sdate,
+		    pro_edate,
+		    pro_detail,
+		    pro_end_yn,
+		    pro_del_yn,
+		    pro_cls_cd
+		) VALUES (
+		     #{proCode}
+			,#{memEmail,jdbcType=VARCHAR}
+			,#{proTitle,jdbcType=VARCHAR}
+			,TO_CHAR(SYSDATE,'YYYYMMDD')
+			,REPLACE(#{proSdate,jdbcType=VARCHAR},'-','')
+			,REPLACE(#{proEdate,jdbcType=VARCHAR},'-','')
+			,#{proDetail,jdbcType=VARCHAR}
+			,'N'
+			,'N'
+			,'P'
+		)
+	</insert>
+	
+	<select id="selectProject" parameterType="string" resultType="ProjectVO">
+		SELECT
+		    PRO_CODE,
+		    MEM_EMAIL,
+		    PRO_TITLE,
+		    PRO_CDATE,
+		    PRO_SDATE,
+		    PRO_EDATE,
+		    PRO_DETAIL,
+		    PRO_END_YN,
+		    PRO_DEL_YN,
+		    PRO_CLS_CD
+		FROM
+		    PROJECT
+		WHERE PRO_CODE = #{proCode}
+	</select>
+	
+	<select id="selectProjectListAll" parameterType="PagingVO" resultType="ProjectVO">
+		SELECT A.*
+		FROM(
+		    SELECT
+		        ROWNUM RNUM,
+		        PRO_CODE,
+		        (
+		            SELECT MEM_NAME
+		            FROM MEMBER A
+		            WHERE A.MEM_EMAIL = B.MEM_EMAIL
+		        )MEM_NAME,
+		        PRO_TITLE,
+		        PRO_CDATE,
+		        PRO_SDATE,
+		        PRO_EDATE,
+		        PRO_DETAIL,
+		        PRO_END_YN,
+		        PRO_DEL_YN,
+		        PRO_CLS_CD
+		    FROM
+		        PROJECT B
+		) A
+		WHERE RNUM BETWEEN #{startRow} AND #{endRow}
+	</select>
+	
+ 	<select id="selectMyProjectListAll" parameterType="string" resultType="kr.or.ddit.project.home.vo.ProjectVO">
+		SELECT
+		    PRO_CODE,
+		    (
+		        SELECT MEM_NAME
+		        FROM MEMBER A
+		        WHERE A.MEM_EMAIL = B.MEM_EMAIL
+		    )MEM_NAME,
+		    PRO_TITLE,
+		    PRO_CDATE,
+		    PRO_SDATE,
+		    PRO_EDATE,
+		    PRO_DETAIL,
+		    PRO_END_YN,
+		    PRO_DEL_YN,
+		    PRO_CLS_CD
+		FROM
+		    PROJECT B
+		WHERE MEM_EMAIL = #{memEmail}
+	</select>
+	
+	<select id="selectMyProjectSelectList" parameterType="string" resultType="kr.or.ddit.project.home.vo.ProjectVO">
+		SELECT
+		    PRO_CODE,
+		    (
+		        SELECT MEM_NAME
+		        FROM MEMBER A
+		        WHERE A.MEM_EMAIL = B.MEM_EMAIL
+		    )MEM_NAME,
+		    PRO_TITLE,
+		    PRO_CDATE,
+		    PRO_SDATE,
+		    PRO_EDATE,
+		    PRO_DETAIL,
+		    PRO_END_YN,
+		    PRO_DEL_YN,
+		    PRO_CLS_CD
+		FROM
+		    PROJECT B
+		WHERE MEM_EMAIL = #{memEmail}
+		<if test="proSelect.proSelect == 'proBefore'">
+			<![CDATA[ 
+			AND TO_NUMBER(TRIM(TO_NUMBER(PRO_SDATE)) - TO_NUMBER(TO_CHAR(SYSDATE,'YYYYMMDD'))) > 0
+			]]>
+		</if>
+		<if test="proSelect.proSelect == 'proIng'">
+			<![CDATA[ 
+			AND TO_NUMBER(PRO_SDATE) <= TO_NUMBER(TO_CHAR(SYSDATE,'YYYYMMDD')) 
+			AND TO_NUMBER(TO_CHAR(SYSDATE,'YYYYMMDD')) <= TO_NUMBER(PRO_EDATE)
+			]]>
+		</if>
+		<if test="proSelect.proSelect == 'proEnd'">
+			<![CDATA[ 
+			AND TO_NUMBER(TRIM(TO_NUMBER(PRO_EDATE)) - TO_NUMBER(TO_CHAR(SYSDATE,'YYYYMMDD'))) < 0
+			]]>
+		</if>
+		
+	</select>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

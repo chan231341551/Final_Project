@@ -1,0 +1,240 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+
+<a data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling4"
+	style="position: fixed; bottom: 240px; right: 30px; width: 50px;"
+	aria-controls="offcanvasScrolling"> <img id="chatImg"
+	src="${pageContext.request.contextPath }/resources/images/icon/chatIcon.png"
+	width="60" height="60" />
+</a>
+
+<%-- <security:authentication property="principal.realMember" var="authMember"/> --%>
+<div class="offcanvas offcanvas-end" data-bs-scroll="true"
+	data-bs-backdrop="false" tabindex="-1" id="offcanvasScrolling4"
+	aria-labelledby="offcanvasScrollingLabel">
+	<div class="offcanvas-header">
+		
+		<div id="searchUI" class="input-group" style="padding-top: 30px;">
+			<select id="projSearchOption" class="form-select" aria-label="Default select example">
+				<option value>옵션</option>
+				<option value="proTitle">제목</option>
+				<option value="proSdate">시작일</option>
+			</select>
+			<input id="projSearchWord" type="text" class="form-control"
+				aria-label="Text input with segmented dropdown button">
+			<input type="button" class="btn btn-outline-secondary" value="검색" id="projSearchBtn" />
+		</div>
+		
+		<h5 class="offcanvas-title" id="offcanvasScrollingLabel"></h5>
+		<button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+			aria-label="Close"></button>
+	</div>
+	<div class="offcanvas-body chatBody">
+		
+	</div>
+</div>
+
+<script>
+
+	// 프로젝트 , 일반 채팅 버튼
+// 	let makeChatTypeBtn = function(){
+// 		return $("<div>").append(
+// 			$("<button>").attr({
+// 			type : "button",
+// 			class : "btn btn-outline-primary",
+// 			id : "projectChat"
+// 		}).html("프로젝트 채팅"),
+// 		$("<br>"),
+// 		$("<button>").attr({
+// 			type : "button",
+// 			class : "btn btn-outline-primary",
+// 			id : "generalChat"
+// 		}).html("일반 채팅"))
+// 	}
+// 	let btnTags = [];
+// 	btnTags.push(makeChatTypeBtn());
+// 	$(".chatBody").html(btnTags);
+	
+// 	$("#projectChat").on("click",function(){
+		
+// 	})
+
+// <div class="card">
+	//  <img class="card-img-top" src="img/photos/unsplash-1.jpg" alt="Unsplash">
+	// 	<div class="card-header">
+	// 		<h5 class="card-title mb-0">Card with image and links</h5>
+	// 	</div>
+	// 	<div class="card-body">
+	// 		<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+	// 		<a href="#" class="card-link">Card link</a>
+	// 		<a href="#" class="card-link">Another link</a>
+	// 	</div>
+// </div>
+
+// 프로젝트 리스트 tag 만들기 (카멜케이스)
+let makeProjectList = function(v){
+	console.log("v : ",v);
+	return	$("<div>").attr("class","card").append(
+		$("<img>").attr({
+			"class" : "card-img-top",
+			"src" : "",
+			"alt" : "Unsplash"
+		}),
+		$("<div>").attr("class","card-header").append(
+			$("<h5>").attr("class","card-title mb-0").html(v.proTitle)
+		),
+		$("<div>").attr("class","card-body").append(
+			$("<p>").attr("class","card-text").html("시작일 : "+v.proSdate),
+			$("<p>").attr("class","card-text").html("종료일 : "+v.proEdate),
+			$("<a>").attr({
+				"htef" : "#",
+				"class" : "card-link chatStyle",
+				"id" : "projChat"
+			}).html("프로젝트 채팅"),
+			$("<a>").attr({
+				"htef" : "#",
+				"class" : "card-link chatStyle",
+				"id" : "normalChat"
+			}).html("일반 채팅")
+		)
+	)
+}
+
+// 프로젝트 리스트 tag 만들기 (스네이크방식)
+let makeProjectSnakeList = function(v){
+	console.log("v : ",v);
+	return	$("<div>").attr("class","card").append(
+		$("<img>").attr({
+			"class" : "card-img-top",
+			"src" : "",
+			"alt" : "Unsplash"
+		}),
+		$("<div>").attr("class","card-header").append(
+			$("<h5>").attr("class","card-title mb-0").html(v.PRO_TITLE)
+		),
+		$("<div>").attr("class","card-body").append(
+			$("<p>").attr("class","card-text").html("시작일 : "+v.PRO_SDATE),
+			$("<p>").attr("class","card-text").html("종료일 : "+v.PRO_EDATE),
+			$("<a>").attr({
+				"htef" : "#",
+				"class" : "card-link chatStyle",
+				"id" : "projChat"
+			}).html("프로젝트 채팅"),
+			$("<a>").attr({
+				"htef" : "#",
+				"class" : "card-link chatStyle",
+				"id" : "normalChat"
+			}).html("일반 채팅")
+		)
+	)
+}
+
+// 회원이 속한 프로젝트 리스트 조회 ajax
+function projectList(){
+	$("#chatImg").on("click",function(){
+		$.ajax({
+			url : "${pageContext.request.contextPath}/chat/projectList",
+			method : "get",
+			dataType : "json",
+			success : function(resp) {
+				console.log("나의 프로젝트 리스트 : ",resp );
+				let projectTag = [];
+				if(resp){
+					$.each(resp,function(i,v){
+						projectTag.push(makeProjectList(v));
+					
+					})
+				}
+				else{
+					$("<h2>").html("프로젝트 없음");
+				}
+				$(".chatBody").html(projectTag);
+				
+				
+				
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});
+	})
+}
+projectList();
+// 검색 버튼 눌렀을떄 이벤트
+$("#projSearchBtn").on("click",function(){
+	projSearchList();
+});
+// 프로젝트 리스트 검색 결과 불러오기 ajax
+projSearchList = function(){
+	let projSearchOption = $("#projSearchOption option:selected").val();
+    let projSearchWord = $("#projSearchWord").val();
+
+	let data = {
+		projSearchOption : projSearchOption,
+		projSearchWord : projSearchWord
+	}
+	console.log("data : ",data);
+	
+	$.ajax({
+		url : "${pageContext.request.contextPath}/chat/projectSearchList",
+		method : "post",
+		data : JSON.stringify(data),
+		contentType : "application/json;charset=utf-8",
+		dataType : "json",
+		success : function(resp) {
+			console.log("검색 결과 : ",resp.length);
+			let projectTag = [];
+			if(resp != null && resp.length > 0){
+				$(".chatBody").html("");
+				$.each(resp,function(i,v){
+					projectTag.push(makeProjectSnakeList(v));
+				})	
+			}
+			else{
+				swal("검색 결과 없음!", "You clicked the button!", "warning");
+				return;
+			}
+			$(".chatBody").html(projectTag);
+			
+			
+		},
+		error : function(jqXHR, status, error) {
+			console.log(jqXHR);
+			console.log(status);
+			console.log(error);
+		}
+	});
+}
+
+$(".chatBody").on("click",".chatStyle",function(){
+	let ATagId = $(this).attr("id");
+	
+	if(ATagId == 'projChat'){
+		console.log("프로젝트 채팅");
+		$.ajax({
+			url : "",
+			method : "",
+			data : {},
+			dataType : "json",
+			success : function(resp) {
+
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});
+		
+	}
+	else{
+		console.log("일반 채팅");
+	}
+})
+
+
+</script>

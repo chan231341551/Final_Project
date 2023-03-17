@@ -1,0 +1,165 @@
+<%@page import="java.util.Date"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>    
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="security" %>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<%String log = new Date(session.getCreationTime()).toLocaleString(); %>
+
+<!-- 폰트 어썸 cdn -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"/>
+
+<security:authentication property="principal.realMember" var="authMember"/>
+
+<main class="content">
+	<div class="container-fluid p-0">
+		<h1 class="h3 mb-3">내 프로젝트</h1>
+		<nav aria-label="breadcrumb">
+			<ol class="breadcrumb">
+				<li class="breadcrumb-item"><a href="#">Pms</a></li>
+				<li class="breadcrumb-item"><a href="#">Home</a></li>
+				<li class="breadcrumb-item active">초대받은 프로젝트 목록</li>
+			</ol>
+		</nav>
+		<hr>
+		
+		<div class="card">
+			<div class="card-header">
+				<ul class="nav nav-pills card-header-pills pull-left" role="tablist">
+					<li class="nav-item" role="presentation">
+						<a id="proAll" class="nav-link active" data-bs-toggle="tab" href="#tab-1" aria-selected="true" role="tab">초대 대기중인 프로젝트</a>
+					</li>
+					<li class="nav-item" role="presentation">
+						<a id="proBefore" class="nav-link" data-bs-toggle="tab" href="#tab-2" aria-selected="false" role="tab" tabindex="-1">수락한 프로젝트</a>
+					</li>
+					<li class="nav-item" role="presentation">
+						<a id="proIng" class="nav-link" data-bs-toggle="tab" href="#tab-3" aria-selected="false" tabindex="-1" role="tab">거절한 프로젝트</a>
+					</li>
+				</ul>
+			</div>		
+		</div>
+		
+		<div class="tab-content">
+			<!-- 초대 대기중인 프로젝트 -->
+			<div class="tab-pane fade active show" id="tab-1" role="tabpanel">
+				<div id="proInviteListDisp" class="row"></div>
+			</div>
+			<!-- 수락한 프로젝트 -->
+			<div class="tab-pane fade" id="tab-2" role="tabpanel">
+				<div id="proBeforeDisp" class="row">
+				</div>
+			</div>
+			<!-- 거절한 프로젝트 -->
+			<div class="tab-pane fade" id="tab-3" role="tabpanel">
+				<div id="proIngDisp" class="row">
+				</div>
+			</div>
+		</div>
+	</div>
+</main>
+
+<script>
+
+	/*************************** 초대받은 프로젝트 목록 시작 ***************************/
+	// 프로젝트가 없는 경우 html
+	let makeNoProjectHtml = function(){
+		let projectHtml = "";
+		projectHtml += `
+		<div class="col-12 col-md-6 col-lg-3">
+			<div class="card">
+				<div class="card-body">
+					<p>프로젝트가 없습니다.</p>
+				</div>
+			</div>
+		</div>`;
+		return projectHtml;
+	}
+
+	// 초대받은 Project List Html
+	let makeProInviteListHtml = function(projectList){
+		let proInviteListHtml = "";
+		for(let i=0; i < projectList.length; i++){
+			proInviteListHtml += `
+			<div class="col-12 col-md-6 col-lg-3">
+				<div class="card">
+	
+					<img class="card-img-top" src="${pageContext.request.contextPath }/resources/images/pms/800.png" alt="Project">
+	
+					<div class="card-body">
+						<ul class="list-unstyled mb-0">
+							<div style="dsiapy:flex;flex-direction: column;">
+								<h5 class="h6 card-title">\${projectList[i].proTitle }</h5>
+								<li class="mb-1"><i class="align-middle" data-feather="user"></i> <span class="align-middle text-secondary">\${projectList[i].memName }</span></li>
+							</div>
+							<hr>
+							<li><span class="badge bg-primary rounded-pill">시작</span> \${projectList[i].proSdate }</li>
+							<li><span class="badge bg-secondary rounded-pill">종료</span> \${projectList[i].proEdate }</li>
+						</ul>
+					</div>
+					<button type="button" data-pro-Code="\${projectList[i].proCode}" data-mem-Email="${authMember.memEmail }" data-part-Yn="1" class="participateAcceptBtn btn btn-primary">수락하기</button>
+					<button type="button" data-pro-Code="\${projectList[i].proCode}" data-mem-Email="${authMember.memEmail }" data-part-Yn="2" class="participateAcceptBtn btn btn-outline-primary">거절하기</button>
+				</div>
+			</div>`;
+		}
+		return proInviteListHtml;
+	}
+	
+	// 초대받은 프로젝트 목록
+	proInviteListView();
+	
+	// 초대받은 프로젝트 list view
+	function proInviteListView(){
+		$.ajax({
+			url :"${pageContext.request.contextPath }/project/myProject/participateList",
+			method : "get",
+			dataType : "json",
+			success : function(resp) {
+				if(resp.length>0){					
+					$("#proInviteListDisp").html(makeProInviteListHtml(resp));
+					projectParticipateUpdate();
+					console.log("hi");
+				}else{
+					$("#proInviteListDisp").html(makeNoProjectHtml());
+				}
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});
+	}
+	
+	// 초대받은 프로젝트 수락하기
+	function projectParticipateUpdate(){
+		$(".participateAcceptBtn").on('click', function(){
+			let data = 
+				{ 
+					"memEmail" : this.dataset.memEmail, 
+					"proCode" : this.dataset.proCode,
+					"partYn" : this.dataset.partYn
+				}
+			console.log(data);
+ 			$.ajax({
+				url : "${pageContext.request.contextPath}/project/myProject/participateAccept",
+				method : "post",
+				data : data,
+				success : function(resp) {
+					if(resp=="1"){
+						proInviteListView();						
+					}
+					if(resp=="0"){
+						console.log("실패");
+					}
+				},
+				error : function(jqXHR, status, error) {
+					console.log(jqXHR);
+					console.log(status);
+					console.log(error);
+				}
+			}); 
+		});
+	}
+	/*************************** 초대받은 프로젝트 목록 종료 ***************************/
+
+</script>

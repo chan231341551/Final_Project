@@ -1,0 +1,20 @@
+package kr.or.ddit.project.work.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import kr.or.ddit.member.vo.MemberVO;
+import kr.or.ddit.project.work.vo.WorkVO;
+
+@Mapper
+public interface WorkDAO {
+	
+	// 이슈페이지 내 작업목록 조회
+	public List<WorkVO> selectISWork(@Param("memEmail") String memEmail);
+	
+	// 이슈페이지 내 작업목록 조회
+	public List<MemberVO> selectISMember(@Param("workNo") int workNo);
+	
+}

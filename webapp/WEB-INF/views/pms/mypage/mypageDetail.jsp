@@ -1,0 +1,92 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="security" %> 
+
+    
+		<div class="card h-100" style="float:left; width:49%">
+			<div class="card-body d-flex flex-column mb-n4">
+				<div class="card-header mb-n2">
+					<h5 class="card-title mb-0 text-center">Private info</h5>
+				</div>
+				<div class="card-body h-100">
+					<form action="${pageContext.request.contextPath}/member/memberUpdate" method="post">
+					<div class="row ">
+						<div class="mb-2 d-flex justify-content-end">
+							<label id="memSdate" class="form-label "></label>
+						</div>
+					</div>
+					<div class="row">
+						<div class="mb-2">
+							<label class="form-label" for="inputFirstName">이메일</label>
+							<input type="email" class="form-control" name="memEmail" id="memEmail" readonly="true">
+						</div>
+					</div>
+					<div class="row">
+						<div class="mb-2">
+							<label class="form-label" for="inputLastName">이름</label>
+							<input type="text" class="form-control" name="memName" id="memName" placeholder="변경할 이름을 입력하세요" >
+						</div>
+					</div>
+					<div class="row">
+						<div class="mb-2">
+							<label class="form-label" for="inputEmail4">전화번호</label>
+							<input type="text" class="form-control" name="memTel" id="memTel" placeholder="변경할 전화번호을 입력하세요"> 
+						</div>
+					</div>
+					<div class="row">
+						<div class="mb-4">
+							<label class="form-label" for="inputAddress2">비밀번호</label>
+							<input type="password" class="form-control" name="memPass" id="memPass" value="" placeholder="수정하려면 비밀번호를 입력하세요">
+						</div>
+					</div>
+					<div class="mb-2 d-flex justify-content-end">
+						<button type="submit" class="btn btn-primary ">수정</button>
+					</div>
+					<security:csrfInput/>
+				</form>
+				</div>
+			</div>
+		</div>
+
+		<div class="card text-center h-100" style="float:right; width:49%">
+			<div class="card-body d-flex flex-column mb-n4">
+				<div class="card-header mb-n2">
+			<!-- 접속 로그 -->
+					<h5 id="memee" class="h6 card-title">마지막 접속 일시</h5>
+					<ul class="list-unstyled mb-0">
+						<li class="mb-1">
+							<span id="memLog" class="me-1">
+							</span>
+						</li>
+					</ul>
+					<hr class="">
+				</div>
+				<div class="card-body h-100">
+				</div>
+			</div>
+		</div>
+
+
+<script>
+	$.ajax({
+		url : "${pageContext.request.contextPath}/member/memberDetail",
+		method : "get",
+		beforeSend : function(xhr) {   // 데이터 전송 전  헤더에 csrf값 설정
+	        xhr.setRequestHeader("${_csrf.headerName}", "${_csrf.token}");
+	    },
+		success : function(member) {
+// 			console.log("받아온 결과값 : ",member);
+			$("#memSdate").text("가입일 : "+member.memSdate);
+			$("#memEmail").val(member.memEmail);
+			$("#memName").val(member.memName);
+			$("#memTel").val(member.memTel);
+			$("#memLog").html(member.memDateLog);
+		},
+		error : function(jqXHR, status, error) {
+			console.log(jqXHR);
+			console.log(status);
+			console.log(error);
+		}
+	})
+	
+</script>

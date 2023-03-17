@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.project.home.dao.ProjectDAO">
+	
+	<sql id="searchFrag">
+	    <where>
+	    	<if test="simpleCondition neq null and @org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+	    		<choose>
+	    			<when test="simpleCondition.searchOption eq 'title'">
+	    				INSTR(PRO_TITLE, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<when test="simpleCondition.searchOption eq 'name'">
+	    				INSTR(MEM_NAME, #{simpleCondition.searchWord}) > 0
+	    			</when>
+	    			<otherwise>
+	    				INSTR(PRO_TITLE, #{simpleCondition.searchWord}) > 0
+	    				OR
+	    				INSTR(MEM_NAME, #{simpleCondition.searchWord}) > 0
+	    			</otherwise>
+	    		</choose>
+	    	</if>
+	    </where>
+	</sql>
+
+	<select id="selectTotalRecord" parameterType="PagingVO" resultType="int">
+		SELECT COUNT(*)
+		FROM PROJECTMEMNAMEVIEW
+		<include refid="searchFrag" />
+	</select>
+
+	<!-- 프로젝트 생성 -->
+	<insert id="insertProject" parameterType="kr.or.ddit.project.home.vo.ProjectVO">
+		<selectKey order="BEFORE" resultType="string" keyProperty="proCode">			
+			SELECT 'P'||
+			        TO_CHAR(SYSDATE,'YYYYMMDD')||
+			        TRIM(TO_CHAR(PROJECT_SEQ.NEXTVAL,'0000'))
+			FROM DUAL
+   	 	</selectKey>
+		INSERT INTO project (
+	        pro_code,
+		    mem_email,
+		    pro_title,
+		    pro_cdate,
+		    pro_sdate,
+		    pro_edate,
+		    pro_detail,
+		    pro_end_yn,
+		    pro_del_yn,
+		    pro_cls_cd,
+		    pro_Progress
+		) VALUES (
+		     #{proCode}
+			,#{memEmail,jdbcType=VARCHAR}
+			,#{proTitle,jdbcType=VARCHAR}
+			,TO_CHAR(SYSDATE,'YYYYMMDD')
+			,REPLACE(#{proSdate,jdbcType=VARCHAR},'-','')
+			,REPLACE(#{proEdate,jdbcType=VARCHAR},'-','')
+			,#{proDetail,jdbcType=VARCHAR}
+			,'N'
+			,'N'
+			,#{proClsCd,jdbcType=VARCHAR}
+			,0
+		)
+	</insert>
+	
+	<!-- 프로젝트 초대 멤버 추가 -->
+	<insert id="insertProjectParticipate" parameterType="kr.or.ddit.project.home.vo.ParticipateVO">
+		INSERT INTO PARTICIPATE (
+		    PRO_CODE,
+		    MEM_EMAIL,
+		    PRO_ROLE_CD,
+		    PART_DATE,
+		    PART_YN,
+		    PRO_FAVORITES
+		) VALUES (
+		    #{proCode,jdbcType=VARCHAR}
+			,#{memEmail,jdbcType=VARCHAR}
+			,#{proRoleCd,jdbcType=VARCHAR}
+			,TO_CHAR(SYSDATE,'YYYYMMDD')
+			,'1'
+			,'0'
+		)
+	</insert>
+
+	<!-- 프로젝트 하나 조회 -->
+	<select id="selectProject" parameterType="string" resultMap="projectMap">
+		SELECT
+		    A.PRO_CODE,
+		    A.MEM_EMAIL,
+		    A.PRO_TITLE,
+            TO_CHAR(TO_DATE((PRO_CDATE), 'YYYY-MM-DD'),'YYYY-MM-DD') AS PRO_CDATE, 
+            TO_CHAR(TO_DATE((PRO_SDATE), 'YYYY-MM-DD'),'YYYY-MM-DD') AS PRO_SDATE, 
+            TO_CHAR(TO_DATE((PRO_EDATE), 'YYYY-MM-DD'),'YYYY-MM-DD') AS PRO_EDATE, 
+		    A.PRO_DETAIL,
+		    A.PRO_END_YN,
+		    A.PRO_DEL_YN,
+		    A.PRO_CLS_CD,
+            A.PRO_PROGRESS,
+            B.MEM_EMAIL AS ParticipateMemEmail,
+            B.PRO_ROLE_CD,
+            B.PART_DATE,
+            (SELECT ATT_PATH || ATT_SAVENAME
+			   FROM ATTATCH
+    	      WHERE ATT_NO = A.PRO_ATT_NO) AS PRO_ATT_PATH
+		FROM
+		    PROJECT A INNER JOIN PARTICIPATE B ON A.PRO_CODE = B.PRO_CODE
+		WHERE A.PRO_CODE = #{proCode}
+          AND B.PART_YN = '1'
+	</select>
+	
+	<!-- 프로젝트 참여 회원목록조회(멘션) -->
+	<select id="selectProMemList" parameterType="string" resultType="ParticipateVO">
+		SELECT
+		    B.MEM_NAME,
+		    A.MEM_EMAIL,
+		    A.PART_YN
+		FROM
+		    PARTICIPATE A, MEMBER B
+		WHERE A.MEM_EMAIL=B.MEM_EMAIL
+		AND A.PRO_CODE = #{proCode}
+	</select>
+	
+	<!-- 모든 프로젝트 조회 -->
+	<select id="selectProjectListAll" parameterType="PagingVO" resultType="ProjectVO">
+		SELECT B.*
+		FROM (
+		   SELECT A.* 
+		          , ROWNUM RNUM
+		   FROM PROJECTMEMNAMEVIEW A
+		   <include refid="searchFrag" />
+		) B
+		WHERE RNUM BETWEEN #{startRow} AND #{endRow}
+	</select>
+	
+	<!-- 내가 참여한 모든 프로젝트 조회, 왼쪽 메뉴에서 내 프로젝트 클릭 시 -->
+ 	<select id="selectMyProjectListAll" parameterType="string" resultType="kr.or.ddit.project.home.vo.ProjectVO">
+		SELECT
+		    B.PRO_CODE,
+		    A.MEM_EMAIL,
+		    (SELECT MEM_NAME 
+		       FROM MEMBER M 
+		      WHERE M.MEM_EMAIL = #{memEmail}) AS MEM_NAME,
+		    B.PRO_TITLE,
+		    B.PRO_CDATE,
+		    B.PRO_SDATE,
+		    B.PRO_EDATE,
+		    B.PRO_DETAIL,
+		    B.PRO_END_YN,
+		    B.PRO_DEL_YN,
+		    B.PRO_CLS_CD,
+		    A.PRO_FAVORITES,
+            (SELECT ATT_PATH || ATT_SAVENAME
+			   FROM ATTATCH
+    	      WHERE ATT_NO = B.PRO_ATT_NO) AS PRO_ATT_PATH
+		FROM
+		    PARTICIPATE A INNER JOIN PROJECT B ON A.PRO_CODE = B.PRO_CODE
+		WHERE A.MEM_EMAIL = #{memEmail}
+		  AND A.PART_YN = '1'
+		  AND B.PRO_DEL_YN = 'N'
+	</select>
+	
+	
+	<!-- 프로젝트에 참여한 회원 목록 JOIN -->
+	<resultMap type="kr.or.ddit.project.home.vo.ProjectVO" id="projectMap" autoMapping="true">
+		<id property="proCode" column="PRO_CODE"/>
+		<collection property="participateMemberList" ofType="ParticipateVO" autoMapping="false">
+			<id property="ParticipateMemEmail" column="PARTICIPATEMEMEMAIL"/>
+			<id property="proRoleCd" column="PRO_ROLE_CD"/>
+			<id property="proFavorites" column="PRO_FAVORITES"/>
+			<id property="partDate" column="PART_DATE"/>
+		</collection>
+	</resultMap>
+	
+	<!-- 내가 참여한 프로젝트 리스트 : 시작전, 종료된, 진행중, 전체  -->
+	<select id="selectMyProjectSelectList" parameterType="string" resultMap="projectMap">
+	   SELECT A.PRO_CODE, A.MEM_EMAIL
+		    , A.PRO_TITLE, A.PRO_CDATE, A.PRO_SDATE, A.PRO_EDATE, A.PRO_DETAIL, A.PRO_END_YN, A.PRO_DEL_YN, A.PRO_CLS_CD, A.PRO_PROGRESS
+		    , B.MEM_EMAIL AS PARTICIPATEMEMEMAIL
+		    , B.PRO_ROLE_CD
+		    , B.PRO_FAVORITES
+			, (SELECT ATT_PATH || ATT_SAVENAME
+			     FROM ATTATCH
+    	        WHERE ATT_NO = A.PRO_ATT_NO) AS PRO_ATT_PATH
+		 FROM PROJECT A INNER JOIN PARTICIPATE B ON A.PRO_CODE = B.PRO_CODE
+	    WHERE A.PRO_CODE IN (SELECT PRO_CODE
+		                    FROM PARTICIPATE
+		                    WHERE MEM_EMAIL = #{memEmail}
+		                    AND PART_YN = '1')
+		  AND B.PART_YN = '1'
+		  AND A.PRO_DEL_YN = 'N'
+		<if test="proSelect.proSelect == 'proBefore'">
+			<![CDATA[ 
+			AND TO_NUMBER(TRIM(TO_NUMBER(A.PRO_SDATE)) - TO_NUMBER(TO_CHAR(SYSDATE,'YYYYMMDD'))) > 0
+			]]>
+		</if>
+		<if test="proSelect.proSelect == 'proIng'">
+			<![CDATA[ 
+			AND TO_NUMBER(A.PRO_SDATE) <= TO_NUMBER(TO_CHAR(SYSDATE,'YYYYMMDD')) 
+			AND TO_NUMBER(TO_CHAR(SYSDATE,'YYYYMMDD')) <= TO_NUMBER(A.PRO_EDATE)
+			]]>
+		</if>
+		<if test="proSelect.proSelect == 'proEnd'">
+			<![CDATA[ 
+			AND TO_NUMBER(TRIM(TO_NUMBER(A.PRO_EDATE)) - TO_NUMBER(TO_CHAR(SYSDATE,'YYYYMMDD'))) < 0
+			]]>
+		</if>
+		ORDER BY A.PRO_CODE DESC
+	</select>
+	
+	<!-- 내가 참여한 프로젝트 중에 즐겨찾기 한 프로젝트 목록 조회 -->
+ 	<select id="selectMyProjectFavoritesListAll" parameterType="string" resultMap="projectMap">
+	   SELECT A.PRO_CODE, A.MEM_EMAIL
+		    , A.PRO_TITLE, A.PRO_CDATE, A.PRO_SDATE, A.PRO_EDATE, A.PRO_DETAIL, A.PRO_END_YN, A.PRO_DEL_YN, A.PRO_CLS_CD, A.PRO_PROGRESS
+		    , B.MEM_EMAIL AS PARTICIPATEMEMEMAIL
+		    , B.PRO_ROLE_CD
+		    , B.PRO_FAVORITES
+		 FROM PROJECT A INNER JOIN PARTICIPATE B ON A.PRO_CODE = B.PRO_CODE
+	    WHERE A.PRO_CODE IN (SELECT PRO_CODE
+		                    FROM PARTICIPATE
+		                    WHERE MEM_EMAIL = #{memEmail}
+		                    AND PART_YN = '1')
+		  AND B.PART_YN = '1'
+		  AND A.PRO_DEL_YN = 'N'
+		ORDER BY A.PRO_CODE DESC
+	</select>
+	
+	<!-- 프로젝트 수정하기 -->
+	<update id="updateProject" parameterType="ProjectVO">
+		UPDATE PROJECT
+		   SET
+		       PRO_TITLE = #{proTitle,jdbcType=VARCHAR}
+		       , PRO_SDATE = REPLACE(#{proSdate,jdbcType=VARCHAR},'-','')
+		       , PRO_EDATE = REPLACE(#{proEdate,jdbcType=VARCHAR},'-','')
+		       , PRO_DETAIL = #{proDetail,jdbcType=VARCHAR}
+		       , PRO_END_YN = #{proEndYn,jdbcType=VARCHAR}
+		       , PRO_CLS_CD = #{proClsCd,jdbcType=VARCHAR}
+		       , PRO_PROGRESS = #{proProgress,jdbcType=VARCHAR}
+		       
+		 WHERE PRO_CODE = #{proCode,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 프로젝트 삭제하기 : Y-->
+	<update id="deleteProject" parameterType="ProjectVO">
+		UPDATE PROJECT
+		   SET PRO_DEL_YN = 'Y'
+		 WHERE PRO_CODE = #{proCode,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 프로젝트 즐겨찾기 수정 -->
+	<update id="updateProjectFavorites" parameterType="ParticipateVO">
+		UPDATE PARTICIPATE A
+		SET    A.PRO_FAVORITES = (SELECT MOD(TO_NUMBER(B.PRO_FAVORITES)+1,2) FROM PARTICIPATE B WHERE B.PRO_CODE = #{proCode,jdbcType=VARCHAR} AND B.MEM_EMAIL = #{memEmail,jdbcType=VARCHAR})
+		WHERE  A.PRO_CODE = #{proCode,jdbcType=VARCHAR}
+		  AND A.MEM_EMAIL = #{memEmail,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 내가 초대받은 프로젝트 목록 -->
+	<select id="selectProjectParticipateList" parameterType="string" resultMap="projectMap">
+	   SELECT A.PRO_CODE, A.MEM_EMAIL
+		    , A.PRO_TITLE, A.PRO_CDATE, A.PRO_SDATE, A.PRO_EDATE, A.PRO_DETAIL, A.PRO_END_YN, A.PRO_DEL_YN, A.PRO_CLS_CD, A.PRO_PROGRESS
+		    , B.MEM_EMAIL AS PARTICIPATEMEMEMAIL
+		    , B.PRO_ROLE_CD
+		    , B.PRO_FAVORITES
+			, (SELECT ATT_PATH || ATT_SAVENAME
+			     FROM ATTATCH
+    	        WHERE ATT_NO = A.PRO_ATT_NO) AS PRO_ATT_PATH
+		 FROM PROJECT A INNER JOIN PARTICIPATE B ON A.PRO_CODE = B.PRO_CODE
+		WHERE B.MEM_EMAIL = #{memEmail}
+		  AND A.PRO_DEL_YN = 'N'
+		  AND B.PART_YN = '0'
+	</select>
+	
+	<!-- 내가 거절한 프로젝트 목록 -->
+	<select id="selectProjectRefuseList" parameterType="string" resultMap="projectMap">
+	   SELECT A.PRO_CODE, A.MEM_EMAIL
+		    , A.PRO_TITLE, A.PRO_CDATE, A.PRO_SDATE, A.PRO_EDATE, A.PRO_DETAIL, A.PRO_END_YN, A.PRO_DEL_YN, A.PRO_CLS_CD, A.PRO_PROGRESS
+		    , B.MEM_EMAIL AS PARTICIPATEMEMEMAIL
+		    , B.PRO_ROLE_CD
+		    , B.PRO_FAVORITES
+			, (SELECT ATT_PATH || ATT_SAVENAME
+			     FROM ATTATCH
+    	        WHERE ATT_NO = A.PRO_ATT_NO) AS PRO_ATT_PATH
+		 FROM PROJECT A INNER JOIN PARTICIPATE B ON A.PRO_CODE = B.PRO_CODE
+		WHERE B.MEM_EMAIL = #{memEmail}
+		  AND A.PRO_DEL_YN = 'N'
+		  AND B.PART_YN = '2'
+	</select>
+	
+	<!-- 초대받은 프로젝트 상태 변환 : 수락 1, 거절 2, 대기 0 -->
+	<update id="updateProjectParticipate" parameterType="ParticipateVO">
+		UPDATE PARTICIPATE
+		   SET PART_YN = #{partYn,jdbcType=VARCHAR},
+		   	   PART_DATE = TO_CHAR(SYSDATE,('YYYYMMDD'))
+		 WHERE MEM_EMAIL = #{memEmail,jdbcType=VARCHAR}
+		   AND PRO_CODE = #{proCode,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 프로젝트 프로필 사진 수정 -->
+	<update id="updateProAttNo" parameterType="ProjectVO">
+		UPDATE PROJECT
+		SET
+			PRO_ATT_NO = #{proAttNo,jdbcType=NUMERIC} 
+		WHERE
+			PRO_CODE =  #{proCode,jdbcType=VARCHAR}
+	</update>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

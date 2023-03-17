@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.main.help.dao.NoticeDAO">
+	
+	<select id="selectTotalRecord" parameterType="PagingVO" resultType="int">
+	 	SELECT COUNT(*)
+	 	  FROM NOTICE	
+	</select>
+	
+	<select id="selectNoticeList" parameterType="PagingVO" resultType="NoticeVO">
+		
+		WITH NOTICEBOARD AS (
+		SELECT
+		    NOTICE_NO,
+		    NOTICE_TITLE,
+		    NOTICE_CONT,
+		    NOTICE_DATE,
+		    NOTICE_HIT
+		FROM
+		    NOTICE
+		ORDER BY NOTICE_NO DESC
+		)
+		SELECT A.*
+		  FROM (
+		         SELECT ROWNUM RNUM, NOTICEBOARD.*
+		           FROM NOTICEBOARD
+		        ) A
+		  WHERE RNUM BETWEEN #{startRow} AND #{endRow}
+	</select>
+	
+	<select id="selectNotice" parameterType="int" resultType="NoticeVO">
+		SELECT NOTICE_NO, NOTICE_TITLE, NOTICE_CONT, NOTICE_DATE, NOTICE_HIT
+  		  FROM NOTICE
+  		 WHERE NOTICE_NO = #{noticeNo}
+	</select>
+	
+	<update id="incrementHit">
+		UPDATE NOTICE
+		SET
+		NOTICE_HIT = NOTICE_HIT + 1
+		WHERE NOTICE_NO = #{noticeNo}
+	</update>
+	
+	
+	<insert id="insertNotice" parameterType="NoticeVO">
+		<selectKey order="BEFORE" resultType="int" keyProperty="noticeNo">
+			SELECT NOTICE_SEQ.NEXTVAL
+			  FROM NOTICE
+		</selectKey>
+		INSERT INTO NOTICE (
+			NOTICE_NO ,
+			NOTICE_TITLE,
+			NOTICE_CONT,
+			NOTICE_DATE
+			)
+			VALUES (
+			
+			NOTICE_SEQ.NEXTVAL,
+			#{noticeTitle, jdbcType=VARCHAR},
+			#{noticeContent, jdbcType=VARCHAR},
+			TO_CHAR(SYSDATE,'YYYY/MM/DD')
+			)
+	</insert>
+	 
+</mapper>

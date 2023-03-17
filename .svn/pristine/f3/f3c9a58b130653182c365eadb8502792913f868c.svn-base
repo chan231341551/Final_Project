@@ -1,0 +1,18 @@
+package kr.or.ddit.project.issue.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.project.issue.vo.IssueVO;
+import kr.or.ddit.vo.PagingVO;
+
+@Mapper
+public interface IssueDAO {
+	public int insertIssue(IssueVO Issue);
+	public List<IssueVO> selectIssueList(PagingVO<IssueVO> pagingVO);
+	public int selectTotalRecord(PagingVO<IssueVO> pagingVO);
+	public IssueVO selectIssue(int issNo);
+	public int updateIssue(IssueVO Issue);
+	public int deleteIssue(int issNo);
+}

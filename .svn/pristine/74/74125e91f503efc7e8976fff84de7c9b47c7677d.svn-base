@@ -1,0 +1,44 @@
+package kr.or.ddit.main.pay.controller;
+
+import java.security.Principal;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.main.pay.service.PayService;
+import kr.or.ddit.main.pay.vo.PayVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/service")
+public class PayDetailController {
+	
+	@Inject
+	private PayService service;
+	
+	@GetMapping("/payDetail")
+	public String payDetail(){
+		return "/service/payDetail";
+	}
+	
+	@GetMapping("/kakaoPay")
+	public String kakaoPay(PayVO pay, Principal principal){
+		log.info("결제 ! : ", pay);
+		int rowcnt = service.createPay(pay);
+		String memEmail = principal.getName();
+		pay.setMemEmail(memEmail);
+		String message = "";
+		if(rowcnt > 0) {
+			message = "OK";
+		}else {
+			message = "FAIL";
+		}
+		return message;
+	}
+	
+	 
+}

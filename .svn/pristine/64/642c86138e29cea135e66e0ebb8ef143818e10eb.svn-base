@@ -1,0 +1,165 @@
+<%@page import="java.util.Date"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>    
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="security" %>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<%String log = new Date(session.getCreationTime()).toLocaleString(); %>
+
+<!-- 폰트 어썸 cdn -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"/>
+
+<security:authentication property="principal.realMember" var="authMember"/>
+
+<main class="content">
+	<div class="container-fluid p-0">
+		<h1 class="h3 mb-3">내 프로젝트</h1>
+		<nav aria-label="breadcrumb">
+			<ol class="breadcrumb">
+				<li class="breadcrumb-item"><a href="#">Pms</a></li>
+				<li class="breadcrumb-item"><a href="#">Home</a></li>
+				<li class="breadcrumb-item active">즐겨찾기 프로젝트</li>
+			</ol>
+		</nav>
+		<hr>
+		
+		<div class="card">
+			<div class="card-header">
+			</div>
+			<div class="card-body">
+				<div id="proFavoritesDisp" class="row"></div>
+			</div>			
+		</div>
+	</div>
+</main>
+
+
+<script>
+
+
+
+	// 프로젝트가 없는 경우 html
+	let makeNoProjectHtml = function(){
+		let projectHtml = "";
+		projectHtml += `
+		<div class="col-12 col-md-6 col-lg-3">
+			<div class="card">
+				<p>프로젝트가 없습니다.</p>
+			</div>
+		</div>`;
+		return projectHtml;
+	}
+	
+	// Project List Html
+	let makeProjectListHtml = function(projectList){
+		
+		let projectListHtml = "";
+		for(let i=0; i < projectList.length; i++){
+			let proFavorites = projectList[i].proFavorites;
+			
+			projectListHtml += "";
+	    	projectListHtml += "<div class='col-12 col-md-6 col-lg-3'>";
+		    projectListHtml += "	<div class='card' style='position: relative; left:0; top:0;'>";
+		    
+		    projectListHtml += "<div style='position: absolute; right:1rem; top:1rem; z-index:9;'>";
+			projectListHtml += "	<div class='projectFavoritesBtn' data-favorites='"+proFavorites+"' data-project-code='"+projectList[i].proCode+"'>";
+			if(proFavorites=="0"){
+			projectListHtml += "	<i class='fa fa-star fa-2x' data-color='white' style='color: white;'></i>";
+			}else{
+			projectListHtml += "	<i class='fa fa-star fa-2x' data-color='yellow' style='color: #f3da35'></i>";
+			}
+			projectListHtml += "	</div>";
+			projectListHtml += "</div>";
+		    
+		    projectListHtml += "		<a href='"+"${pageContext.request.contextPath}"+"/project/project/Home/"+projectList[i].proCode+"'>";
+		    projectListHtml += "			<img class='card-img-top' src='${pageContext.request.contextPath }/resources/images/pms/800.png' alt='Project'>";
+		    projectListHtml += "		</a>";
+		    projectListHtml += "		<div class='card-body'>";
+		    projectListHtml += "			<ul class='list-unstyled mb-0'>";
+		    projectListHtml += "				<div style='dsiapy:flex;flex-direction: column;'>";
+		    projectListHtml += "					<h5 class='h6 card-title'>"+projectList[i].proTitle+"</h5>";
+		    projectListHtml += "					<li class='mb-1'><i class='align-middle' data-feather='user'></i> <span class='align-middle text-secondary'>"+projectList[i].memName+"</span></li>";
+		    projectListHtml += "				</div>";
+		    projectListHtml += "				<hr>";
+		    projectListHtml += "				<li><span class='badge bg-primary rounded-pill'>시작</span>"+projectList[i].proSdate+"</li>";
+		    projectListHtml += "				<li><span class='badge bg-secondary rounded-pill'>종료</span>"+projectList[i].proEdate+"</li>";
+		    projectListHtml += "			</ul>";
+		    projectListHtml += "		</div>";
+		    projectListHtml += "	</div>";
+		    projectListHtml += "</div>";
+		}
+		
+		return projectListHtml;
+	}
+	
+	
+	// 내 프로젝트 중에 즐겨찾기 한 목록
+	f_MyprojectFavoritesListView();
+	function f_MyprojectFavoritesListView(){
+		$.ajax({
+			url :"${pageContext.request.contextPath }/project/myProject/favoritesList",
+			method : "get",
+			dataType : "json",
+			success : function(resp) {
+				console.log("hihihihi",resp);
+				if(resp.length>0){					
+					$("#proFavoritesDisp").html(makeProjectListHtml(resp));
+				}else{
+					$("#proFavoritesDisp").html(makeNoProjectHtml());
+				}
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});
+	}
+	
+	
+	// 프로젝트 즐겨찾기 수정
+	$(document).on("click", ".projectFavoritesBtn", function(){
+		console.log("dataSet",$(this)[0].dataset['favorites']);
+		console.log("dataSet",$(this)[0].dataset['projectCode']);
+		let data = {
+				"proFavorites" : $(this)[0].dataset['favorites'],
+				"proCode" : $(this)[0].dataset['projectCode'],
+				"memEmail" : '${authMember.memEmail}'
+		}
+		console.log(data);
+		let project = $(this);
+		
+		//선택된 것
+		//console.log("color : " + $(this).children().data("color"));
+		
+		let color = $(this).children().data("color");
+		
+		if(color=="yellow"){
+			$(this).children().css("color","#FFFFFF");
+			$(this).children().data("color","white");		
+		}else{
+			$(this).children().css("color","#f3da35");
+			$(this).children().data("color","yellow");
+		}			
+		
+		$.ajax({
+			url : "${pageContext.request.contextPath}/project/project/favoritesUpdate",
+			method : "post",
+			data : JSON.stringify(data),
+			contentType : "application/json;charset=utf-8",
+			dataType : "json",
+			async: false,
+			success : function(resp) {
+				console.log("응답",resp);
+				console.log("project",project);
+				f_MyprojectFavoritesListView();
+			},
+			error : function(jqXHR, status, error) {
+				console.log(jqXHR);
+				console.log(status);
+				console.log(error);
+			}
+		});
+	});
+	
+</script>

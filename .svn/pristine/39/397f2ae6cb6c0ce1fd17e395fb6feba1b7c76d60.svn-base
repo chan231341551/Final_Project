@@ -1,0 +1,6 @@
+package kr.or.ddit.project.statistics.dao;
+
+public interface StatisticDAO {
+	
+//	public  selectProjectStatistic
+}

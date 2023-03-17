@@ -1,0 +1,19 @@
+package kr.or.ddit.project.work.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping("/project")
+public class MyWorkController {
+	@GetMapping("/myWork")
+	public String myWorkList() {
+		return "pms/mywork/workList";
+	}
+	
+	@GetMapping("/project/workList")
+	public String projectWorkList() {
+		return "project/work/workList";
+	}
+}

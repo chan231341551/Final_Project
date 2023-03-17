@@ -1,0 +1,49 @@
+package kr.or.ddit.main.help.vo;
+
+import java.io.Serializable;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
+/**
+ * 공지사항 게시판 VO
+ * @author 김경하
+ * @since 2023. 2. 4.
+ * @version 1.0
+ * @see javax.servlet.http.HttpServlet
+ * <pre>
+ * [[개정이력(Modification Information)]]
+ * 수정일                          수정자               수정내용
+ * --------     --------    ----------------------
+ * 2023. 2. 4.       PC-13       최초작성
+ * Copyright (c) 2023 by DDIT All right reserved
+ * </pre>
+ */
+
+@Data
+@EqualsAndHashCode(of="noticeNo")
+@ToString
+public class NoticeVO implements Serializable{
+	
+	private int rnum;
+	private Integer noticeNo;
+	private String noticeTitle;
+	private String noticeCont;
+	private String noticeDate;
+	private Integer noticeHit;
+	private String noticeTopYn;
+	private Integer noticeAttNo;
+	
+	//첨부파일
+    private MultipartFile[] files;
+    //첨부파일 경로
+    private String noticeAttPath;
+    
+    //파일 이름
+    private String attFilename;
+	
+
+}
